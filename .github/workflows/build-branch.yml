@@ -3,22 +3,34 @@ name: Branch Build CE
 on:
   workflow_dispatch:
     inputs:
+      build_type:
+        description: "Type of build to run"
+        required: true
+        type: choice
+        default: "Build"
+        options:
+          - "Build"
+          - "Release"
+      releaseVersion:
+        description: "Release Version"
+        type: string
+        default: v0.0.0
+      isPrerelease:
+        description: "Is Pre-release"
+        type: boolean
+        default: false
+        required: true
       arm64:
         description: "Build for ARM64 architecture"
         required: false
         default: false
         type: boolean
-  push:
-    branches:
-      - master
-      - preview
-  release:
-    types: [released, prereleased]
-
 env:
   TARGET_BRANCH: ${{ github.ref_name || github.event.release.target_commitish }}
   ARM64_BUILD: ${{ github.event.inputs.arm64 }}
-  IS_PRERELEASE: ${{ github.event.release.prerelease }}
+  BUILD_TYPE: ${{ github.event.inputs.build_type }}
+  RELEASE_VERSION: ${{ github.event.inputs.releaseVersion }}
+  IS_PRERELEASE: ${{ github.event.inputs.isPrerelease }}
 
 jobs:
   branch_build_setup:

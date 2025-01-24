@@ -51,7 +51,11 @@ const ProjectPagesPage = observer(() => {
         projectId={projectId.toString()}
         pageType={currentPageType()}
       >
-        <PagesListRoot pageType={currentPageType()} />
+        <PagesListRoot
+          pageType={currentPageType()}
+          workspaceSlug={workspaceSlug.toString()}
+          projectId={projectId.toString()}
+        />
       </PagesListView>
     </>
   );

@@ -7,25 +7,26 @@ import { AlertModalCore, TOAST_TYPE, setToast } from "@plane/ui";
 // constants
 import { PAGE_DELETED } from "@/constants/event-tracker";
 // hooks
-import { useEventTracker, useProjectPages } from "@/hooks/store";
-import { TPageInstance } from "@/store/pages/base-page";
+import { useEventTracker, usePage, useProjectPages } from "@/hooks/store";
 
 type TConfirmPageDeletionProps = {
-  page: TPageInstance;
   isOpen: boolean;
   onClose: () => void;
+  pageId: string;
 };
 
 export const DeletePageModal: React.FC<TConfirmPageDeletionProps> = observer((props) => {
-  const { page, isOpen, onClose } = props;
+  const { pageId, isOpen, onClose } = props;
   // states
   const [isDeleting, setIsDeleting] = useState(false);
   // store hooks
   const { removePage } = useProjectPages();
   const { capturePageEvent } = useEventTracker();
-  if (!page || !page.id) return null;
-  // derived values
-  const { id: pageId, name } = page;
+  const page = usePage(pageId);
+
+  if (!page) return null;
+
+  const { name } = page;
 
   const handleClose = () => {
     setIsDeleting(false);

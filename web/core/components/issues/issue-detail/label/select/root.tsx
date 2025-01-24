@@ -26,7 +26,6 @@ export const IssueLabelSelectRoot: FC<TIssueLabelSelectRoot> = (props) => {
       issueId={issueId}
       values={values}
       onSelect={handleLabel}
-      onAddLabel={labelOperations.createLabel}
     />
   );
 };

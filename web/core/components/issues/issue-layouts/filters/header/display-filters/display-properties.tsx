@@ -16,7 +16,6 @@ type Props = {
   handleUpdate: (updatedDisplayProperties: Partial<IIssueDisplayProperties>) => void;
   cycleViewDisabled?: boolean;
   moduleViewDisabled?: boolean;
-  isEpic?: boolean;
 };
 
 export const FilterDisplayProperties: React.FC<Props> = observer((props) => {
@@ -26,7 +25,6 @@ export const FilterDisplayProperties: React.FC<Props> = observer((props) => {
     handleUpdate,
     cycleViewDisabled = false,
     moduleViewDisabled = false,
-    isEpic = false,
   } = props;
   // router
   const { workspaceSlug, projectId: routerProjectId } = useParams();
@@ -47,11 +45,6 @@ export const FilterDisplayProperties: React.FC<Props> = observer((props) => {
       default:
         return shouldRenderDisplayProperty({ workspaceSlug: workspaceSlug?.toString(), projectId, key: property.key });
     }
-  }).map((property) => {
-    if (isEpic && property.key === "sub_issue_count") {
-      return { ...property, title: "Issue count" };
-    }
-    return property;
   });
 
   return (

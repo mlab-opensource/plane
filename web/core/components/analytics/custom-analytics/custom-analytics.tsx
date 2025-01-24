@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -12,7 +11,6 @@ import { CustomAnalyticsSelectBar, CustomAnalyticsMainContent, CustomAnalyticsSi
 import { ANALYTICS } from "@/constants/fetch-keys";
 import { cn } from "@/helpers/common.helper";
 import { useAppTheme } from "@/hooks/store";
-import { hideFloatingBot, showFloatingBot } from "@/plane-web/helpers/pi-chat.helper";
 import { AnalyticsService } from "@/services/analytics.service";
 
 type Props = {
@@ -52,13 +50,6 @@ export const CustomAnalytics: React.FC<Props> = observer((props) => {
   const { workspaceAnalyticsSidebarCollapsed } = useAppTheme();
 
   const isProjectLevel = projectId ? true : false;
-
-  useEffect(() => {
-    hideFloatingBot();
-    return () => {
-      showFloatingBot();
-    };
-  }, []);
 
   return (
     <div className={cn("relative flex h-full w-full overflow-hidden", isProjectLevel ? "flex-col-reverse" : "")}>

@@ -8,7 +8,7 @@ from ..mixins import TimeAuditModel
 from .base import BaseModel
 
 
-class DeprecatedDashboard(BaseModel):
+class Dashboard(BaseModel):
     DASHBOARD_CHOICES = (
         ("workspace", "Workspace"),
         ("project", "Project"),
@@ -20,7 +20,9 @@ class DeprecatedDashboard(BaseModel):
     description_html = models.TextField(blank=True, default="<p></p>")
     identifier = models.UUIDField(null=True)
     owned_by = models.ForeignKey(
-        "db.User", on_delete=models.CASCADE, related_name="dashboards"
+        "db.User",
+        on_delete=models.CASCADE,
+        related_name="dashboards",
     )
     is_default = models.BooleanField(default=False)
     type_identifier = models.CharField(
@@ -36,15 +38,19 @@ class DeprecatedDashboard(BaseModel):
         return f"{self.name}"
 
     class Meta:
-        verbose_name = "DeprecatedDashboard"
-        verbose_name_plural = "DeprecatedDashboards"
-        db_table = "deprecated_dashboards"
+        verbose_name = "Dashboard"
+        verbose_name_plural = "Dashboards"
+        db_table = "dashboards"
         ordering = ("-created_at",)
 
 
-class DeprecatedWidget(TimeAuditModel):
+class Widget(TimeAuditModel):
     id = models.UUIDField(
-        default=uuid.uuid4, unique=True, editable=False, db_index=True, primary_key=True
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        db_index=True,
+        primary_key=True,
     )
     key = models.CharField(max_length=255)
     filters = models.JSONField(default=dict)
@@ -55,18 +61,22 @@ class DeprecatedWidget(TimeAuditModel):
         return f"{self.key}"
 
     class Meta:
-        verbose_name = "DeprecatedWidget"
-        verbose_name_plural = "DeprecatedWidgets"
-        db_table = "deprecated_widgets"
+        verbose_name = "Widget"
+        verbose_name_plural = "Widgets"
+        db_table = "widgets"
         ordering = ("-created_at",)
 
 
-class DeprecatedDashboardWidget(BaseModel):
+class DashboardWidget(BaseModel):
     widget = models.ForeignKey(
-        DeprecatedWidget, on_delete=models.CASCADE, related_name="dashboard_widgets"
+        Widget,
+        on_delete=models.CASCADE,
+        related_name="dashboard_widgets",
     )
     dashboard = models.ForeignKey(
-        DeprecatedDashboard, on_delete=models.CASCADE, related_name="dashboard_widgets"
+        Dashboard,
+        on_delete=models.CASCADE,
+        related_name="dashboard_widgets",
     )
     is_visible = models.BooleanField(default=True)
     sort_order = models.FloatField(default=65535)
@@ -86,7 +96,7 @@ class DeprecatedDashboardWidget(BaseModel):
                 name="dashboard_widget_unique_widget_dashboard_when_deleted_at_null",
             )
         ]
-        verbose_name = "Deprecated Dashboard Widget"
-        verbose_name_plural = "Deprecated Dashboard Widgets"
-        db_table = "deprecated_dashboard_widgets"
+        verbose_name = "Dashboard Widget"
+        verbose_name_plural = "Dashboard Widgets"
+        db_table = "dashboard_widgets"
         ordering = ("-created_at",)

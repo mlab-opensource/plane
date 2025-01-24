@@ -12,11 +12,10 @@ type Props = {
   handleRegenerate: () => Promise<void>;
   isRegenerating: boolean;
   response: string | undefined;
-  workspaceSlug: string;
 };
 
 export const AskPiMenu: React.FC<Props> = (props) => {
-  const { handleInsertText, handleRegenerate, isRegenerating, response, workspaceSlug } = props;
+  const { handleInsertText, handleRegenerate, isRegenerating, response } = props;
   // states
   const [query, setQuery] = useState("");
 
@@ -40,7 +39,6 @@ export const AskPiMenu: React.FC<Props> = (props) => {
               initialValue={response}
               containerClassName="!p-0 border-none"
               editorClassName="!pl-0"
-              workspaceSlug={workspaceSlug}
             />
             <div className="mt-3 flex items-center gap-4">
               <button

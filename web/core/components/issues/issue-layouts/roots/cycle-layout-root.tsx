@@ -3,10 +3,8 @@ import isEmpty from "lodash/isEmpty";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
-// plane constants
-import { EIssueLayoutTypes, EIssuesStoreType } from "@plane/constants";
+// hooks
 // components
-import { LogoSpinner } from "@/components/common";
 import { TransferIssues, TransferIssuesModal } from "@/components/cycles";
 import {
   CycleAppliedFiltersRoot,
@@ -18,6 +16,7 @@ import {
   IssuePeekOverview,
 } from "@/components/issues";
 // constants
+import { EIssueLayoutTypes, EIssuesStoreType } from "@/constants/issue";
 // hooks
 import { useCycle, useIssues } from "@/hooks/store";
 import { IssuesStoreContext } from "@/hooks/use-issue-layout-store";
@@ -51,7 +50,7 @@ export const CycleLayoutRoot: React.FC = observer(() => {
   // state
   const [transferIssuesModal, setTransferIssuesModal] = useState(false);
 
-  const { isLoading } = useSWR(
+  useSWR(
     workspaceSlug && projectId && cycleId
       ? `CYCLE_ISSUES_${workspaceSlug.toString()}_${projectId.toString()}_${cycleId.toString()}`
       : null,
@@ -63,8 +62,7 @@ export const CycleLayoutRoot: React.FC = observer(() => {
     { revalidateIfStale: false, revalidateOnFocus: false }
   );
 
-  const issueFilters = issuesFilter?.getIssueFilters(cycleId?.toString());
-  const activeLayout = issueFilters?.displayFilters?.layout;
+  const activeLayout = issuesFilter?.issueFilters?.displayFilters?.layout;
 
   const cycleDetails = cycleId ? getCycleById(cycleId.toString()) : undefined;
   const cycleStatus = cycleDetails?.status?.toLocaleLowerCase() ?? "draft";
@@ -77,20 +75,9 @@ export const CycleLayoutRoot: React.FC = observer(() => {
 
   if (!workspaceSlug || !projectId || !cycleId) return <></>;
 
-  if (isLoading && !issueFilters)
-    return (
-      <div className="h-full w-full flex items-center justify-center">
-        <LogoSpinner />
-      </div>
-    );
-
   return (
     <IssuesStoreContext.Provider value={EIssuesStoreType.CYCLE}>
-      <TransferIssuesModal
-        handleClose={() => setTransferIssuesModal(false)}
-        cycleId={cycleId.toString()}
-        isOpen={transferIssuesModal}
-      />
+      <TransferIssuesModal handleClose={() => setTransferIssuesModal(false)} isOpen={transferIssuesModal} />
       <div className="relative flex h-full w-full flex-col overflow-hidden">
         {cycleStatus === "completed" && (
           <TransferIssues

@@ -1,9 +1,9 @@
 "use client";
 import { useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssue, TIssueServiceType } from "@plane/types";
-import { TOAST_TYPE, setToast } from "@plane/ui";
+import { CircleDot, CopyPlus, XCircle } from "lucide-react";
+import { TIssue } from "@plane/types";
+import { RelatedIcon, TOAST_TYPE, setToast } from "@plane/ui";
 // constants
 import { ISSUE_DELETED, ISSUE_UPDATED } from "@/constants/event-tracker";
 // helper
@@ -17,14 +17,10 @@ export type TRelationIssueOperations = {
   remove: (workspaceSlug: string, projectId: string, issueId: string) => Promise<void>;
 };
 
-export const useRelationOperations = (
-  issueServiceType: TIssueServiceType = EIssueServiceType.ISSUES
-): TRelationIssueOperations => {
-  const { updateIssue, removeIssue } = useIssueDetail(issueServiceType);
+export const useRelationOperations = (): TRelationIssueOperations => {
+  const { updateIssue, removeIssue } = useIssueDetail();
   const { captureIssueEvent } = useEventTracker();
   const pathname = usePathname();
-  // derived values
-  const entityName = issueServiceType === EIssueServiceType.ISSUES ? "Issue" : "Epic";
 
   const issueOperations: TRelationIssueOperations = useMemo(
     () => ({
@@ -34,7 +30,7 @@ export const useRelationOperations = (
           setToast({
             type: TOAST_TYPE.SUCCESS,
             title: "Link Copied!",
-            message: `${entityName} link copied to clipboard.`,
+            message: "Issue link copied to clipboard.",
           });
         });
       },
@@ -53,7 +49,7 @@ export const useRelationOperations = (
           setToast({
             title: "Success!",
             type: TOAST_TYPE.SUCCESS,
-            message: `${entityName} updated successfully`,
+            message: "Issue updated successfully",
           });
         } catch (error) {
           captureIssueEvent({
@@ -68,7 +64,7 @@ export const useRelationOperations = (
           setToast({
             title: "Error!",
             type: TOAST_TYPE.ERROR,
-            message: `${entityName} update failed`,
+            message: "Issue update failed",
           });
         }
       },
@@ -95,3 +91,30 @@ export const useRelationOperations = (
 
   return issueOperations;
 };
+
+export const ISSUE_RELATION_OPTIONS = [
+  {
+    key: "blocked_by",
+    label: "Blocked by",
+    icon: (size: number) => <CircleDot size={size} />,
+    className: "bg-red-500/20 text-red-700",
+  },
+  {
+    key: "blocking",
+    label: "Blocking",
+    icon: (size: number) => <XCircle size={size} />,
+    className: "bg-yellow-500/20 text-yellow-700",
+  },
+  {
+    key: "relates_to",
+    label: "Relates to",
+    icon: (size: number) => <RelatedIcon height={size} width={size} />,
+    className: "bg-custom-background-80 text-custom-text-200",
+  },
+  {
+    key: "duplicate",
+    label: "Duplicate of",
+    icon: (size: number) => <CopyPlus size={size} />,
+    className: "bg-custom-background-80 text-custom-text-200",
+  },
+];

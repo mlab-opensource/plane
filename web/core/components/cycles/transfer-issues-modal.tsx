@@ -8,8 +8,8 @@ import { Dialog, Transition } from "@headlessui/react";
 // hooks
 // ui
 //icons
-import { EIssuesStoreType } from "@plane/constants";
 import { ContrastIcon, TransferIcon, TOAST_TYPE, setToast } from "@plane/ui";
+import { EIssuesStoreType } from "@/constants/issue";
 import { useCycle, useIssues } from "@/hooks/store";
 //icons
 // constants
@@ -17,56 +17,40 @@ import { useCycle, useIssues } from "@/hooks/store";
 type Props = {
   isOpen: boolean;
   handleClose: () => void;
-  cycleId: string;
 };
 
 export const TransferIssuesModal: React.FC<Props> = observer((props) => {
-  const { isOpen, handleClose, cycleId } = props;
+  const { isOpen, handleClose } = props;
   // states
   const [query, setQuery] = useState("");
 
   // store hooks
-  const { currentProjectIncompleteCycleIds, getCycleById, fetchActiveCycleProgress } = useCycle();
+  const { currentProjectIncompleteCycleIds, getCycleById } = useCycle();
   const {
     issues: { transferIssuesFromCycle },
   } = useIssues(EIssuesStoreType.CYCLE);
 
-  const { workspaceSlug, projectId } = useParams();
+  const { workspaceSlug, projectId, cycleId } = useParams();
 
-  const transferIssue = async (payload: { new_cycle_id: string }) => {
+  const transferIssue = async (payload: any) => {
     if (!workspaceSlug || !projectId || !cycleId) return;
 
+    // TODO: import transferIssuesFromCycle from store
     await transferIssuesFromCycle(workspaceSlug.toString(), projectId.toString(), cycleId.toString(), payload)
-      .then(async () => {
+      .then(() => {
         setToast({
           type: TOAST_TYPE.SUCCESS,
           title: "Success!",
           message: "Issues have been transferred successfully",
         });
-        await getCycleDetails(payload.new_cycle_id);
       })
       .catch(() => {
         setToast({
           type: TOAST_TYPE.ERROR,
           title: "Error!",
-          message: "Unable to transfer Issues. Please try again.",
+          message: "Issues cannot be transfer. Please try again.",
         });
       });
-  };
-
-  /**To update issue counts in target cycle and current cycle */
-  const getCycleDetails = async (newCycleId: string) => {
-    const cyclesFetch = [
-      fetchActiveCycleProgress(workspaceSlug.toString(), projectId.toString(), cycleId),
-      fetchActiveCycleProgress(workspaceSlug.toString(), projectId.toString(), newCycleId),
-    ];
-    await Promise.all(cyclesFetch).catch((error) => {
-      setToast({
-        type: TOAST_TYPE.ERROR,
-        title: "Error",
-        message: error.error || "Unable to fetch cycle details",
-      });
-    });
   };
 
   const filteredOptions = currentProjectIncompleteCycleIds?.filter((optionId) => {
@@ -112,8 +96,8 @@ export const TransferIssuesModal: React.FC<Props> = observer((props) => {
               <Dialog.Panel className="relative transform rounded-lg bg-custom-background-100 py-5 text-left shadow-custom-shadow-md transition-all sm:w-full sm:max-w-2xl">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between px-5">
-                    <div className="flex items-center gap-1">
-                      <TransferIcon className="w-5 fill-custom-text-100" />
+                    <div className="flex items-center gap-3">
+                      <TransferIcon className="h-4 w-4" color="#495057" />
                       <h4 className="text-xl font-medium text-custom-text-100">Transfer Issues</h4>
                     </div>
                     <button onClick={handleClose}>
@@ -123,7 +107,7 @@ export const TransferIssuesModal: React.FC<Props> = observer((props) => {
                   <div className="flex items-center gap-2 border-b border-custom-border-200 px-5 pb-3">
                     <Search className="h-4 w-4 text-custom-text-200" />
                     <input
-                      className="outline-none text-sm"
+                      className="bg-custom-background-90 outline-none"
                       placeholder="Search for a cycle..."
                       onChange={(e) => setQuery(e.target.value)}
                       value={query}

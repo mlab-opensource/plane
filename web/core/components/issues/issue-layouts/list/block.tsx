@@ -6,7 +6,6 @@ import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { EIssueServiceType } from "@plane/constants";
 // types
 import { TIssue, IIssueDisplayProperties, TIssueMap } from "@plane/types";
 // ui
@@ -22,7 +21,6 @@ import { TSelectionHelper } from "@/hooks/use-multiple-select";
 import { usePlatformOS } from "@/hooks/use-platform-os";
 // plane web components
 import { IssueIdentifier } from "@/plane-web/components/issues";
-import { IssueStats } from "@/plane-web/components/issues/issue-layouts/issue-stats";
 // types
 import { TRenderQuickActions } from "./list-view-types";
 
@@ -42,7 +40,6 @@ interface IssueBlockProps {
   isCurrentBlockDragging: boolean;
   setIsCurrentBlockDragging: React.Dispatch<React.SetStateAction<boolean>>;
   canDrag: boolean;
-  isEpic?: boolean;
 }
 
 export const IssueBlock = observer((props: IssueBlockProps) => {
@@ -62,7 +59,6 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
     isCurrentBlockDragging,
     setIsCurrentBlockDragging,
     canDrag,
-    isEpic = false,
   } = props;
   // ref
   const issueRef = useRef<HTMLDivElement | null>(null);
@@ -73,12 +69,7 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
   // hooks
   const { sidebarCollapsed: isSidebarCollapsed } = useAppTheme();
   const { getProjectIdentifierById } = useProject();
-  const {
-    getIsIssuePeeked,
-    peekIssue,
-    setPeekIssue,
-    subIssues: subIssuesStore,
-  } = useIssueDetail(isEpic ? EIssueServiceType.EPICS : EIssueServiceType.ISSUES);
+  const { getIsIssuePeeked, peekIssue, setPeekIssue, subIssues: subIssuesStore } = useIssueDetail();
 
   const handleIssuePeekOverview = (issue: TIssue) =>
     workspaceSlug &&
@@ -86,19 +77,10 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
     issue.project_id &&
     issue.id &&
     !getIsIssuePeeked(issue.id) &&
-    setPeekIssue({
-      workspaceSlug,
-      projectId: issue.project_id,
-      issueId: issue.id,
-      nestingLevel: nestingLevel,
-      isArchived: !!issue.archived_at,
-    });
+    setPeekIssue({ workspaceSlug, projectId: issue.project_id, issueId: issue.id, nestingLevel: nestingLevel });
 
-  // derived values
   const issue = issuesMap[issueId];
   const subIssuesCount = issue?.sub_issues_count ?? 0;
-  const canEditIssueProperties = canEditProperties(issue?.project_id ?? undefined);
-  const isDraggingAllowed = canDrag && canEditIssueProperties;
 
   const { isMobile } = usePlatformOS();
 
@@ -110,7 +92,7 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
     return combine(
       draggable({
         element,
-        canDrag: () => isDraggingAllowed,
+        canDrag: () => canDrag,
         getInitialData: () => ({ id: issueId, type: "ISSUE", groupId }),
         onDragStart: () => {
           setIsCurrentBlockDragging(true);
@@ -120,10 +102,11 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
         },
       })
     );
-  }, [isDraggingAllowed, issueId, groupId, setIsCurrentBlockDragging]);
+  }, [canDrag, issueId, groupId, setIsCurrentBlockDragging]);
 
   if (!issue) return null;
 
+  const canEditIssueProperties = canEditProperties(issue.project_id ?? undefined);
   const projectIdentifier = getProjectIdentifierById(issue.project_id);
   const isIssueSelected = selectionHelpers.getIsEntitySelected(issue.id);
   const isIssueActive = selectionHelpers.getIsEntityActive(issue.id);
@@ -152,7 +135,7 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
   return (
     <ControlLink
       id={`issue-${issue.id}`}
-      href={`/${workspaceSlug}/projects/${issue.project_id}/${issue.archived_at ? "archives/" : ""}${isEpic ? "epics" : "issues"}/${issue.id}`}
+      href={`/${workspaceSlug}/projects/${issue.project_id}/${issue.archived_at ? "archives/" : ""}issues/${issue.id}`}
       onClick={() => handleIssuePeekOverview(issue)}
       className="w-full cursor-pointer"
       disabled={!!issue?.tempId || issue?.is_draft}
@@ -172,13 +155,11 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
           }
         )}
         onDragStart={() => {
-          if (!isDraggingAllowed) {
+          if (!canDrag) {
             setToast({
               type: TOAST_TYPE.WARNING,
               title: "Cannot move issue",
-              message: !canEditIssueProperties
-                ? "You are not allowed to move this issue"
-                : "Drag and drop is disabled for the current grouping",
+              message: "Drag and drop is disabled for the current grouping",
             });
           }
         }}
@@ -187,7 +168,7 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
           <div className="flex flex-grow items-center gap-0.5 truncate">
             <div className="flex items-center gap-1" style={isSubIssue ? { marginLeft } : {}}>
               {/* select checkbox */}
-              {projectId && canSelectIssues && !isEpic && (
+              {projectId && canSelectIssues && (
                 <Tooltip
                   tooltipContent={
                     <>
@@ -229,7 +210,7 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
 
               {/* sub-issues chevron */}
               <div className="size-4 grid place-items-center flex-shrink-0">
-                {subIssuesCount > 0 && !isEpic && (
+                {subIssuesCount > 0 && (
                   <button
                     type="button"
                     className="size-4 grid place-items-center rounded-sm text-custom-text-400 hover:text-custom-text-300"
@@ -277,7 +258,6 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
         <div className="flex flex-shrink-0 items-center gap-2">
           {!issue?.tempId ? (
             <>
-              {isEpic && <IssueStats issueId={issue.id} />}
               <IssueProperties
                 className={`relative flex flex-wrap ${isSidebarCollapsed ? "md:flex-grow md:flex-shrink-0" : "lg:flex-grow lg:flex-shrink-0"} items-center gap-2 whitespace-nowrap`}
                 issue={issue}
@@ -285,7 +265,6 @@ export const IssueBlock = observer((props: IssueBlockProps) => {
                 updateIssue={updateIssue}
                 displayProperties={displayProperties}
                 activeLayout="List"
-                isEpic={isEpic}
               />
               <div
                 className={cn("hidden", {

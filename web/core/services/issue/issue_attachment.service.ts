@@ -1,33 +1,28 @@
-import { AxiosRequestConfig } from "axios";
-import { EIssueServiceType } from "@plane/constants";
-// plane types
-import { TIssueAttachment, TIssueAttachmentUploadResponse, TIssueServiceType } from "@plane/types";
+import { TIssueAttachment } from "@plane/types";
 // helpers
 import { API_BASE_URL } from "@/helpers/common.helper";
-import { generateFileUploadPayload, getFileMetaDataForUpload } from "@/helpers/file.helper";
 // services
 import { APIService } from "@/services/api.service";
-import { FileUploadService } from "@/services/file-upload.service";
 
 export class IssueAttachmentService extends APIService {
-  private fileUploadService: FileUploadService;
-  private serviceType: TIssueServiceType;
-
-  constructor(serviceType: TIssueServiceType = EIssueServiceType.ISSUES) {
+  constructor() {
     super(API_BASE_URL);
-    // upload service
-    this.fileUploadService = new FileUploadService();
-    this.serviceType = serviceType;
   }
 
-  private async updateIssueAttachmentUploadStatus(
+  async uploadIssueAttachment(
     workspaceSlug: string,
     projectId: string,
     issueId: string,
-    attachmentId: string
-  ): Promise<void> {
-    return this.patch(
-      `/api/assets/v2/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/attachments/${attachmentId}/`
+    file: FormData
+  ): Promise<TIssueAttachment> {
+    return this.post(
+      `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}/issue-attachments/`,
+      file,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
     )
       .then((response) => response?.data)
       .catch((error) => {
@@ -35,38 +30,8 @@ export class IssueAttachmentService extends APIService {
       });
   }
 
-  async uploadIssueAttachment(
-    workspaceSlug: string,
-    projectId: string,
-    issueId: string,
-    file: File,
-    uploadProgressHandler?: AxiosRequestConfig["onUploadProgress"]
-  ): Promise<TIssueAttachment> {
-    const fileMetaData = getFileMetaDataForUpload(file);
-    return this.post(
-      `/api/assets/v2/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/attachments/`,
-      fileMetaData
-    )
-      .then(async (response) => {
-        const signedURLResponse: TIssueAttachmentUploadResponse = response?.data;
-        const fileUploadPayload = generateFileUploadPayload(signedURLResponse, file);
-        await this.fileUploadService.uploadFile(
-          signedURLResponse.upload_data.url,
-          fileUploadPayload,
-          uploadProgressHandler
-        );
-        await this.updateIssueAttachmentUploadStatus(workspaceSlug, projectId, issueId, signedURLResponse.asset_id);
-        return signedURLResponse.attachment;
-      })
-      .catch((error) => {
-        throw error?.response?.data;
-      });
-  }
-
-  async getIssueAttachments(workspaceSlug: string, projectId: string, issueId: string): Promise<TIssueAttachment[]> {
-    return this.get(
-      `/api/assets/v2/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/attachments/`
-    )
+  async getIssueAttachment(workspaceSlug: string, projectId: string, issueId: string): Promise<TIssueAttachment[]> {
+    return this.get(`/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}/issue-attachments/`)
       .then((response) => response?.data)
       .catch((error) => {
         throw error?.response?.data;
@@ -80,7 +45,7 @@ export class IssueAttachmentService extends APIService {
     assetId: string
   ): Promise<TIssueAttachment> {
     return this.delete(
-      `/api/assets/v2/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/attachments/${assetId}/`
+      `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}/issue-attachments/${assetId}/`
     )
       .then((response) => response?.data)
       .catch((error) => {

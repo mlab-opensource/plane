@@ -4,7 +4,7 @@ import { PlusIcon } from "lucide-react";
 import { TQuickAddIssueButton } from "../root";
 
 export const KanbanQuickAddIssueButton: FC<TQuickAddIssueButton> = observer((props) => {
-  const { onClick, isEpic = false } = props;
+  const { onClick } = props;
 
   return (
     <div
@@ -12,7 +12,7 @@ export const KanbanQuickAddIssueButton: FC<TQuickAddIssueButton> = observer((pro
       onClick={onClick}
     >
       <PlusIcon className="h-3.5 w-3.5 stroke-2" />
-      <span className="text-sm font-medium">{`New ${isEpic ? "Epic" : "Issue"}`}</span>
+      <span className="text-sm font-medium">New Issue</span>
     </div>
   );
 });

@@ -5,7 +5,7 @@ import { Row } from "@plane/ui";
 import { TQuickAddIssueButton } from "../root";
 
 export const ListQuickAddIssueButton: FC<TQuickAddIssueButton> = observer((props) => {
-  const { onClick, isEpic = false } = props;
+  const { onClick } = props;
 
   return (
     <Row
@@ -13,7 +13,7 @@ export const ListQuickAddIssueButton: FC<TQuickAddIssueButton> = observer((props
       onClick={onClick}
     >
       <PlusIcon className="h-3.5 w-3.5 stroke-2" />
-      <span className="text-sm font-medium">{`New ${isEpic ? "Epic" : "Issue"}`}</span>
+      <span className="text-sm font-medium">New Issue</span>
     </Row>
   );
 });

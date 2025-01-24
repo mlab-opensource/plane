@@ -1,9 +1,7 @@
 import set from "lodash/set";
 import { action, computed, makeObservable, observable, runInAction } from "mobx";
-// plane imports
-import { SitesMemberService } from "@plane/services";
-
 import { TPublicMember } from "@/types/member";
+import { MemberService } from "../services/member.service";
 import { CoreRootStore } from "./root.store";
 
 export interface IIssueMemberStore {
@@ -18,7 +16,7 @@ export interface IIssueMemberStore {
 
 export class MemberStore implements IIssueMemberStore {
   memberMap: Record<string, TPublicMember> = {};
-  memberService: SitesMemberService;
+  memberService: MemberService;
   rootStore: CoreRootStore;
 
   constructor(_rootStore: CoreRootStore) {
@@ -30,7 +28,7 @@ export class MemberStore implements IIssueMemberStore {
       // fetch action
       fetchMembers: action,
     });
-    this.memberService = new SitesMemberService();
+    this.memberService = new MemberService();
     this.rootStore = _rootStore;
   }
 
@@ -54,7 +52,7 @@ export class MemberStore implements IIssueMemberStore {
 
   fetchMembers = async (anchor: string) => {
     try {
-      const membersResponse = await this.memberService.list(anchor);
+      const membersResponse = await this.memberService.getAnchorMembers(anchor);
       runInAction(() => {
         this.memberMap = {};
         for (const member of membersResponse) {

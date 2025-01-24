@@ -1,10 +1,9 @@
 "use client";
 
 import { observer } from "mobx-react";
-// plane ui
+// planes
+import { cn } from "@plane/editor";
 import { DiceIcon, Tooltip } from "@plane/ui";
-// plane utils
-import { cn } from "@plane/utils";
 // hooks
 import { useModule } from "@/hooks/store/use-module";
 

@@ -3,7 +3,7 @@ import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { observer } from "mobx-react";
 // plane helpers
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 // components
 import { CalendarIssueBlock } from "@/components/issues";
 import { useIssueDetail } from "@/hooks/store";
@@ -15,12 +15,10 @@ type Props = {
   issueId: string;
   quickActions: TRenderQuickActions;
   isDragDisabled: boolean;
-  isEpic?: boolean;
-  canEditProperties: (projectId: string | undefined) => boolean;
 };
 
 export const CalendarIssueBlockRoot: React.FC<Props> = observer((props) => {
-  const { issueId, quickActions, isDragDisabled, isEpic = false, canEditProperties } = props;
+  const { issueId, quickActions, isDragDisabled } = props;
 
   const issueRef = useRef<HTMLAnchorElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -31,8 +29,6 @@ export const CalendarIssueBlockRoot: React.FC<Props> = observer((props) => {
 
   const issue = getIssueById(issueId);
 
-  const canDrag = !isDragDisabled && canEditProperties(issue?.project_id ?? undefined);
-
   useEffect(() => {
     const element = issueRef.current;
 
@@ -41,7 +37,7 @@ export const CalendarIssueBlockRoot: React.FC<Props> = observer((props) => {
     return combine(
       draggable({
         element,
-        canDrag: () => canDrag,
+        canDrag: () => !isDragDisabled,
         getInitialData: () => ({ id: issue?.id, date: issue?.target_date }),
         onDragStart: () => {
           setIsDragging(true);
@@ -51,7 +47,7 @@ export const CalendarIssueBlockRoot: React.FC<Props> = observer((props) => {
         },
       })
     );
-  }, [issueRef?.current, issue, canDrag]);
+  }, [issueRef?.current, issue]);
 
   useOutsideClickDetector(issueRef, () => {
     issueRef?.current?.classList?.remove(HIGHLIGHT_CLASS);
@@ -59,13 +55,5 @@ export const CalendarIssueBlockRoot: React.FC<Props> = observer((props) => {
 
   if (!issue) return null;
 
-  return (
-    <CalendarIssueBlock
-      isDragging={isDragging}
-      issue={issue}
-      quickActions={quickActions}
-      ref={issueRef}
-      isEpic={isEpic}
-    />
-  );
+  return <CalendarIssueBlock isDragging={isDragging} issue={issue} quickActions={quickActions} ref={issueRef} />;
 });

@@ -6,6 +6,8 @@ import { Controller, useForm } from "react-hook-form";
 import type { ILinkDetails, ModuleLink } from "@plane/types";
 // plane ui
 import { Button, Input, ModalCore, setToast, TOAST_TYPE } from "@plane/ui";
+// helpers
+import { checkURLValidity } from "@/helpers/string.helper";
 
 type Props = {
   createLink: (formData: ModuleLink) => Promise<void>;
@@ -37,10 +39,9 @@ export const CreateUpdateModuleLinkModal: FC<Props> = (props) => {
   };
 
   const handleFormSubmit = async (formData: ModuleLink) => {
-    const parsedUrl = formData.url.startsWith("http") ? formData.url : `http://${formData.url}`;
     const payload = {
       title: formData.title,
-      url: parsedUrl,
+      url: formData.url,
     };
 
     try {
@@ -91,6 +92,7 @@ export const CreateUpdateModuleLinkModal: FC<Props> = (props) => {
                 name="url"
                 rules={{
                   required: "URL is required",
+                  validate: (value) => checkURLValidity(value) || "URL is invalid",
                 }}
                 render={({ field: { value, onChange, ref } }) => (
                   <Input

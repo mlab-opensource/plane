@@ -1,11 +1,12 @@
 import { observer } from "mobx-react";
 import { Control, Controller, UseFormSetValue } from "react-hook-form";
-// plane imports
-import { ANALYTICS_X_AXIS_VALUES } from "@plane/constants";
+// types
 import { IAnalyticsParams } from "@plane/types";
+// ui
 import { Row } from "@plane/ui";
 // components
 import { SelectProject, SelectSegment, SelectXAxis, SelectYAxis } from "@/components/analytics";
+import { ANALYTICS_X_AXIS_VALUES } from "@/constants/analytics";
 // hooks
 import { useProject } from "@/hooks/store";
 

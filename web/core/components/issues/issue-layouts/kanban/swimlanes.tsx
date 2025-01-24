@@ -15,6 +15,7 @@ import {
 // UI
 import { Row } from "@plane/ui";
 // hooks
+import { useCycle, useLabel, useMember, useModule, useProject, useProjectState } from "@/hooks/store";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 // components
 import { TRenderQuickActions } from "../list/list-view-types";
@@ -53,7 +54,7 @@ const visibilitySubGroupByGroupCount = (subGroupIssueCount: number, showEmptyGro
 
 const SubGroupSwimlaneHeader: React.FC<ISubGroupSwimlaneHeader> = observer(
   ({ getGroupIssueCount, sub_group_by, group_by, list, collapsedGroups, handleCollapsedGroups, showEmptyGroup }) => (
-    <div className="relative flex h-max min-h-full w-full items-center gap-4">
+    <div className="relative flex h-max min-h-full w-full items-center gap-2">
       {list &&
         list.length > 0 &&
         list.map((_list: IGroupByColumn) => {
@@ -169,7 +170,6 @@ const SubGroupSwimlane: React.FC<ISubGroupSwimlane> = observer((props) => {
                     count={issueCount}
                     collapsedGroups={collapsedGroups}
                     handleCollapsedGroups={handleCollapsedGroups}
-                    sub_group_by={sub_group_by}
                   />
                 </Row>
               </div>
@@ -261,19 +261,38 @@ export const KanBanSwimLanes: React.FC<IKanBanSwimLanes> = observer((props) => {
     quickAddCallback,
     scrollableContainerRef,
   } = props;
-  // store hooks
+
   const storeType = useIssueStoreType();
-  // derived values
-  const groupByList = getGroupByColumns({
-    groupBy: group_by as GroupByColumnTypes,
-    includeNone: true,
-    isWorkspaceLevel: isWorkspaceLevel(storeType),
-  });
-  const subGroupByList = getGroupByColumns({
-    groupBy: sub_group_by as GroupByColumnTypes,
-    includeNone: true,
-    isWorkspaceLevel: isWorkspaceLevel(storeType),
-  });
+
+  const member = useMember();
+  const project = useProject();
+  const label = useLabel();
+  const cycle = useCycle();
+  const projectModule = useModule();
+  const projectState = useProjectState();
+
+  const groupByList = getGroupByColumns(
+    group_by as GroupByColumnTypes,
+    project,
+    cycle,
+    projectModule,
+    label,
+    projectState,
+    member,
+    true,
+    isWorkspaceLevel(storeType)
+  );
+  const subGroupByList = getGroupByColumns(
+    sub_group_by as GroupByColumnTypes,
+    project,
+    cycle,
+    projectModule,
+    label,
+    projectState,
+    member,
+    true,
+    isWorkspaceLevel(storeType)
+  );
 
   if (!groupByList || !subGroupByList) return null;
 

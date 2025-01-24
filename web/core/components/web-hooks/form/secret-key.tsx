@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, FC } from "react";
-import range from "lodash/range";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // icons
@@ -103,7 +102,7 @@ export const WebhookSecretKey: FC<Props> = observer((props) => {
                   <p className="text-xs">{webhookSecretKey}</p>
                 ) : (
                   <div className="flex items-center gap-1.5 overflow-hidden mr-2">
-                    {range(30).map((index) => (
+                    {[...Array(30)].map((_, index) => (
                       <div key={index} className="h-1 w-1 rounded-full bg-custom-text-400 flex-shrink-0" />
                     ))}
                   </div>

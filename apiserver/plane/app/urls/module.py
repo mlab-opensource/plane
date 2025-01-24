@@ -14,7 +14,12 @@ from plane.app.views import (
 urlpatterns = [
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/modules/",
-        ModuleViewSet.as_view({"get": "list", "post": "create"}),
+        ModuleViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
         name="project-modules",
     ),
     path(
@@ -31,12 +36,21 @@ urlpatterns = [
     ),
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/issues/<uuid:issue_id>/modules/",
-        ModuleIssueViewSet.as_view({"post": "create_issue_modules"}),
+        ModuleIssueViewSet.as_view(
+            {
+                "post": "create_issue_modules",
+            }
+        ),
         name="issue-module",
     ),
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/modules/<uuid:module_id>/issues/",
-        ModuleIssueViewSet.as_view({"post": "create_module_issues", "get": "list"}),
+        ModuleIssueViewSet.as_view(
+            {
+                "post": "create_module_issues",
+                "get": "list",
+            }
+        ),
         name="project-module-issues",
     ),
     path(
@@ -53,7 +67,12 @@ urlpatterns = [
     ),
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/modules/<uuid:module_id>/module-links/",
-        ModuleLinkViewSet.as_view({"get": "list", "post": "create"}),
+        ModuleLinkViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
         name="project-issue-module-links",
     ),
     path(
@@ -70,12 +89,21 @@ urlpatterns = [
     ),
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/user-favorite-modules/",
-        ModuleFavoriteViewSet.as_view({"get": "list", "post": "create"}),
+        ModuleFavoriteViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
         name="user-favorite-module",
     ),
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/user-favorite-modules/<uuid:module_id>/",
-        ModuleFavoriteViewSet.as_view({"delete": "destroy"}),
+        ModuleFavoriteViewSet.as_view(
+            {
+                "delete": "destroy",
+            }
+        ),
         name="user-favorite-module",
     ),
     path(

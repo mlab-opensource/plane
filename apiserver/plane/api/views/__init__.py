@@ -27,4 +27,5 @@ from .module import (
 
 from .member import ProjectMemberAPIEndpoint
 
-from .intake import IntakeIssueAPIEndpoint
+from .inbox import InboxIssueAPIEndpoint
+

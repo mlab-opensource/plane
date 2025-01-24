@@ -8,7 +8,11 @@ from .project import ProjectBaseModel
 
 class Importer(ProjectBaseModel):
     service = models.CharField(
-        max_length=50, choices=(("github", "GitHub"), ("jira", "Jira"))
+        max_length=50,
+        choices=(
+            ("github", "GitHub"),
+            ("jira", "Jira"),
+        ),
     )
     status = models.CharField(
         max_length=50,
@@ -21,7 +25,9 @@ class Importer(ProjectBaseModel):
         default="queued",
     )
     initiated_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="imports"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="imports",
     )
     metadata = models.JSONField(default=dict)
     config = models.JSONField(default=dict)

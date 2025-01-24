@@ -1,21 +1,20 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { observer } from "mobx-react";
 import { useForm, Controller } from "react-hook-form";
-// plane imports
+// editor
 import { EditorRefApi } from "@plane/editor";
-import { SitesFileService } from "@plane/services";
-import { TIssuePublicComment } from "@plane/types";
+// ui
 import { TOAST_TYPE, setToast } from "@plane/ui";
 // editor components
 import { LiteTextEditor } from "@/components/editor/lite-text-editor";
 // hooks
 import { useIssueDetails, usePublish, useUser } from "@/hooks/store";
-// services
-const fileService = new SitesFileService();
+// types
+import { Comment } from "@/types/issue";
 
-const defaultValues: Partial<TIssuePublicComment> = {
+const defaultValues: Partial<Comment> = {
   comment_html: "",
 };
 
@@ -26,14 +25,12 @@ type Props = {
 
 export const AddComment: React.FC<Props> = observer((props) => {
   const { anchor } = props;
-  // states
-  const [uploadedAssetIds, setUploadAssetIds] = useState<string[]>([]);
   // refs
   const editorRef = useRef<EditorRefApi>(null);
   // store hooks
-  const { peekId: issueId, addIssueComment, uploadCommentAsset } = useIssueDetails();
+  const { peekId: issueId, addIssueComment } = useIssueDetails();
   const { data: currentUser } = useUser();
-  const { workspace: workspaceID } = usePublish(anchor);
+  const { workspaceSlug, workspace: workspaceID } = usePublish(anchor);
   // form info
   const {
     handleSubmit,
@@ -41,21 +38,15 @@ export const AddComment: React.FC<Props> = observer((props) => {
     watch,
     formState: { isSubmitting },
     reset,
-  } = useForm<TIssuePublicComment>({ defaultValues });
+  } = useForm<Comment>({ defaultValues });
 
-  const onSubmit = async (formData: TIssuePublicComment) => {
+  const onSubmit = async (formData: Comment) => {
     if (!anchor || !issueId || isSubmitting || !formData.comment_html) return;
 
     await addIssueComment(anchor, issueId, formData)
-      .then(async (res) => {
+      .then(() => {
         reset(defaultValues);
         editorRef.current?.clearEditor();
-        if (uploadedAssetIds.length > 0) {
-          await fileService.updateBulkAssetsUploadStatus(anchor, res.id, {
-            asset_ids: uploadedAssetIds,
-          });
-          setUploadAssetIds([]);
-        }
       })
       .catch(() =>
         setToast({
@@ -78,8 +69,8 @@ export const AddComment: React.FC<Props> = observer((props) => {
               onEnterKeyPress={(e) => {
                 if (currentUser) handleSubmit(onSubmit)(e);
               }}
-              anchor={anchor}
               workspaceId={workspaceID?.toString() ?? ""}
+              workspaceSlug={workspaceSlug?.toString() ?? ""}
               ref={editorRef}
               id="peek-overview-add-comment"
               initialValue={
@@ -89,12 +80,7 @@ export const AddComment: React.FC<Props> = observer((props) => {
               }
               onChange={(comment_json, comment_html) => onChange(comment_html)}
               isSubmitting={isSubmitting}
-              placeholder="Add comment..."
-              uploadFile={async (file) => {
-                const { asset_id } = await uploadCommentAsset(file, anchor);
-                setUploadAssetIds((prev) => [...prev, asset_id]);
-                return asset_id;
-              }}
+              placeholder="Add Comment..."
             />
           )}
         />

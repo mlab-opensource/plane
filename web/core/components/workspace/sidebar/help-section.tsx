@@ -4,19 +4,17 @@ import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { FileText, HelpCircle, MessagesSquare, MoveLeft, User } from "lucide-react";
-import { useTranslation } from "@plane/i18n";
 // ui
-import { CustomMenu, Tooltip, ToggleSwitch } from "@plane/ui";
-// components
-import { ProductUpdatesModal } from "@/components/global";
+import { CustomMenu, ToggleSwitch, Tooltip } from "@plane/ui";
 // helpers
 import { cn } from "@/helpers/common.helper";
 // hooks
 import { useAppTheme, useCommandPalette, useInstance, useTransient, useUserSettings } from "@/hooks/store";
 import { usePlatformOS } from "@/hooks/use-platform-os";
 // plane web components
-import { PlaneVersionNumber } from "@/plane-web/components/global";
+import { PlaneVersionNumber, ProductUpdates, ProductUpdatesModal } from "@/plane-web/components/global";
 import { WorkspaceEditionBadge } from "@/plane-web/components/workspace";
+import { ENABLE_LOCAL_DB_CACHE } from "@/plane-web/constants/issues";
 
 export interface WorkspaceHelpSectionProps {
   setSidebarActive?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,7 +23,6 @@ export interface WorkspaceHelpSectionProps {
 export const SidebarHelpSection: React.FC<WorkspaceHelpSectionProps> = observer(() => {
   const { workspaceSlug, projectId } = useParams();
   // store hooks
-  const { t } = useTranslation();
   const { sidebarCollapsed, toggleSidebar } = useAppTheme();
   const { toggleShortcutModal } = useCommandPalette();
   const { isMobile } = usePlatformOS();
@@ -34,7 +31,7 @@ export const SidebarHelpSection: React.FC<WorkspaceHelpSectionProps> = observer(
   const { canUseLocalDB, toggleLocalDB } = useUserSettings();
   // states
   const [isNeedHelpOpen, setIsNeedHelpOpen] = useState(false);
-  const [isProductUpdatesModalOpen, setProductUpdatesModalOpen] = useState(false);
+  const [isChangeLogOpen, setIsChangeLogOpen] = useState(false);
 
   const handleCrispWindowShow = () => {
     toggleIntercom(!isIntercomToggle);
@@ -44,7 +41,7 @@ export const SidebarHelpSection: React.FC<WorkspaceHelpSectionProps> = observer(
 
   return (
     <>
-      <ProductUpdatesModal isOpen={isProductUpdatesModalOpen} handleClose={() => setProductUpdatesModalOpen(false)} />
+      <ProductUpdatesModal isOpen={isChangeLogOpen} handleClose={() => setIsChangeLogOpen(false)} />
       <div
         className={cn(
           "flex w-full items-center justify-between px-2 self-baseline border-t border-custom-border-200 bg-custom-sidebar-background-100 h-12 flex-shrink-0",
@@ -58,7 +55,8 @@ export const SidebarHelpSection: React.FC<WorkspaceHelpSectionProps> = observer(
         >
           <CustomMenu
             customButton={
-              <div
+              <button
+                type="button"
                 className={cn(
                   "grid place-items-center rounded-md p-1 outline-none text-custom-text-200 hover:text-custom-text-100 hover:bg-custom-background-90",
                   {
@@ -69,7 +67,7 @@ export const SidebarHelpSection: React.FC<WorkspaceHelpSectionProps> = observer(
                 <Tooltip tooltipContent="Help" isMobile={isMobile} disabled={isNeedHelpOpen}>
                   <HelpCircle className="h-[18px] w-[18px] outline-none" />
                 </Tooltip>
-              </div>
+              </button>
             }
             customButtonClassName={`relative grid place-items-center rounded-md p-1.5 outline-none ${isCollapsed ? "w-full" : ""}`}
             menuButtonOnClick={() => !isNeedHelpOpen && setIsNeedHelpOpen(true)}
@@ -85,7 +83,7 @@ export const SidebarHelpSection: React.FC<WorkspaceHelpSectionProps> = observer(
                 className="flex items-center justify- gap-x-2 rounded text-xs hover:bg-custom-background-80"
               >
                 <FileText className="h-3.5 w-3.5 text-custom-text-200" size={14} />
-                <span className="text-xs">{t("documentation")}</span>
+                <span className="text-xs">Documentation</span>
               </a>
             </CustomMenu.MenuItem>
             {config?.intercom_app_id && config?.is_intercom_enabled && (
@@ -96,7 +94,7 @@ export const SidebarHelpSection: React.FC<WorkspaceHelpSectionProps> = observer(
                   className="flex w-full items-center gap-x-2 rounded text-xs hover:bg-custom-background-80"
                 >
                   <MessagesSquare className="h-3.5 w-3.5 text-custom-text-200" />
-                  <span className="text-xs">{t("message_support")}</span>
+                  <span className="text-xs">Message support</span>
                 </button>
               </CustomMenu.MenuItem>
             )}
@@ -107,43 +105,37 @@ export const SidebarHelpSection: React.FC<WorkspaceHelpSectionProps> = observer(
                 className="flex items-center justify- gap-x-2 rounded text-xs hover:bg-custom-background-80"
               >
                 <User className="h-3.5 w-3.5 text-custom-text-200" size={14} />
-                <span className="text-xs">{t("contact_sales")}</span>
+                <span className="text-xs">Contact sales</span>
               </a>
             </CustomMenu.MenuItem>
             <div className="my-1 border-t border-custom-border-200" />
-            <CustomMenu.MenuItem>
-              <div
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                className="flex w-full items-center justify-between text-xs hover:bg-custom-background-80"
-              >
-                <span className="racking-tight">{t("hyper_mode")}</span>
-                <ToggleSwitch
-                  value={canUseLocalDB}
-                  onChange={() => toggleLocalDB(workspaceSlug?.toString(), projectId?.toString())}
-                />
-              </div>
-            </CustomMenu.MenuItem>
+            {ENABLE_LOCAL_DB_CACHE && (
+              <CustomMenu.MenuItem>
+                <div
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  className="flex w-full items-center justify-between text-xs hover:bg-custom-background-80"
+                >
+                  <span className="racking-tight">Local Cache</span>
+                  <ToggleSwitch
+                    value={canUseLocalDB}
+                    onChange={() => toggleLocalDB(workspaceSlug?.toString(), projectId?.toString())}
+                  />
+                </div>
+              </CustomMenu.MenuItem>
+            )}
             <CustomMenu.MenuItem>
               <button
                 type="button"
                 onClick={() => toggleShortcutModal(true)}
                 className="flex w-full items-center justify-start text-xs hover:bg-custom-background-80"
               >
-                <span className="text-xs">{t("keyboard_shortcuts")}</span>
+                <span className="text-xs">Keyboard shortcuts</span>
               </button>
             </CustomMenu.MenuItem>
-            <CustomMenu.MenuItem>
-              <button
-                type="button"
-                onClick={() => setProductUpdatesModalOpen(true)}
-                className="flex w-full items-center justify-start text-xs hover:bg-custom-background-80"
-              >
-                <span className="text-xs">{t("whats_new")}</span>
-              </button>
-            </CustomMenu.MenuItem>
+            <ProductUpdates setIsChangeLogOpen={setIsChangeLogOpen} />
             <CustomMenu.MenuItem>
               <a
                 href="https://go.plane.so/p-discord"

@@ -10,6 +10,7 @@ from plane.db.models import User
 
 
 class SignOutAuthSpaceEndpoint(View):
+
     def post(self, request):
         next_path = request.POST.get("next_path")
 

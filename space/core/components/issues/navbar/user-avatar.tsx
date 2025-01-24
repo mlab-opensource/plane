@@ -7,15 +7,14 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { usePopper } from "react-popper";
 import { LogOut } from "lucide-react";
 import { Popover, Transition } from "@headlessui/react";
-// plane imports
-import { API_BASE_URL } from "@plane/constants";
-import { AuthService } from "@plane/services";
 import { Avatar, Button } from "@plane/ui";
 // helpers
-import { getFileURL } from "@/helpers/file.helper";
+import { API_BASE_URL } from "@/helpers/common.helper";
 import { queryParamGenerator } from "@/helpers/query-param-generator";
 // hooks
 import { useUser } from "@/hooks/store";
+// services
+import { AuthService } from "@/services/auth.service";
 
 const authService = new AuthService();
 
@@ -67,7 +66,7 @@ export const UserAvatar: FC = observer(() => {
               >
                 <Avatar
                   name={currentUser?.display_name}
-                  src={getFileURL(currentUser?.avatar_url)}
+                  src={currentUser?.avatar ?? undefined}
                   shape="square"
                   size="sm"
                   showTooltip={false}

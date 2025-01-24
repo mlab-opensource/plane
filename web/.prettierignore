@@ -1,5 +1,6 @@
 .next
-.turbo
+.vercel
+.tubro
 out/
-dist/
+dis/
 build/

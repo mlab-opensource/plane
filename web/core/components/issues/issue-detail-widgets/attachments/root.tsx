@@ -1,8 +1,6 @@
 "use client";
 import React, { FC } from "react";
 import { observer } from "mobx-react";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssueServiceType } from "@plane/types";
 import { Collapsible } from "@plane/ui";
 // components
 import {
@@ -17,13 +15,12 @@ type Props = {
   projectId: string;
   issueId: string;
   disabled?: boolean;
-  issueServiceType?: TIssueServiceType;
 };
 
 export const AttachmentsCollapsible: FC<Props> = observer((props) => {
-  const { workspaceSlug, projectId, issueId, disabled = false, issueServiceType = EIssueServiceType.ISSUES } = props;
+  const { workspaceSlug, projectId, issueId, disabled = false } = props;
   // store hooks
-  const { openWidgets, toggleOpenWidget } = useIssueDetail(issueServiceType);
+  const { openWidgets, toggleOpenWidget } = useIssueDetail();
 
   // derived values
   const isCollapsibleOpen = openWidgets.includes("attachments");
@@ -39,7 +36,6 @@ export const AttachmentsCollapsible: FC<Props> = observer((props) => {
           projectId={projectId}
           issueId={issueId}
           disabled={disabled}
-          issueServiceType={issueServiceType}
         />
       }
       buttonClassName="w-full"
@@ -49,7 +45,6 @@ export const AttachmentsCollapsible: FC<Props> = observer((props) => {
         projectId={projectId}
         issueId={issueId}
         disabled={disabled}
-        issueServiceType={issueServiceType}
       />
     </Collapsible>
   );

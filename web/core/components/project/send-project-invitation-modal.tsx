@@ -8,11 +8,9 @@ import { ChevronDown, Plus, X } from "lucide-react";
 import { Dialog, Transition } from "@headlessui/react";
 // ui
 import { Avatar, Button, CustomSelect, CustomSearchSelect, TOAST_TYPE, setToast } from "@plane/ui";
-// constants
+// helpers
 import { PROJECT_MEMBER_ADDED } from "@/constants/event-tracker";
 import { ROLE } from "@/constants/workspace";
-// helpers
-import { getFileURL } from "@/helpers/file.helper";
 // hooks
 import { useEventTracker, useMember, useUserPermissions } from "@/hooks/store";
 // plane-web constants
@@ -153,7 +151,7 @@ export const SendProjectInvitationModal: React.FC<Props> = observer((props) => {
         content: (
           <div className="flex w-full items-center gap-2">
             <div className="flex-shrink-0 pt-0.5">
-              <Avatar name={memberDetails?.member.display_name} src={getFileURL(memberDetails?.member.avatar_url)} />
+              <Avatar name={memberDetails?.member.display_name} src={memberDetails?.member.avatar} />
             </div>
             <div className="truncate">
               {memberDetails?.member.display_name} (
@@ -240,7 +238,7 @@ export const SendProjectInvitationModal: React.FC<Props> = observer((props) => {
                                           <div className="flex items-center gap-2">
                                             <Avatar
                                               name={selectedMember?.member.display_name}
-                                              src={getFileURL(selectedMember?.member.avatar_url ?? "")}
+                                              src={selectedMember?.member.avatar}
                                             />
                                             {selectedMember?.member.display_name}
                                           </div>

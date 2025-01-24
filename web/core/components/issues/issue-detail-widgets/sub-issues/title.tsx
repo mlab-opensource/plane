@@ -1,8 +1,6 @@
 "use client";
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 import { observer } from "mobx-react";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssueServiceType } from "@plane/types";
 import { CircularProgressIndicator, CollapsibleButton } from "@plane/ui";
 // components
 import { SubIssuesActionButton } from "@/components/issues/issue-detail-widgets";
@@ -13,15 +11,14 @@ type Props = {
   isOpen: boolean;
   parentIssueId: string;
   disabled: boolean;
-  issueServiceType?: TIssueServiceType;
 };
 
 export const SubIssuesCollapsibleTitle: FC<Props> = observer((props) => {
-  const { isOpen, parentIssueId, disabled, issueServiceType = EIssueServiceType.ISSUES } = props;
+  const { isOpen, parentIssueId, disabled } = props;
   // store hooks
   const {
     subIssues: { subIssuesByIssueId, stateDistributionByIssueId },
-  } = useIssueDetail(issueServiceType);
+  } = useIssueDetail();
 
   // derived data
   const subIssuesDistribution = stateDistributionByIssueId(parentIssueId);
@@ -35,23 +32,25 @@ export const SubIssuesCollapsibleTitle: FC<Props> = observer((props) => {
   const totalCount = subIssues.length;
   const percentage = completedCount && totalCount ? (completedCount / totalCount) * 100 : 0;
 
+  // indicator element
+  const indicatorElement = useMemo(
+    () => (
+      <div className="flex items-center gap-1.5 text-custom-text-300 text-sm">
+        <CircularProgressIndicator size={18} percentage={percentage} strokeWidth={3} />
+        <span>
+          {completedCount}/{totalCount} Done
+        </span>
+      </div>
+    ),
+    [completedCount, totalCount, percentage]
+  );
+
   return (
     <CollapsibleButton
       isOpen={isOpen}
-      title={`${issueServiceType === EIssueServiceType.EPICS ? "Issues" : "Sub-issues"}`}
-      indicatorElement={
-        <div className="flex items-center gap-1.5 text-custom-text-300 text-sm">
-          <CircularProgressIndicator size={18} percentage={percentage} strokeWidth={3} />
-          <span>
-            {completedCount}/{totalCount} Done
-          </span>
-        </div>
-      }
-      actionItemElement={
-        !disabled && (
-          <SubIssuesActionButton issueId={parentIssueId} disabled={disabled} issueServiceType={issueServiceType} />
-        )
-      }
+      title="Sub-issues"
+      indicatorElement={indicatorElement}
+      actionItemElement={!disabled && <SubIssuesActionButton issueId={parentIssueId} disabled={disabled} />}
     />
   );
 });

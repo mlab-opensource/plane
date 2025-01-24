@@ -1,8 +1,7 @@
 "use client";
-import React, { FC, useEffect, useState, useCallback } from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssue, TIssueServiceType } from "@plane/types";
+import { TIssue } from "@plane/types";
 // components
 import { DeleteIssueModal } from "@/components/issues/delete-issue-modal";
 import { CreateUpdateIssueModal } from "@/components/issues/issue-modal";
@@ -17,13 +16,12 @@ type Props = {
   projectId: string;
   parentIssueId: string;
   disabled: boolean;
-  issueServiceType?: TIssueServiceType;
 };
 
 type TIssueCrudState = { toggle: boolean; parentIssueId: string | undefined; issue: TIssue | undefined };
 
 export const SubIssuesCollapsibleContent: FC<Props> = observer((props) => {
-  const { workspaceSlug, projectId, parentIssueId, disabled, issueServiceType = EIssueServiceType.ISSUES } = props;
+  const { workspaceSlug, projectId, parentIssueId, disabled } = props;
   // state
   const [issueCrudState, setIssueCrudState] = useState<{
     create: TIssueCrudState;
@@ -53,13 +51,14 @@ export const SubIssuesCollapsibleContent: FC<Props> = observer((props) => {
     },
   });
   // store hooks
-  const { toggleCreateIssueModal, toggleDeleteIssueModal } = useIssueDetail();
   const {
     subIssues: { subIssueHelpersByIssueId, setSubIssueHelpers },
-  } = useIssueDetail(issueServiceType);
+    toggleCreateIssueModal,
+    toggleDeleteIssueModal,
+  } = useIssueDetail();
 
   // helpers
-  const subIssueOperations = useSubIssueOperations(issueServiceType);
+  const subIssueOperations = useSubIssueOperations();
   const subIssueHelpers = subIssueHelpersByIssueId(`${parentIssueId}_root`);
 
   // handler
@@ -80,16 +79,11 @@ export const SubIssuesCollapsibleContent: FC<Props> = observer((props) => {
 
   const handleFetchSubIssues = useCallback(async () => {
     if (!subIssueHelpers.issue_visibility.includes(parentIssueId)) {
-      try {
-        setSubIssueHelpers(`${parentIssueId}_root`, "preview_loader", parentIssueId);
-        await subIssueOperations.fetchSubIssues(workspaceSlug, projectId, parentIssueId);
-        setSubIssueHelpers(`${parentIssueId}_root`, "issue_visibility", parentIssueId);
-      } catch (error) {
-        console.error("Error fetching sub-issues:", error);
-      } finally {
-        setSubIssueHelpers(`${parentIssueId}_root`, "preview_loader", "");
-      }
+      setSubIssueHelpers(`${parentIssueId}_root`, "preview_loader", parentIssueId);
+      await subIssueOperations.fetchSubIssues(workspaceSlug, projectId, parentIssueId);
+      setSubIssueHelpers(`${parentIssueId}_root`, "preview_loader", parentIssueId);
     }
+    setSubIssueHelpers(`${parentIssueId}_root`, "issue_visibility", parentIssueId);
   }, [
     parentIssueId,
     projectId,
@@ -101,6 +95,10 @@ export const SubIssuesCollapsibleContent: FC<Props> = observer((props) => {
 
   useEffect(() => {
     handleFetchSubIssues();
+
+    return () => {
+      handleFetchSubIssues();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentIssueId]);
 
@@ -125,7 +123,6 @@ export const SubIssuesCollapsibleContent: FC<Props> = observer((props) => {
           disabled={!disabled}
           handleIssueCrudState={handleIssueCrudState}
           subIssueOperations={subIssueOperations}
-          issueServiceType={issueServiceType}
         />
       )}
 

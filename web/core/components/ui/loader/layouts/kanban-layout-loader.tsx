@@ -1,9 +1,6 @@
 import { forwardRef } from "react";
-import range from "lodash/range";
-// plane ui
+import { cn } from "@plane/editor";
 import { ContentWrapper } from "@plane/ui";
-// plane utils
-import { cn } from "@plane/utils";
 
 export const KanbanIssueBlockLoader = forwardRef<HTMLSpanElement, { cardHeight?: number; shouldAnimate?: boolean }>(
   ({ cardHeight = 100, shouldAnimate = true }, ref) => (
@@ -35,7 +32,7 @@ export const KanbanColumnLoader = ({
         </div>
       </div>
     )}
-    {range(cardsInColumn).map((cardIndex) => (
+    {Array.from({ length: cardsInColumn }, (_, cardIndex) => (
       <KanbanIssueBlockLoader key={cardIndex} cardHeight={cardHeight} shouldAnimate={shouldAnimate} />
     ))}
   </div>

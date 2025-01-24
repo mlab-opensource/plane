@@ -12,13 +12,12 @@ import { ProfileEmptyState } from "@/components/ui";
 import { USER_PROFILE_ACTIVITY } from "@/constants/fetch-keys";
 // helpers
 import { calculateTimeAgo } from "@/helpers/date-time.helper";
-import { getFileURL } from "@/helpers/file.helper";
-// hooks
-import { useUser } from "@/hooks/store";
-// assets
-import recentActivityEmptyState from "@/public/empty-state/recent_activity.svg";
+//hooks
 // services
+import { useUser } from "@/hooks/store";
+import recentActivityEmptyState from "@/public/empty-state/recent_activity.svg";
 import { UserService } from "@/services/user.service";
+// assets
 
 const userService = new UserService();
 
@@ -47,9 +46,9 @@ export const ProfileActivity = observer(() => {
               {userProfileActivity.results.map((activity) => (
                 <div key={activity.id} className="flex gap-3">
                   <div className="flex-shrink-0 grid place-items-center overflow-hidden rounded h-6 w-6">
-                    {activity.actor_detail?.avatar_url && activity.actor_detail?.avatar_url !== "" ? (
+                    {activity.actor_detail?.avatar && activity.actor_detail?.avatar !== "" ? (
                       <img
-                        src={getFileURL(activity.actor_detail?.avatar_url)}
+                        src={activity.actor_detail?.avatar}
                         alt={activity.actor_detail?.display_name}
                         className="rounded"
                       />

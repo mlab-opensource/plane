@@ -3,13 +3,7 @@ import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { Search, X } from "lucide-react";
 // types
-import {
-  IIssueDisplayFilterOptions,
-  IIssueFilterOptions,
-  IIssueLabel,
-  ILayoutDisplayFiltersOptions,
-  IState,
-} from "@plane/types";
+import { IIssueDisplayFilterOptions, IIssueFilterOptions, IIssueLabel, IState } from "@plane/types";
 // components
 import {
   FilterAssignees,
@@ -26,12 +20,12 @@ import {
   FilterModule,
   FilterIssueGrouping,
 } from "@/components/issues";
+// constants
+import { ILayoutDisplayFiltersOptions } from "@/constants/issue";
 // hooks
-import { useMember } from "@/hooks/store";
 import { usePlatformOS } from "@/hooks/use-platform-os";
 // plane web components
-import { FilterIssueTypes, FilterTeamProjects } from "@/plane-web/components/issues";
-import { EUserPermissions } from "@/plane-web/constants";
+import { FilterIssueTypes } from "@/plane-web/components/issues";
 
 type Props = {
   filters: IIssueFilterOptions;
@@ -39,13 +33,11 @@ type Props = {
   handleDisplayFiltersUpdate?: (updatedDisplayFilter: Partial<IIssueDisplayFilterOptions>) => void;
   handleFiltersUpdate: (key: keyof IIssueFilterOptions, value: string | string[]) => void;
   layoutDisplayFiltersOptions: ILayoutDisplayFiltersOptions | undefined;
-  projectId?: string;
   labels?: IIssueLabel[] | undefined;
   memberIds?: string[] | undefined;
   states?: IState[] | undefined;
   cycleViewDisabled?: boolean;
   moduleViewDisabled?: boolean;
-  isEpic?: boolean;
 };
 
 export const FilterSelection: React.FC<Props> = observer((props) => {
@@ -55,32 +47,17 @@ export const FilterSelection: React.FC<Props> = observer((props) => {
     handleDisplayFiltersUpdate,
     handleFiltersUpdate,
     layoutDisplayFiltersOptions,
-    projectId,
     labels,
     memberIds,
     states,
     cycleViewDisabled = false,
     moduleViewDisabled = false,
-    isEpic = false,
   } = props;
   // hooks
   const { isMobile } = usePlatformOS();
   const { moduleId, cycleId } = useParams();
-  const {
-    project: { getProjectMemberDetails },
-  } = useMember();
   // states
   const [filtersSearchQuery, setFiltersSearchQuery] = useState("");
-
-  // filter guests from assignees
-  const assigneeIds = memberIds?.filter((id) => {
-    if (projectId) {
-      const memeberDetails = getProjectMemberDetails(id, projectId);
-      const isGuest = (memeberDetails?.role || EUserPermissions.GUEST) === EUserPermissions.GUEST;
-      if (isGuest && memeberDetails) return false;
-    }
-    return true;
-  });
 
   const isFilterEnabled = (filter: keyof IIssueFilterOptions) => layoutDisplayFiltersOptions?.filters.includes(filter);
 
@@ -157,7 +134,7 @@ export const FilterSelection: React.FC<Props> = observer((props) => {
             <FilterAssignees
               appliedFilters={filters.assignees ?? null}
               handleUpdate={(val) => handleFiltersUpdate("assignees", val)}
-              memberIds={assigneeIds}
+              memberIds={memberIds}
               searchQuery={filtersSearchQuery}
             />
           </div>
@@ -231,18 +208,6 @@ export const FilterSelection: React.FC<Props> = observer((props) => {
             />
           </div>
         )}
-
-        {/* team project */}
-        {isFilterEnabled("team_project") && (
-          <div className="py-2">
-            <FilterTeamProjects
-              appliedFilters={filters.team_project ?? null}
-              handleUpdate={(val) => handleFiltersUpdate("team_project", val)}
-              searchQuery={filtersSearchQuery}
-            />
-          </div>
-        )}
-
         {/* issue type */}
         {isDisplayFilterEnabled("type") && displayFilters && handleDisplayFiltersUpdate && (
           <div className="py-2">
@@ -253,7 +218,6 @@ export const FilterSelection: React.FC<Props> = observer((props) => {
                   type: val,
                 })
               }
-              isEpic={isEpic}
             />
           </div>
         )}

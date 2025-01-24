@@ -1,18 +1,15 @@
 // icons
 import { Calendar, GanttChartSquare, Kanban, List, Sheet } from "lucide-react";
-// plane constants
-import { EIssueLayoutTypes, EIssuesStoreType } from "@plane/constants";
 // types
 import {
+  IIssueFilterOptions,
   IIssueDisplayProperties,
   TIssueExtraOptions,
   TIssueGroupByOptions,
   TIssueOrderByOptions,
   TIssuePriorities,
   TIssueGroupingFilters,
-  ILayoutDisplayFiltersOptions,
 } from "@plane/types";
-import { ADDITIONAL_ISSUE_DISPLAY_FILTERS_BY_LAYOUT } from "@/plane-web/constants";
 
 export const DRAG_ALLOWED_GROUPS: TIssueGroupByOptions[] = [
   "state",
@@ -23,15 +20,44 @@ export const DRAG_ALLOWED_GROUPS: TIssueGroupByOptions[] = [
   "cycle",
 ];
 
+export enum EIssuesStoreType {
+  GLOBAL = "GLOBAL",
+  PROFILE = "PROFILE",
+  PROJECT = "PROJECT",
+  CYCLE = "CYCLE",
+  MODULE = "MODULE",
+  PROJECT_VIEW = "PROJECT_VIEW",
+  ARCHIVED = "ARCHIVED",
+  DRAFT = "DRAFT",
+  DEFAULT = "DEFAULT",
+}
+
+export enum EIssueLayoutTypes {
+  LIST = "list",
+  KANBAN = "kanban",
+  CALENDAR = "calendar",
+  GANTT = "gantt_chart",
+  SPREADSHEET = "spreadsheet",
+}
+
 export type TCreateModalStoreTypes =
-  | EIssuesStoreType.TEAM
   | EIssuesStoreType.PROJECT
-  | EIssuesStoreType.TEAM_VIEW
   | EIssuesStoreType.PROJECT_VIEW
   | EIssuesStoreType.PROFILE
   | EIssuesStoreType.CYCLE
-  | EIssuesStoreType.MODULE
-  | EIssuesStoreType.EPIC;
+  | EIssuesStoreType.MODULE;
+
+export enum EIssueFilterType {
+  FILTERS = "filters",
+  DISPLAY_FILTERS = "display_filters",
+  DISPLAY_PROPERTIES = "display_properties",
+  KANBAN_FILTERS = "kanban_filters",
+}
+
+export enum EIssueCommentAccessSpecifier {
+  EXTERNAL = "EXTERNAL",
+  INTERNAL = "INTERNAL",
+}
 
 export const ISSUE_PRIORITIES: {
   key: TIssuePriorities;
@@ -51,7 +77,6 @@ export const ISSUE_GROUP_BY_OPTIONS: {
   { key: "state", title: "States" },
   { key: "state_detail.group", title: "State Groups" },
   { key: "priority", title: "Priority" },
-  { key: "team_project", title: "Team Project" }, // required this on team issues
   { key: "project", title: "Project" }, // required this on my issues
   { key: "cycle", title: "Cycle" }, // required this on my issues
   { key: "module", title: "Module" }, // required this on my issues
@@ -78,8 +103,8 @@ export const ISSUE_FILTER_OPTIONS: {
   title: string;
 }[] = [
   { key: null, title: "All" },
-  { key: "active", title: "Active" },
-  { key: "backlog", title: "Backlog" },
+  { key: "active", title: "Active Issues" },
+  { key: "backlog", title: "Backlog Issues" },
   // { key: "draft", title: "Draft Issues" },
 ];
 
@@ -101,10 +126,6 @@ export const ISSUE_DISPLAY_PROPERTIES_KEYS: (keyof IIssueDisplayProperties)[] = 
   "cycle",
   "issue_type",
 ];
-
-export const EPICS_DISPLAY_PROPERTIES_KEYS: (keyof IIssueDisplayProperties)[] = ISSUE_DISPLAY_PROPERTIES_KEYS.filter(
-  (key) => !["cycle", "modules"].includes(key)
-);
 
 export const ISSUE_DISPLAY_PROPERTIES: {
   key: keyof IIssueDisplayProperties;
@@ -135,24 +156,24 @@ export const ISSUE_EXTRA_OPTIONS: {
 ];
 
 export const ISSUE_LAYOUT_MAP = {
-  [EIssueLayoutTypes.LIST]: { key: EIssueLayoutTypes.LIST, title: "List layout", label: "List", icon: List },
-  [EIssueLayoutTypes.KANBAN]: { key: EIssueLayoutTypes.KANBAN, title: "Board layout", label: "Board", icon: Kanban },
+  [EIssueLayoutTypes.LIST]: { key: EIssueLayoutTypes.LIST, title: "List Layout", label: "List", icon: List },
+  [EIssueLayoutTypes.KANBAN]: { key: EIssueLayoutTypes.KANBAN, title: "Kanban Layout", label: "Kanban", icon: Kanban },
   [EIssueLayoutTypes.CALENDAR]: {
     key: EIssueLayoutTypes.CALENDAR,
-    title: "Calendar layout",
+    title: "Calendar Layout",
     label: "Calendar",
     icon: Calendar,
   },
   [EIssueLayoutTypes.SPREADSHEET]: {
     key: EIssueLayoutTypes.SPREADSHEET,
-    title: "Table layout",
-    label: "Table",
+    title: "Spreadsheet Layout",
+    label: "Spreadsheet",
     icon: Sheet,
   },
   [EIssueLayoutTypes.GANTT]: {
     key: EIssueLayoutTypes.GANTT,
-    title: "Timeline layout",
-    label: "Timeline",
+    title: "Gantt Chart Layout",
+    label: "Gantt",
     icon: GanttChartSquare,
   },
 };
@@ -163,15 +184,24 @@ export const ISSUE_LAYOUTS: {
   icon: any;
 }[] = Object.values(ISSUE_LAYOUT_MAP);
 
-export type TFiltersByLayout = {
-  [layoutType: string]: ILayoutDisplayFiltersOptions;
-};
+export interface ILayoutDisplayFiltersOptions {
+  filters: (keyof IIssueFilterOptions)[];
+  display_properties: (keyof IIssueDisplayProperties)[];
+  display_filters: {
+    group_by?: TIssueGroupByOptions[];
+    sub_group_by?: TIssueGroupByOptions[];
+    order_by?: TIssueOrderByOptions[];
+    type?: TIssueGroupingFilters[];
+  };
+  extra_options: {
+    access: boolean;
+    values: TIssueExtraOptions[];
+  };
+}
 
-export type TIssueFiltersToDisplayByPageType = {
-  [pageType: string]: TFiltersByLayout;
-};
-
-export const ISSUE_DISPLAY_FILTERS_BY_LAYOUT: TIssueFiltersToDisplayByPageType = {
+export const ISSUE_DISPLAY_FILTERS_BY_LAYOUT: {
+  [pageType: string]: { [layoutType: string]: ILayoutDisplayFiltersOptions };
+} = {
   profile_issues: {
     list: {
       filters: ["priority", "state_group", "labels", "start_date", "target_date"],
@@ -432,77 +462,14 @@ export const ISSUE_DISPLAY_FILTERS_BY_LAYOUT: TIssueFiltersToDisplayByPageType =
       },
     },
   },
-  epics: {
-    list: {
-      filters: ["priority", "state", "assignees", "mentions", "created_by", "labels", "start_date", "target_date"],
-      display_properties: EPICS_DISPLAY_PROPERTIES_KEYS,
-      display_filters: {
-        group_by: ["state", "priority", "labels", "assignees", "created_by", null],
-        order_by: ["sort_order", "-created_at", "-updated_at", "start_date", "-priority"],
-        type: [null, "active", "backlog"],
-      },
-      extra_options: {
-        access: true,
-        values: ["show_empty_groups", "sub_issue"],
-      },
-    },
-    kanban: {
-      filters: ["priority", "state", "assignees", "mentions", "created_by", "labels", "start_date", "target_date"],
-      display_properties: EPICS_DISPLAY_PROPERTIES_KEYS,
-      display_filters: {
-        group_by: ["state", "priority", "labels", "assignees", "created_by"],
-        sub_group_by: ["state", "priority", "labels", "assignees", "created_by", null],
-        order_by: ["sort_order", "-created_at", "-updated_at", "start_date", "-priority", "target_date"],
-        type: [null, "active", "backlog"],
-      },
-      extra_options: {
-        access: true,
-        values: ["show_empty_groups", "sub_issue"],
-      },
-    },
-    calendar: {
-      filters: ["priority", "state", "assignees", "mentions", "created_by", "labels", "start_date"],
-      display_properties: ["key", "issue_type"],
-      display_filters: {
-        type: [null, "active", "backlog"],
-      },
-      extra_options: {
-        access: true,
-        values: ["sub_issue"],
-      },
-    },
-    spreadsheet: {
-      filters: ["priority", "state", "assignees", "mentions", "created_by", "labels", "start_date", "target_date"],
-      display_properties: EPICS_DISPLAY_PROPERTIES_KEYS,
-      display_filters: {
-        order_by: ["sort_order", "-created_at", "-updated_at", "start_date", "-priority"],
-        type: [null, "active", "backlog"],
-      },
-      extra_options: {
-        access: true,
-        values: ["sub_issue"],
-      },
-    },
-    gantt_chart: {
-      filters: ["priority", "state", "assignees", "mentions", "created_by", "labels", "start_date", "target_date"],
-      display_properties: ["key", "issue_type"],
-      display_filters: {
-        order_by: ["sort_order", "-created_at", "-updated_at", "start_date", "-priority"],
-        type: [null, "active", "backlog"],
-      },
-      extra_options: {
-        access: true,
-        values: ["sub_issue"],
-      },
-    },
-  },
-  ...ADDITIONAL_ISSUE_DISPLAY_FILTERS_BY_LAYOUT,
 };
 
-export const ISSUE_STORE_TO_FILTERS_MAP: Partial<Record<EIssuesStoreType, TFiltersByLayout>> = {
-  [EIssuesStoreType.PROJECT]: ISSUE_DISPLAY_FILTERS_BY_LAYOUT.issues,
-  [EIssuesStoreType.EPIC]: ISSUE_DISPLAY_FILTERS_BY_LAYOUT.epics,
-};
+export enum EIssueListRow {
+  HEADER = "HEADER",
+  ISSUE = "ISSUE",
+  NO_ISSUES = "NO_ISSUES",
+  QUICK_ADD = "QUICK_ADD",
+}
 
 // issue reactions
 export const issueReactionEmojis = ["128077", "128078", "128516", "128165", "128533", "129505", "9992", "128064"];

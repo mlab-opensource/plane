@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { X } from "lucide-react";
 import { Transition, Dialog } from "@headlessui/react";
+import { TNotification } from "@plane/types";
 import { Button, CustomSelect } from "@plane/ui";
 // components
 import { DateDropdown } from "@/components/dropdowns";
@@ -16,7 +17,7 @@ import { getDate } from "@/helpers/date-time.helper";
 type TNotificationSnoozeModal = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (dateTime?: Date | undefined) => Promise<void>;
+  onSubmit: (dateTime?: Date | undefined) => Promise<TNotification | undefined>;
 };
 
 type FormValues = {

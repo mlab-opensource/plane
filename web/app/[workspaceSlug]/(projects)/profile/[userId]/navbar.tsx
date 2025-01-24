@@ -2,7 +2,6 @@ import React from "react";
 
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { useTranslation } from "@plane/i18n";
 
 // components
 // constants
@@ -15,7 +14,7 @@ type Props = {
 
 export const ProfileNavbar: React.FC<Props> = (props) => {
   const { isAuthorized } = props;
-  const { t } = useTranslation();
+
   const { workspaceSlug, userId } = useParams();
   const pathname = usePathname();
 
@@ -33,7 +32,7 @@ export const ProfileNavbar: React.FC<Props> = (props) => {
                   : "border-transparent"
               }`}
             >
-              {t(tab.label)}
+              {tab.label}
             </span>
           </Link>
         ))}

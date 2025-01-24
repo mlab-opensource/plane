@@ -6,7 +6,7 @@ import { LUCIDE_ICONS_LIST } from "./icons";
 // helpers
 import { emojiCodeToUnicode } from "./helpers";
 
-export type TEmojiLogoProps = {
+type TLogoProps = {
   in_use: "emoji" | "icon";
   emoji?: {
     value?: string;
@@ -19,7 +19,7 @@ export type TEmojiLogoProps = {
 };
 
 type Props = {
-  logo: TEmojiLogoProps;
+  logo: TLogoProps;
   size?: number;
   type?: "lucide" | "material";
 };

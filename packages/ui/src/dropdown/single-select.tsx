@@ -5,7 +5,7 @@ import { Combobox } from "@headlessui/react";
 // popper-js
 import { usePopper } from "react-popper";
 // plane helpers
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 // components
 import { DropdownButton } from "./common";
 import { DropdownOptions } from "./common/options";
@@ -110,7 +110,7 @@ export const Dropdown: FC<ISingleSelectDropdown> = (props) => {
   // hooks
   const handleKeyDown = useDropdownKeyPressed(toggleDropdown, handleClose);
 
-  useOutsideClickDetector(dropdownRef, handleClose, true);
+  useOutsideClickDetector(dropdownRef, handleClose);
 
   return (
     <Combobox

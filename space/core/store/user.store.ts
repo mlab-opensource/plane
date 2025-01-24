@@ -1,8 +1,10 @@
 import set from "lodash/set";
 import { action, computed, makeObservable, observable, runInAction } from "mobx";
-// plane imports
-import { UserService } from "@plane/services";
+// types
 import { IUser } from "@plane/types";
+// services
+import { AuthService } from "@/services/auth.service";
+import { UserService } from "@/services/user.service";
 // store types
 import { ProfileStore, IProfileStore } from "@/store/profile.store";
 // store
@@ -43,12 +45,14 @@ export class UserStore implements IUserStore {
   profile: IProfileStore;
   // service
   userService: UserService;
+  authService: AuthService;
 
   constructor(private store: CoreRootStore) {
     // stores
     this.profile = new ProfileStore(store);
     // service
     this.userService = new UserService();
+    this.authService = new AuthService();
     // observables
     makeObservable(this, {
       // observables
@@ -75,7 +79,7 @@ export class UserStore implements IUserStore {
       first_name: this.data?.first_name,
       last_name: this.data?.last_name,
       display_name: this.data?.display_name,
-      avatar_url: this.data?.avatar_url || undefined,
+      avatar: this.data?.avatar || undefined,
       is_bot: false,
     };
   }
@@ -91,7 +95,7 @@ export class UserStore implements IUserStore {
         if (this.data === undefined) this.isLoading = true;
         this.error = undefined;
       });
-      const user = await this.userService.me();
+      const user = await this.userService.currentUser();
       if (user && user?.id) {
         await this.profile.fetchUserProfile();
         runInAction(() => {
@@ -133,7 +137,7 @@ export class UserStore implements IUserStore {
           if (this.data) set(this.data, userKey, data[userKey]);
         });
       }
-      const user = await this.userService.update(data);
+      const user = await this.userService.updateUser(data);
       return user;
     } catch (error) {
       if (currentUserData) {

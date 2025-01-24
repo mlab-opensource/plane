@@ -1,7 +1,7 @@
 import { FC, useState, useRef, useEffect } from "react";
 import { Search, X } from "lucide-react";
 // plane helpers
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 // helpers
 import { cn } from "@/helpers/common.helper";
 

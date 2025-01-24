@@ -11,7 +11,6 @@ class InstanceAdminMeSerializer(BaseSerializer):
         fields = [
             "id",
             "avatar",
-            "avatar_url",
             "cover_image",
             "date_joined",
             "display_name",
@@ -35,4 +34,8 @@ class InstanceAdminSerializer(BaseSerializer):
     class Meta:
         model = InstanceAdmin
         fields = "__all__"
-        read_only_fields = ["id", "instance", "user"]
+        read_only_fields = [
+            "id",
+            "instance",
+            "user",
+        ]

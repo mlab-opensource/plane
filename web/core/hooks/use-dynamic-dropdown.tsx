@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from "react";
 // plane helpers
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 
 /**
  * Custom hook for dynamic dropdown position calculation.

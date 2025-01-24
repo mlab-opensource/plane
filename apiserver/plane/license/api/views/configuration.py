@@ -8,7 +8,11 @@ from smtplib import (
 )
 
 # Django imports
-from django.core.mail import BadHeaderError, EmailMultiAlternatives, get_connection
+from django.core.mail import (
+    BadHeaderError,
+    EmailMultiAlternatives,
+    get_connection,
+)
 
 # Third party imports
 from rest_framework import status
@@ -21,16 +25,22 @@ from plane.license.models import InstanceConfiguration
 from plane.license.api.serializers import InstanceConfigurationSerializer
 from plane.license.utils.encryption import encrypt_data
 from plane.utils.cache import cache_response, invalidate_cache
-from plane.license.utils.instance_value import get_email_configuration
+from plane.license.utils.instance_value import (
+    get_email_configuration,
+)
 
 
 class InstanceConfigurationEndpoint(BaseAPIView):
-    permission_classes = [InstanceAdminPermission]
+    permission_classes = [
+        InstanceAdminPermission,
+    ]
 
     @cache_response(60 * 60 * 2, user=False)
     def get(self, request):
         instance_configurations = InstanceConfiguration.objects.all()
-        serializer = InstanceConfigurationSerializer(instance_configurations, many=True)
+        serializer = InstanceConfigurationSerializer(
+            instance_configurations, many=True
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @invalidate_cache(path="/api/instances/configurations/", user=False)
@@ -58,6 +68,7 @@ class InstanceConfigurationEndpoint(BaseAPIView):
 
 
 class EmailCredentialCheckEndpoint(BaseAPIView):
+
     def post(self, request):
         receiver_email = request.data.get("receiver_email", False)
         if not receiver_email:
@@ -87,7 +98,9 @@ class EmailCredentialCheckEndpoint(BaseAPIView):
         )
         # Prepare email details
         subject = "Email Notification from Plane"
-        message = "This is a sample email notification sent from Plane application."
+        message = (
+            "This is a sample email notification sent from Plane application."
+        )
         # Send the email
         try:
             msg = EmailMultiAlternatives(
@@ -99,11 +112,13 @@ class EmailCredentialCheckEndpoint(BaseAPIView):
             )
             msg.send(fail_silently=False)
             return Response(
-                {"message": "Email successfully sent."}, status=status.HTTP_200_OK
+                {"message": "Email successfully sent."},
+                status=status.HTTP_200_OK,
             )
         except BadHeaderError:
             return Response(
-                {"error": "Invalid email header."}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Invalid email header."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except SMTPAuthenticationError:
             return Response(
@@ -132,7 +147,9 @@ class EmailCredentialCheckEndpoint(BaseAPIView):
             )
         except TimeoutError:
             return Response(
-                {"error": "Timeout error while trying to connect to the SMTP server."},
+                {
+                    "error": "Timeout error while trying to connect to the SMTP server."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except ConnectionError:
@@ -144,6 +161,8 @@ class EmailCredentialCheckEndpoint(BaseAPIView):
             )
         except Exception:
             return Response(
-                {"error": "Could not send email. Please check your configuration"},
+                {
+                    "error": "Could not send email. Please check your configuration"
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )

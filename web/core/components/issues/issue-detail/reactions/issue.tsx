@@ -20,11 +20,10 @@ export type TIssueReaction = {
   issueId: string;
   currentUser: IUser;
   disabled?: boolean;
-  className?: string;
 };
 
 export const IssueReaction: FC<TIssueReaction> = observer((props) => {
-  const { workspaceSlug, projectId, issueId, currentUser, disabled = false, className = "" } = props;
+  const { workspaceSlug, projectId, issueId, currentUser, disabled = false } = props;
   // hooks
   const {
     reaction: { getReactionsByIssueId, reactionsByUser, getReactionById },
@@ -93,7 +92,7 @@ export const IssueReaction: FC<TIssueReaction> = observer((props) => {
   };
 
   return (
-    <div className={cn("relative mt-4 flex items-center gap-1.5", className)}>
+    <div className="relative mt-4 flex items-center gap-1.5">
       {!disabled && (
         <ReactionSelector size="md" position="top" value={userReactions} onSelect={issueReactionOperations.react} />
       )}

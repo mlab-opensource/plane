@@ -1,5 +1,4 @@
 import { useFormContext } from "react-hook-form";
-import { useTranslation } from "@plane/i18n";
 import { IProject } from "@plane/types";
 // ui
 import { Button } from "@plane/ui";
@@ -14,7 +13,6 @@ type Props = {
 };
 
 const ProjectCreateButtons: React.FC<Props> = (props) => {
-  const { t } = useTranslation();
   const { handleClose, isMobile = false } = props;
   const {
     formState: { isSubmitting },
@@ -25,10 +23,10 @@ const ProjectCreateButtons: React.FC<Props> = (props) => {
   return (
     <div className="flex justify-end gap-2 py-4 border-t border-custom-border-100">
       <Button variant="neutral-primary" size="sm" onClick={handleClose} tabIndex={getIndex("cancel")}>
-        {t("cancel")}
+        Cancel
       </Button>
       <Button variant="primary" type="submit" size="sm" loading={isSubmitting} tabIndex={getIndex("submit")}>
-        {isSubmitting ? t("creating") : t("create_project")}
+        {isSubmitting ? "Creating" : "Create project"}
       </Button>
     </div>
   );

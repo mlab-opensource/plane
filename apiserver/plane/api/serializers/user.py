@@ -13,7 +13,6 @@ class UserLiteSerializer(BaseSerializer):
             "last_name",
             "email",
             "avatar",
-            "avatar_url",
             "display_name",
             "email",
         ]

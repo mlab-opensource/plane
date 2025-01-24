@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { Copy, LinkIcon, Pencil, Trash2 } from "lucide-react";
+import { ExternalLink, LinkIcon, Pencil, Trash2 } from "lucide-react";
 // plane types
 import { ILinkDetails } from "@plane/types";
 // plane ui
@@ -45,9 +45,12 @@ export const ModulesLinksListItem: React.FC<Props> = observer((props) => {
             <LinkIcon className="h-3 w-3 flex-shrink-0" />
           </span>
           <Tooltip tooltipContent={link.title && link.title !== "" ? link.title : link.url} isMobile={isMobile}>
-            <a href={link.url} target="_blank" rel="noopener noreferrer" className="cursor-pointer truncate text-xs">
+            <span
+              className="cursor-pointer truncate text-xs"
+              onClick={() => copyToClipboard(link.title && link.title !== "" ? link.title : link.url)}
+            >
               {link.title && link.title !== "" ? link.title : link.url}
-            </a>
+            </span>
           </Tooltip>
         </div>
 
@@ -65,12 +68,14 @@ export const ModulesLinksListItem: React.FC<Props> = observer((props) => {
               <Pencil className="size-3 stroke-[1.5] text-custom-text-200" />
             </button>
           )}
-          <span
-            onClick={() => copyToClipboard(link.url)}
-            className="grid place-items-center p-1 hover:bg-custom-background-80 cursor-pointer"
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="grid place-items-center p-1 hover:bg-custom-background-80"
           >
-            <Copy className="h-3.5 w-3.5 stroke-[1.5]" />
-          </span>
+            <ExternalLink className="size-3 stroke-[1.5] text-custom-text-200" />
+          </a>
           {isEditingAllowed && (
             <button
               type="button"

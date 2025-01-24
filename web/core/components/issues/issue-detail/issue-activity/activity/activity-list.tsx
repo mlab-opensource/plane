@@ -1,12 +1,9 @@
 import { FC } from "react";
 import { observer } from "mobx-react";
-// helpers
-import { getValidKeysFromObject } from "@/helpers/array.helper";
 // hooks
 import { useIssueDetail } from "@/hooks/store";
 // plane web components
 import { IssueTypeActivity } from "@/plane-web/components/issues/issue-details";
-import { useTimeLineRelationOptions } from "@/plane-web/components/relations";
 // local components
 import {
   IssueDefaultActivity,
@@ -41,8 +38,6 @@ export const IssueActivityItem: FC<TIssueActivityItem> = observer((props) => {
     activity: { getActivityById },
     comment: {},
   } = useIssueDetail();
-  const ISSUE_RELATION_OPTIONS = useTimeLineRelationOptions();
-  const activityRelations = getValidKeysFromObject(ISSUE_RELATION_OPTIONS);
 
   const componentDefaultProps = { activityId, ends };
 
@@ -64,7 +59,7 @@ export const IssueActivityItem: FC<TIssueActivityItem> = observer((props) => {
       return <IssueEstimateActivity {...componentDefaultProps} showIssue={false} />;
     case "parent":
       return <IssueParentActivity {...componentDefaultProps} showIssue={false} />;
-    case activityRelations.find((field) => field === activityField):
+    case ["blocking", "blocked_by", "duplicate", "relates_to"].find((field) => field === activityField):
       return <IssueRelationActivity {...componentDefaultProps} />;
     case "start_date":
       return <IssueStartDateActivity {...componentDefaultProps} showIssue={false} />;
@@ -82,7 +77,6 @@ export const IssueActivityItem: FC<TIssueActivityItem> = observer((props) => {
       return <IssueAttachmentActivity {...componentDefaultProps} showIssue={false} />;
     case "archived_at":
       return <IssueArchivedAtActivity {...componentDefaultProps} />;
-    case "intake":
     case "inbox":
       return <IssueInboxActivity {...componentDefaultProps} />;
     case "type":

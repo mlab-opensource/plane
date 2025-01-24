@@ -1,6 +1,5 @@
 "use client";
 
-import range from "lodash/range";
 import { Loader } from "@plane/ui";
 
 export const PageLoader: React.FC = (props) => {
@@ -18,7 +17,7 @@ export const PageLoader: React.FC = (props) => {
         </Loader>
       </div>
       <div>
-        {range(10).map((i) => (
+        {Array.from(Array(10)).map((i) => (
           <Loader key={i} className="relative flex items-center gap-2 p-3 py-4 border-b border-custom-border-100">
             <Loader.Item width={`${250 + 10 * Math.floor(Math.random() * 10)}px`} height="22px" />
             <div className="ml-auto relative flex items-center gap-2">

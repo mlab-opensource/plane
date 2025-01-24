@@ -1,7 +1,6 @@
 export const THEMES = ["light", "dark", "light-contrast", "dark-contrast", "custom"];
 
 export interface I_THEME_OPTION {
-  key: string;
   value: string;
   label: string;
   type: string;
@@ -14,7 +13,6 @@ export interface I_THEME_OPTION {
 
 export const THEME_OPTIONS: I_THEME_OPTION[] = [
   {
-    key: "system_preference",
     value: "system",
     label: "System preference",
     type: "light",
@@ -25,7 +23,6 @@ export const THEME_OPTIONS: I_THEME_OPTION[] = [
     },
   },
   {
-    key: "light",
     value: "light",
     label: "Light",
     type: "light",
@@ -36,7 +33,6 @@ export const THEME_OPTIONS: I_THEME_OPTION[] = [
     },
   },
   {
-    key: "dark",
     value: "dark",
     label: "Dark",
     type: "dark",
@@ -47,7 +43,6 @@ export const THEME_OPTIONS: I_THEME_OPTION[] = [
     },
   },
   {
-    key: "light_contrast",
     value: "light-contrast",
     label: "Light high contrast",
     type: "light",
@@ -58,7 +53,6 @@ export const THEME_OPTIONS: I_THEME_OPTION[] = [
     },
   },
   {
-    key: "dark_contrast",
     value: "dark-contrast",
     label: "Dark high contrast",
     type: "dark",
@@ -69,7 +63,6 @@ export const THEME_OPTIONS: I_THEME_OPTION[] = [
     },
   },
   {
-    key: "custom",
     value: "custom",
     label: "Custom theme",
     type: "light",

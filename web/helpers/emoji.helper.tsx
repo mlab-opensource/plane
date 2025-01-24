@@ -8,6 +8,7 @@ export const getRandomEmoji = () => {
     "128204",
     "127773",
     "127891",
+    "127947",
     "128076",
     "128077",
     "128187",
@@ -63,7 +64,6 @@ export const convertHexEmojiToDecimal = (emojiUnified: string): string => {
   if (!emojiUnified) return "";
 
   return emojiUnified
-    .toString()
     .split("-")
     .map((e) => parseInt(e, 16))
     .join("-");
@@ -74,7 +74,6 @@ export const emojiCodeToUnicode = (emoji: string) => {
 
   // convert emoji code to unicode
   const uniCodeEmoji = emoji
-    .toString()
     .split("-")
     .map((emoji) => parseInt(emoji, 10).toString(16))
     .join("-");

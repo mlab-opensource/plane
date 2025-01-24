@@ -7,7 +7,10 @@ class AnalyticViewSerializer(BaseSerializer):
     class Meta:
         model = AnalyticView
         fields = "__all__"
-        read_only_fields = ["workspace", "query"]
+        read_only_fields = [
+            "workspace",
+            "query",
+        ]
 
     def create(self, validated_data):
         query_params = validated_data.get("query_dict", {})

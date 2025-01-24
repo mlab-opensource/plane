@@ -2,8 +2,6 @@
 
 import { observer } from "mobx-react";
 import { useSearchParams } from "next/navigation";
-// components
-import { PoweredBy } from "@/components/common";
 // hooks
 import { usePublish } from "@/hooks/store";
 // plane-web
@@ -26,12 +24,7 @@ const IssuesPage = observer((props: Props) => {
 
   if (!publishSettings) return null;
 
-  return (
-    <>
-      <ViewLayoutsRoot peekId={peekId} publishSettings={publishSettings} />
-      <PoweredBy />
-    </>
-  );
+  return <ViewLayoutsRoot peekId={peekId} publishSettings={publishSettings} />;
 });
 
 export default IssuesPage;

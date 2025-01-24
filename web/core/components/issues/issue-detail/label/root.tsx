@@ -2,17 +2,17 @@
 
 import { FC, useMemo } from "react";
 import { observer } from "mobx-react";
-import { EIssueServiceType } from "@plane/constants";
-import { IIssueLabel, TIssue, TIssueServiceType } from "@plane/types";
+import { IIssueLabel, TIssue } from "@plane/types";
 // components
 import { TOAST_TYPE, setToast } from "@plane/ui";
 // hooks
-import { useIssueDetail, useLabel, useProjectInbox } from "@/hooks/store";
+import { useIssueDetail, useLabel, useProjectInbox, useUserPermissions } from "@/hooks/store";
 // ui
 // types
-import { LabelList, IssueLabelSelectRoot } from "./";
+import { LabelList, LabelCreate, IssueLabelSelectRoot } from "./";
 // TODO: Fix this import statement, as core should not import from ee
 // eslint-disable-next-line import/order
+import { EUserPermissions, EUserPermissionsLevel } from "ee/constants/user-permissions";
 
 export type TIssueLabel = {
   workspaceSlug: string;
@@ -21,7 +21,6 @@ export type TIssueLabel = {
   disabled: boolean;
   isInboxIssue?: boolean;
   onLabelUpdate?: (labelIds: string[]) => void;
-  issueServiceType?: TIssueServiceType;
 };
 
 export type TLabelOperations = {
@@ -30,23 +29,17 @@ export type TLabelOperations = {
 };
 
 export const IssueLabel: FC<TIssueLabel> = observer((props) => {
-  const {
-    workspaceSlug,
-    projectId,
-    issueId,
-    disabled = false,
-    isInboxIssue = false,
-    onLabelUpdate,
-    issueServiceType = EIssueServiceType.ISSUES,
-  } = props;
+  const { workspaceSlug, projectId, issueId, disabled = false, isInboxIssue = false, onLabelUpdate } = props;
   // hooks
-  const { updateIssue } = useIssueDetail(issueServiceType);
+  const { updateIssue } = useIssueDetail();
   const { createLabel } = useLabel();
   const {
     issue: { getIssueById },
-  } = useIssueDetail(issueServiceType);
+  } = useIssueDetail();
   const { getIssueInboxByIssueId } = useProjectInbox();
+  const { allowPermissions } = useUserPermissions();
 
+  const canCreateLabel = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT);
   const issue = isInboxIssue ? getIssueInboxByIssueId(issueId)?.issue : getIssueById(issueId);
 
   const labelOperations: TLabelOperations = useMemo(
@@ -103,6 +96,16 @@ export const IssueLabel: FC<TIssueLabel> = observer((props) => {
 
       {!disabled && (
         <IssueLabelSelectRoot
+          workspaceSlug={workspaceSlug}
+          projectId={projectId}
+          issueId={issueId}
+          values={issue?.label_ids || []}
+          labelOperations={labelOperations}
+        />
+      )}
+
+      {!disabled && canCreateLabel && (
+        <LabelCreate
           workspaceSlug={workspaceSlug}
           projectId={projectId}
           issueId={issueId}

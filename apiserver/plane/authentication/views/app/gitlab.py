@@ -9,7 +9,9 @@ from django.views import View
 from plane.authentication.provider.oauth.gitlab import GitLabOAuthProvider
 from plane.authentication.utils.login import user_login
 from plane.authentication.utils.redirection_path import get_redirection_path
-from plane.authentication.utils.user_auth_workflow import post_user_auth_workflow
+from plane.authentication.utils.user_auth_workflow import (
+    post_user_auth_workflow,
+)
 from plane.license.models import Instance
 from plane.authentication.utils.host import base_host
 from plane.authentication.adapter.error import (
@@ -19,6 +21,7 @@ from plane.authentication.adapter.error import (
 
 
 class GitLabOauthInitiateEndpoint(View):
+
     def get(self, request):
         # Get host and next path
         request.session["host"] = base_host(request=request, is_app=True)
@@ -30,14 +33,17 @@ class GitLabOauthInitiateEndpoint(View):
         instance = Instance.objects.first()
         if instance is None or not instance.is_setup_done:
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES["INSTANCE_NOT_CONFIGURED"],
+                error_code=AUTHENTICATION_ERROR_CODES[
+                    "INSTANCE_NOT_CONFIGURED"
+                ],
                 error_message="INSTANCE_NOT_CONFIGURED",
             )
             params = exc.get_error_dict()
             if next_path:
                 params["next_path"] = str(next_path)
             url = urljoin(
-                base_host(request=request, is_app=True), "?" + urlencode(params)
+                base_host(request=request, is_app=True),
+                "?" + urlencode(params),
             )
             return HttpResponseRedirect(url)
         try:
@@ -51,12 +57,14 @@ class GitLabOauthInitiateEndpoint(View):
             if next_path:
                 params["next_path"] = str(next_path)
             url = urljoin(
-                base_host(request=request, is_app=True), "?" + urlencode(params)
+                base_host(request=request, is_app=True),
+                "?" + urlencode(params),
             )
             return HttpResponseRedirect(url)
 
 
 class GitLabCallbackEndpoint(View):
+
     def get(self, request):
         code = request.GET.get("code")
         state = request.GET.get("state")
@@ -65,29 +73,41 @@ class GitLabCallbackEndpoint(View):
 
         if state != request.session.get("state", ""):
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES["GITLAB_OAUTH_PROVIDER_ERROR"],
+                error_code=AUTHENTICATION_ERROR_CODES[
+                    "GITLAB_OAUTH_PROVIDER_ERROR"
+                ],
                 error_message="GITLAB_OAUTH_PROVIDER_ERROR",
             )
             params = exc.get_error_dict()
             if next_path:
                 params["next_path"] = str(next_path)
-            url = urljoin(base_host, "?" + urlencode(params))
+            url = urljoin(
+                base_host,
+                "?" + urlencode(params),
+            )
             return HttpResponseRedirect(url)
 
         if not code:
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES["GITLAB_OAUTH_PROVIDER_ERROR"],
+                error_code=AUTHENTICATION_ERROR_CODES[
+                    "GITLAB_OAUTH_PROVIDER_ERROR"
+                ],
                 error_message="GITLAB_OAUTH_PROVIDER_ERROR",
             )
             params = exc.get_error_dict()
             if next_path:
                 params["next_path"] = str(next_path)
-            url = urljoin(base_host, "?" + urlencode(params))
+            url = urljoin(
+                base_host,
+                "?" + urlencode(params),
+            )
             return HttpResponseRedirect(url)
 
         try:
             provider = GitLabOAuthProvider(
-                request=request, code=code, callback=post_user_auth_workflow
+                request=request,
+                code=code,
+                callback=post_user_auth_workflow,
             )
             user = provider.authenticate()
             # Login the user and record his device info
@@ -104,5 +124,8 @@ class GitLabCallbackEndpoint(View):
             params = e.get_error_dict()
             if next_path:
                 params["next_path"] = str(next_path)
-            url = urljoin(base_host, "?" + urlencode(params))
+            url = urljoin(
+                base_host,
+                "?" + urlencode(params),
+            )
             return HttpResponseRedirect(url)

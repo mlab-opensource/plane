@@ -11,7 +11,9 @@ from plane.utils.cache import cache_response
 
 
 class WorkspaceEstimatesEndpoint(BaseAPIView):
-    permission_classes = [WorkspaceEntityPermission]
+    permission_classes = [
+        WorkspaceEntityPermission,
+    ]
 
     @cache_response(60 * 60 * 2)
     def get(self, request, slug):

@@ -8,20 +8,15 @@ import { createPortal } from "react-dom";
 import { usePopper } from "react-popper";
 import { Check, Search } from "lucide-react";
 import { Combobox } from "@headlessui/react";
-import { useTranslation } from "@plane/i18n";
-// plane ui
+//components
+import { cn } from "@plane/editor";
 import { Avatar } from "@plane/ui";
-// helpers
-import { cn } from "@/helpers/common.helper";
-import { getFileURL } from "@/helpers/file.helper";
-// hooks
+//store
 import { useUser, useMember } from "@/hooks/store";
 import { usePlatformOS } from "@/hooks/use-platform-os";
-import { EUserPermissions } from "@/plane-web/constants";
 
 interface Props {
-  memberIds?: string[];
-  className?: string;
+  className? : string;
   optionsClassName?: string;
   projectId?: string;
   referenceElement: HTMLButtonElement | null;
@@ -29,19 +24,18 @@ interface Props {
   isOpen: boolean;
 }
 
-export const MemberOptions: React.FC<Props> = observer((props: Props) => {
-  const { memberIds: propsMemberIds, projectId, referenceElement, placement, isOpen, optionsClassName = "" } = props;
+export const MemberOptions = observer((props: Props) => {
+  const { projectId, referenceElement, placement, isOpen, optionsClassName="" } = props;
   // states
   const [query, setQuery] = useState("");
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
   // refs
   const inputRef = useRef<HTMLInputElement | null>(null);
   // store hooks
-  const { t } = useTranslation();
   const { workspaceSlug } = useParams();
   const {
     getUserDetails,
-    project: { getProjectMemberIds, fetchProjectMembers, getProjectMemberDetails },
+    project: { getProjectMemberIds, fetchProjectMembers },
     workspace: { workspaceMemberIds },
   } = useMember();
   const { data: currentUser } = useUser();
@@ -68,7 +62,7 @@ export const MemberOptions: React.FC<Props> = observer((props: Props) => {
     }
   }, [isOpen, isMobile]);
 
-  const memberIds = propsMemberIds ? propsMemberIds : projectId ? getProjectMemberIds(projectId) : workspaceMemberIds;
+  const memberIds = projectId ? getProjectMemberIds(projectId) : workspaceMemberIds;
   const onOpen = () => {
     if (!memberIds && workspaceSlug && projectId) fetchProjectMembers(workspaceSlug.toString(), projectId);
   };
@@ -80,40 +74,29 @@ export const MemberOptions: React.FC<Props> = observer((props: Props) => {
     }
   };
 
-  const options = memberIds
-    ?.map((userId) => {
-      const userDetails = getUserDetails(userId);
-      if (projectId) {
-        const role = getProjectMemberDetails(userId, projectId)?.role;
-        const isGuest = role === EUserPermissions.GUEST;
-        if (isGuest) return;
-      }
+  const options = memberIds?.map((userId) => {
+    const userDetails = getUserDetails(userId);
 
-      return {
-        value: userId,
-        query: `${userDetails?.display_name} ${userDetails?.first_name} ${userDetails?.last_name}`,
-        content: (
-          <div className="flex items-center gap-2">
-            <Avatar name={userDetails?.display_name} src={getFileURL(userDetails?.avatar_url ?? "")} />
-            <span className="flex-grow truncate">
-              {currentUser?.id === userId ? t("you") : userDetails?.display_name}
-            </span>
-          </div>
-        ),
-      };
-    })
-    .filter((o) => !!o);
+    return {
+      value: userId,
+      query: `${userDetails?.display_name} ${userDetails?.first_name} ${userDetails?.last_name}`,
+      content: (
+        <div className="flex items-center gap-2">
+          <Avatar name={userDetails?.display_name} src={userDetails?.avatar} />
+          <span className="flex-grow truncate">{currentUser?.id === userId ? "You" : userDetails?.display_name}</span>
+        </div>
+      ),
+    };
+  });
 
   const filteredOptions =
-    query === "" ? options : options?.filter((o) => o?.query.toLowerCase().includes(query.toLowerCase()));
+    query === "" ? options : options?.filter((o) => o.query.toLowerCase().includes(query.toLowerCase()));
 
   return createPortal(
     <Combobox.Options data-prevent-outside-click static>
       <div
-        className={cn(
-          "my-1 w-48 rounded border-[0.5px] border-custom-border-300 bg-custom-background-100 px-2 py-2.5 text-xs shadow-custom-shadow-rg focus:outline-none z-20",
-          optionsClassName
-        )}
+        className={cn("my-1 w-48 rounded border-[0.5px] border-custom-border-300 bg-custom-background-100 px-2 py-2.5 text-xs shadow-custom-shadow-rg focus:outline-none z-20",
+          optionsClassName)}
         ref={setPopperElement}
         style={{
           ...styles.popper,
@@ -128,7 +111,7 @@ export const MemberOptions: React.FC<Props> = observer((props: Props) => {
             className="w-full bg-transparent py-1 text-xs text-custom-text-200 placeholder:text-custom-text-400 focus:outline-none"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("search")}
+            placeholder="Search"
             displayValue={(assigned: any) => assigned?.name}
             onKeyDown={searchInputKeyDown}
           />
@@ -136,32 +119,29 @@ export const MemberOptions: React.FC<Props> = observer((props: Props) => {
         <div className="mt-2 max-h-48 space-y-1 overflow-y-scroll">
           {filteredOptions ? (
             filteredOptions.length > 0 ? (
-              filteredOptions.map(
-                (option) =>
-                  option && (
-                    <Combobox.Option
-                      key={option.value}
-                      value={option.value}
-                      className={({ active, selected }) =>
-                        `flex w-full cursor-pointer select-none items-center justify-between gap-2 truncate rounded px-1 py-1.5 ${
-                          active ? "bg-custom-background-80" : ""
-                        } ${selected ? "text-custom-text-100" : "text-custom-text-200"}`
-                      }
-                    >
-                      {({ selected }) => (
-                        <>
-                          <span className="flex-grow truncate">{option.content}</span>
-                          {selected && <Check className="h-3.5 w-3.5 flex-shrink-0" />}
-                        </>
-                      )}
-                    </Combobox.Option>
-                  )
-              )
+              filteredOptions.map((option) => (
+                <Combobox.Option
+                  key={option.value}
+                  value={option.value}
+                  className={({ active, selected }) =>
+                    `flex w-full cursor-pointer select-none items-center justify-between gap-2 truncate rounded px-1 py-1.5 ${
+                      active ? "bg-custom-background-80" : ""
+                    } ${selected ? "text-custom-text-100" : "text-custom-text-200"}`
+                  }
+                >
+                  {({ selected }) => (
+                    <>
+                      <span className="flex-grow truncate">{option.content}</span>
+                      {selected && <Check className="h-3.5 w-3.5 flex-shrink-0" />}
+                    </>
+                  )}
+                </Combobox.Option>
+              ))
             ) : (
-              <p className="px-1.5 py-1 italic text-custom-text-400">{t("no_matching_results")}</p>
+              <p className="px-1.5 py-1 italic text-custom-text-400">No matching results</p>
             )
           ) : (
-            <p className="px-1.5 py-1 italic text-custom-text-400">{t("loading")}</p>
+            <p className="px-1.5 py-1 italic text-custom-text-400">Loading...</p>
           )}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import Collaboration from "@tiptap/extension-collaboration";
 import { IndexeddbPersistence } from "y-indexeddb";
@@ -13,9 +13,7 @@ import { TCollaborativeEditorProps } from "@/types";
 
 export const useCollaborativeEditor = (props: TCollaborativeEditorProps) => {
   const {
-    onTransaction,
     disabledExtensions,
-    editable,
     editorClassName,
     editorProps = {},
     embedHandler,
@@ -41,7 +39,7 @@ export const useCollaborativeEditor = (props: TCollaborativeEditorProps) => {
         name: id,
         parameters: realtimeConfig.queryParams,
         // using user id as a token to verify the user on the server
-        token: JSON.stringify(user),
+        token: user.id,
         url: realtimeConfig.url,
         onAuthenticationFailed: () => {
           serverHandler?.onServerError?.();
@@ -56,27 +54,27 @@ export const useCollaborativeEditor = (props: TCollaborativeEditorProps) => {
         },
         onSynced: () => setHasServerSynced(true),
       }),
-    [id, realtimeConfig, serverHandler, user]
+    [id, realtimeConfig, serverHandler, user.id]
   );
 
-  const localProvider = useMemo(
-    () => (id ? new IndexeddbPersistence(id, provider.document) : undefined),
-    [id, provider]
-  );
-
-  // destroy and disconnect all providers connection on unmount
+  // destroy and disconnect connection on unmount
   useEffect(
     () => () => {
-      provider?.destroy();
-      localProvider?.destroy();
+      provider.destroy();
+      provider.disconnect();
     },
-    [provider, localProvider]
+    [provider]
   );
+  // indexed db integration for offline support
+  useLayoutEffect(() => {
+    const localProvider = new IndexeddbPersistence(id, provider.document);
+    return () => {
+      localProvider?.destroy();
+    };
+  }, [provider, id]);
 
   const editor = useEditor({
-    disabledExtensions,
     id,
-    editable,
     editorProps,
     editorClassName,
     enableHistory: false,
@@ -98,10 +96,9 @@ export const useCollaborativeEditor = (props: TCollaborativeEditorProps) => {
       }),
     ],
     fileHandler,
-    forwardedRef,
     handleEditorReady,
+    forwardedRef,
     mentionHandler,
-    onTransaction,
     placeholder,
     provider,
     tabIndex,

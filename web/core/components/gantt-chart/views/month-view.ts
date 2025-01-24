@@ -1,15 +1,38 @@
-import cloneDeep from "lodash/cloneDeep";
-import uniqBy from "lodash/uniqBy";
-//
-import { months } from "../data";
-import { ChartDataType } from "../types";
-import { getNumberOfDaysBetweenTwoDates, getNumberOfDaysInMonth } from "./helpers";
-import { getWeeksBetweenTwoDates, IWeekBlock } from "./week-view";
+// types
+import { findTotalDaysInRange } from "@/helpers/date-time.helper";
+import { weeks, months } from "../data";
+import { ChartDataType, IGanttBlock } from "../types";
+// data
+// helpers
+import { generateDate, getWeekNumberByDate, getNumberOfDaysInMonth, getDatesBetweenTwoDates } from "./helpers";
+
+type GetAllDaysInMonthInMonthViewType = {
+  date: any;
+  day: any;
+  dayData: any;
+  weekNumber: number;
+  title: string;
+  active: boolean;
+  today: boolean;
+};
+
+interface IMonthChild {
+  active: boolean;
+  date: Date;
+  day: number;
+  dayData: {
+    key: number;
+    shortTitle: string;
+    title: string;
+  };
+  title: string;
+  today: boolean;
+  weekNumber: number;
+}
 
 export interface IMonthBlock {
-  today: boolean;
+  children: IMonthChild[];
   month: number;
-  days: number;
   monthData: {
     key: number;
     shortTitle: string;
@@ -18,153 +41,157 @@ export interface IMonthBlock {
   title: string;
   year: number;
 }
+[];
 
-export interface IMonthView {
-  months: IMonthBlock[];
-  weeks: IWeekBlock[];
-}
+const getAllDaysInMonthInMonthView = (month: number, year: number): IMonthChild[] => {
+  const day: GetAllDaysInMonthInMonthViewType[] = [];
+  const numberOfDaysInMonth = getNumberOfDaysInMonth(month, year);
+  const currentDate = new Date();
 
-/**
- * Generate Month Chart data
- * @param monthPayload
- * @param side
- * @returns
- */
-const generateMonthChart = (monthPayload: ChartDataType, side: null | "left" | "right", targetDate?: Date) => {
-  let renderState = cloneDeep(monthPayload);
+  Array.from(Array(numberOfDaysInMonth).keys()).map((_day: number) => {
+    const date: Date = generateDate(_day + 1, month, year);
+    day.push({
+      date: date,
+      day: _day + 1,
+      dayData: weeks[date.getDay()],
+      weekNumber: getWeekNumberByDate(date),
+      title: `${weeks[date.getDay()].shortTitle} ${_day + 1}`,
+      active: false,
+      today:
+        currentDate.getFullYear() === year && currentDate.getMonth() === month && currentDate.getDate() === _day + 1
+          ? true
+          : false,
+    });
+  });
+
+  return day;
+};
+
+const generateMonthDataByMonthAndYearInMonthView = (month: number, year: number): IMonthBlock => {
+  const currentMonth: number = month;
+  const currentYear: number = year;
+
+  const monthPayload = {
+    year: currentYear,
+    month: currentMonth,
+    monthData: months[currentMonth],
+    children: getAllDaysInMonthInMonthView(currentMonth, currentYear),
+    title: `${months[currentMonth].title} ${currentYear}`,
+  };
+
+  return monthPayload;
+};
+
+export const generateMonthChart = (monthPayload: ChartDataType, side: null | "left" | "right") => {
+  let renderState = monthPayload;
+  const renderPayload: any = [];
 
   const range: number = renderState.data.approxFilterRange || 6;
-  let filteredDates: IMonthView = { months: [], weeks: [] };
+  let filteredDates: Date[] = [];
   let minusDate: Date = new Date();
   let plusDate: Date = new Date();
 
-  let startDate = new Date();
-  let endDate = new Date();
-
-  // if side is null generate months on both side of current date
   if (side === null) {
     const currentDate = renderState.data.currentDate;
 
     minusDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - range, currentDate.getDate());
     plusDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + range, currentDate.getDate());
 
-    if (minusDate && plusDate) filteredDates = getMonthsViewBetweenTwoDates(minusDate, plusDate);
+    if (minusDate && plusDate) filteredDates = getDatesBetweenTwoDates(minusDate, plusDate);
 
-    startDate = filteredDates.weeks[0]?.startDate;
-    endDate = filteredDates.weeks[filteredDates.weeks.length - 1]?.endDate;
     renderState = {
       ...renderState,
       data: {
         ...renderState.data,
-        startDate,
-        endDate,
+        startDate: filteredDates[0],
+        endDate: filteredDates[filteredDates.length - 1],
       },
     };
-  }
-  // When side is left, generate more months on the left side of the start date
-  else if (side === "left") {
-    const chartStartDate = renderState.data.startDate;
-    const currentDate = targetDate ? targetDate : chartStartDate;
+  } else if (side === "left") {
+    const currentDate = renderState.data.startDate;
 
-    minusDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - range, 1);
-    plusDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), chartStartDate.getDate() - 1);
+    minusDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - range, currentDate.getDate());
+    plusDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate());
 
-    if (minusDate && plusDate) filteredDates = getMonthsViewBetweenTwoDates(minusDate, plusDate);
+    if (minusDate && plusDate) filteredDates = getDatesBetweenTwoDates(minusDate, plusDate);
 
-    startDate = filteredDates.weeks[0]?.startDate;
-    endDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), chartStartDate.getDate() - 1);
     renderState = {
       ...renderState,
-      data: { ...renderState.data, startDate },
+      data: { ...renderState.data, startDate: filteredDates[0] },
     };
-  }
-  // When side is right, generate more months on the right side of the end date
-  else if (side === "right") {
-    const chartEndDate = renderState.data.endDate;
-    const currentDate = targetDate ? targetDate : chartEndDate;
+  } else if (side === "right") {
+    const currentDate = renderState.data.endDate;
 
-    minusDate = new Date(chartEndDate.getFullYear(), chartEndDate.getMonth(), chartEndDate.getDate() + 1);
-    plusDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + range, 1);
+    minusDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+    plusDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + range, currentDate.getDate());
 
-    if (minusDate && plusDate) filteredDates = getMonthsViewBetweenTwoDates(minusDate, plusDate);
+    if (minusDate && plusDate) filteredDates = getDatesBetweenTwoDates(minusDate, plusDate);
 
-    startDate = new Date(chartEndDate.getFullYear(), chartEndDate.getMonth(), chartEndDate.getDate() + 1);
-    endDate = filteredDates.weeks[filteredDates.weeks.length - 1]?.endDate;
     renderState = {
       ...renderState,
-      data: { ...renderState.data, endDate: filteredDates.weeks[filteredDates.weeks.length - 1]?.endDate },
+      data: { ...renderState.data, endDate: filteredDates[filteredDates.length - 1] },
     };
   }
 
-  const days = Math.abs(getNumberOfDaysBetweenTwoDates(startDate, endDate)) + 1;
-  const scrollWidth = days * monthPayload.data.dayWidth;
+  if (filteredDates && filteredDates.length > 0)
+    for (const currentDate in filteredDates) {
+      const date = filteredDates[parseInt(currentDate)];
+      const currentYear = date.getFullYear();
+      const currentMonth = date.getMonth();
+      renderPayload.push(generateMonthDataByMonthAndYearInMonthView(currentMonth, currentYear));
+    }
 
-  return { state: renderState, payload: filteredDates, scrollWidth: scrollWidth };
+  const scrollWidth =
+    renderPayload
+      .map((monthData: any) => monthData.children.length)
+      .reduce((partialSum: number, a: number) => partialSum + a, 0) * monthPayload.data.width;
+
+  return { state: renderState, payload: renderPayload, scrollWidth: scrollWidth };
 };
 
-/**
- * Get Month View data between two dates, i.e., Months and Weeks between two dates
- * @param startDate
- * @param endDate
- * @returns
- */
-const getMonthsViewBetweenTwoDates = (startDate: Date, endDate: Date): IMonthView => ({
-  months: getMonthsBetweenTwoDates(startDate, endDate),
-  weeks: getWeeksBetweenTwoDates(startDate, endDate, false),
-});
+export const getNumberOfDaysBetweenTwoDatesInMonth = (startDate: Date, endDate: Date) => {
+  let daysDifference: number = 0;
+  startDate.setHours(0, 0, 0, 0);
+  endDate.setHours(0, 0, 0, 0);
 
-/**
- * generate array of months between two dates
- * @param startDate
- * @param endDate
- * @returns
- */
-export const getMonthsBetweenTwoDates = (startDate: Date, endDate: Date): IMonthBlock[] => {
-  const monthBlocks = [];
+  const timeDifference: number = startDate.getTime() - endDate.getTime();
+  daysDifference = Math.abs(Math.floor(timeDifference / (1000 * 60 * 60 * 24)));
 
-  const startYear = startDate.getFullYear();
-  const startMonth = startDate.getMonth();
-
-  const today = new Date();
-  const todayMonth = today.getMonth();
-  const todayYear = today.getFullYear();
-
-  const currentDate = new Date(startYear, startMonth);
-
-  while (currentDate <= endDate) {
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
-
-    monthBlocks.push({
-      year: currentYear,
-      month: currentMonth,
-      monthData: months[currentMonth],
-      title: `${months[currentMonth].title} ${currentYear}`,
-      days: getNumberOfDaysInMonth(currentMonth, currentYear),
-      today: todayMonth === currentMonth && todayYear === currentYear,
-    });
-
-    currentDate.setMonth(currentDate.getMonth() + 1);
-  }
-
-  return monthBlocks;
+  return daysDifference;
 };
 
-/**
- * Merge two MonthView data payloads
- * @param a
- * @param b
- * @returns
- */
-const mergeMonthRenderPayloads = (a: IMonthView, b: IMonthView): IMonthView => ({
-  months: uniqBy([...a.months, ...b.months], (monthBlock) => `${monthBlock.month}_${monthBlock.year}`),
-  weeks: uniqBy(
-    [...a.weeks, ...b.weeks],
-    (weekBlock) => `${weekBlock.startDate.getTime()}_${weekBlock.endDate.getTime()}`
-  ),
-});
+// calc item scroll position and width
+export const getMonthChartItemPositionWidthInMonth = (chartData: ChartDataType, itemData: IGanttBlock) => {
+  let scrollPosition: number = 0;
+  let scrollWidth: number = 0;
 
-export const monthView = {
-  generateChart: generateMonthChart,
-  mergeRenderPayloads: mergeMonthRenderPayloads,
+  const { startDate } = chartData.data;
+  const { start_date: itemStartDate, target_date: itemTargetDate } = itemData;
+
+  if (!itemStartDate || !itemTargetDate) return;
+
+  startDate.setHours(0, 0, 0, 0);
+  itemStartDate.setHours(0, 0, 0, 0);
+  itemTargetDate.setHours(0, 0, 0, 0);
+
+  const positionDaysDifference = findTotalDaysInRange(startDate, itemStartDate, false);
+
+  if (!positionDaysDifference) return;
+
+  scrollPosition = positionDaysDifference * chartData.data.width;
+
+  let diffMonths = (itemStartDate.getFullYear() - startDate.getFullYear()) * 12;
+  diffMonths -= startDate.getMonth();
+  diffMonths += itemStartDate.getMonth();
+
+  scrollPosition = scrollPosition + diffMonths;
+  // position code ends
+
+  // width code starts
+  const widthTimeDifference: number = itemStartDate.getTime() - itemTargetDate.getTime();
+  const widthDaysDifference: number = Math.abs(Math.floor(widthTimeDifference / (1000 * 60 * 60 * 24)));
+  scrollWidth = (widthDaysDifference + 1) * chartData.data.width + 1;
+  // width code ends
+
+  return { marginLeft: scrollPosition, width: scrollWidth };
 };

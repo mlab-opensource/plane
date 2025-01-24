@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 // helpers
-import { cn } from "@plane/utils";
+import { cn } from "helpers/common.helper";
 
 type Props = {
   name: string;

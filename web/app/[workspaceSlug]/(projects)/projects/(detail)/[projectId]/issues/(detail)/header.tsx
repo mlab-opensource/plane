@@ -5,13 +5,11 @@ import { useParams } from "next/navigation";
 // ui
 import { Breadcrumbs, LayersIcon, Header } from "@plane/ui";
 // components
-import { BreadcrumbLink } from "@/components/common";
+import { BreadcrumbLink, Logo } from "@/components/common";
 import { IssueDetailQuickActions } from "@/components/issues";
 // hooks
 import { useIssueDetail, useProject } from "@/hooks/store";
 import { useAppRouter } from "@/hooks/use-app-router";
-// plane web
-import { ProjectBreadcrumb } from "@/plane-web/components/breadcrumbs";
 
 export const ProjectIssueDetailsHeader = observer(() => {
   // router
@@ -30,7 +28,22 @@ export const ProjectIssueDetailsHeader = observer(() => {
       <Header.LeftItem>
         <div>
           <Breadcrumbs onBack={router.back} isLoading={loader}>
-            <ProjectBreadcrumb />
+            <Breadcrumbs.BreadcrumbItem
+              type="text"
+              link={
+                <BreadcrumbLink
+                  href={`/${workspaceSlug}/projects`}
+                  label={currentProjectDetails?.name ?? "Project"}
+                  icon={
+                    currentProjectDetails && (
+                      <span className="grid h-4 w-4 flex-shrink-0 place-items-center">
+                        <Logo logo={currentProjectDetails?.logo_props} size={16} />
+                      </span>
+                    )
+                  }
+                />
+              }
+            />
 
             <Breadcrumbs.BreadcrumbItem
               type="text"

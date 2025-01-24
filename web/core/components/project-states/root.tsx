@@ -16,17 +16,11 @@ type TProjectState = {
 export const ProjectStateRoot: FC<TProjectState> = observer((props) => {
   const { workspaceSlug, projectId } = props;
   // hooks
-  const { groupedProjectStates, fetchProjectStates, fetchProjectStateTransitions } = useProjectState();
+  const { groupedProjectStates, fetchProjectStates } = useProjectState();
 
   useSWR(
     workspaceSlug && projectId ? `PROJECT_STATES_${workspaceSlug}_${projectId}` : null,
-    workspaceSlug && projectId
-      ? () => {
-          fetchProjectStates(workspaceSlug.toString(), projectId.toString());
-          fetchProjectStateTransitions(workspaceSlug.toString(), projectId.toString());
-        }
-      : null,
-    { revalidateIfStale: false, revalidateOnFocus: false }
+    workspaceSlug && projectId ? () => fetchProjectStates(workspaceSlug.toString(), projectId.toString()) : null
   );
 
   // Loader

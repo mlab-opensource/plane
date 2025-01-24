@@ -1,37 +1,29 @@
 "use client";
 
-import { FC, useEffect, useState, useMemo, useCallback } from "react";
+import { FC, useEffect, useState, useMemo } from "react";
 import { observer } from "mobx-react";
 import { usePathname } from "next/navigation";
-// plane types
-import { EIssuesStoreType } from "@plane/constants";
 import { TIssue } from "@plane/types";
-// plane ui
 import { TOAST_TYPE, setPromiseToast, setToast } from "@plane/ui";
 // components
 import { IssueView, TIssueOperations } from "@/components/issues";
 // constants
 import { ISSUE_UPDATED, ISSUE_DELETED, ISSUE_ARCHIVED, ISSUE_RESTORED } from "@/constants/event-tracker";
+import { EIssuesStoreType } from "@/constants/issue";
 // hooks
 import { useEventTracker, useIssueDetail, useIssues, useUserPermissions } from "@/hooks/store";
-import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
-// plane web constants
+import { useIssuesStore } from "@/hooks/use-issue-layout-store";
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 
 interface IIssuePeekOverview {
   embedIssue?: boolean;
   embedRemoveCurrentNotification?: () => void;
+  is_archived?: boolean;
   is_draft?: boolean;
-  storeType?: EIssuesStoreType;
 }
 
 export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
-  const {
-    embedIssue = false,
-    embedRemoveCurrentNotification,
-    is_draft = false,
-    storeType: issueStoreFromProps,
-  } = props;
+  const { embedIssue = false, embedRemoveCurrentNotification, is_archived = false, is_draft = false } = props;
   // router
   const pathname = usePathname();
   // store hook
@@ -46,32 +38,37 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
     issue: { fetchIssue, getIsFetchingIssueDetails },
     fetchActivities,
   } = useIssueDetail();
-  const issueStoreType = useIssueStoreType();
-  const storeType = issueStoreFromProps ?? issueStoreType;
-  const { issues } = useIssues(storeType);
+
+  const { issues } = useIssuesStore();
   const { captureIssueEvent } = useEventTracker();
   // state
   const [error, setError] = useState(false);
 
-  const removeRoutePeekId = useCallback(() => {
+  const removeRoutePeekId = () => {
     setPeekIssue(undefined);
-    if (embedIssue) embedRemoveCurrentNotification?.();
-  }, [embedIssue, embedRemoveCurrentNotification, setPeekIssue]);
+    if (embedIssue) embedRemoveCurrentNotification && embedRemoveCurrentNotification();
+  };
 
   const issueOperations: TIssueOperations = useMemo(
     () => ({
-      fetch: async (workspaceSlug: string, projectId: string, issueId: string) => {
+      fetch: async (workspaceSlug: string, projectId: string, issueId: string, loader = true) => {
         try {
           setError(false);
-          await fetchIssue(workspaceSlug, projectId, issueId, is_draft ? "DRAFT" : "DEFAULT");
+          await fetchIssue(
+            workspaceSlug,
+            projectId,
+            issueId,
+            is_archived ? "ARCHIVED" : is_draft ? "DRAFT" : "DEFAULT"
+          );
+          setError(false);
         } catch (error) {
           setError(true);
-          console.error("Error fetching the parent issue", error);
+          console.error("Error fetching the parent issue");
         }
       },
       update: async (workspaceSlug: string, projectId: string, issueId: string, data: Partial<TIssue>) => {
-        if (issues?.updateIssue) {
-          await issues
+        issues?.updateIssue &&
+          (await issues
             .updateIssue(workspaceSlug, projectId, issueId, data)
             .then(async () => {
               fetchActivities(workspaceSlug, projectId, issueId);
@@ -96,8 +93,7 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
                 type: TOAST_TYPE.ERROR,
                 message: "Issue update failed",
               });
-            });
-        }
+            }));
       },
       remove: async (workspaceSlug: string, projectId: string, issueId: string) => {
         try {
@@ -109,7 +105,7 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
             });
             removeRoutePeekId();
           });
-        } catch {
+        } catch (error) {
           setToast({
             title: "Error!",
             type: TOAST_TYPE.ERROR,
@@ -124,14 +120,13 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
       },
       archive: async (workspaceSlug: string, projectId: string, issueId: string) => {
         try {
-          if (!issues?.archiveIssue) return;
-          await issues.archiveIssue(workspaceSlug, projectId, issueId);
+          issues?.archiveIssue && (await issues.archiveIssue(workspaceSlug, projectId, issueId));
           captureIssueEvent({
             eventName: ISSUE_ARCHIVED,
             payload: { id: issueId, state: "SUCCESS", element: "Issue peek-overview" },
             path: pathname,
           });
-        } catch {
+        } catch (error) {
           captureIssueEvent({
             eventName: ISSUE_ARCHIVED,
             payload: { id: issueId, state: "FAILED", element: "Issue peek-overview" },
@@ -152,7 +147,7 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
             payload: { id: issueId, state: "SUCCESS", element: "Issue peek-overview" },
             path: pathname,
           });
-        } catch {
+        } catch (error) {
           setToast({
             type: TOAST_TYPE.ERROR,
             title: "Error!",
@@ -178,7 +173,7 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
             },
             path: pathname,
           });
-        } catch {
+        } catch (error) {
           setToast({
             type: TOAST_TYPE.ERROR,
             title: "Error!",
@@ -207,7 +202,7 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
             },
             path: pathname,
           });
-        } catch {
+        } catch (error) {
           setToast({
             type: TOAST_TYPE.ERROR,
             title: "Error!",
@@ -249,7 +244,7 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
             },
             path: pathname,
           });
-        } catch {
+        } catch (error) {
           captureIssueEvent({
             eventName: ISSUE_UPDATED,
             payload: { state: "FAILED", element: "Issue peek-overview" },
@@ -312,7 +307,7 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
             },
             path: pathname,
           });
-        } catch {
+        } catch (error) {
           captureIssueEvent({
             eventName: ISSUE_UPDATED,
             payload: { id: issueId, state: "FAILED", element: "Issue peek-overview" },
@@ -325,7 +320,7 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
         }
       },
     }),
-    [fetchIssue, is_draft, issues, fetchActivities, captureIssueEvent, pathname, removeRoutePeekId, restoreIssue]
+    [is_archived, is_draft, fetchIssue, issues, restoreIssue, captureIssueEvent, pathname]
   );
 
   useEffect(() => {
@@ -351,7 +346,7 @@ export const IssuePeekOverview: FC<IIssuePeekOverview> = observer((props) => {
       issueId={peekIssue.issueId}
       isLoading={getIsFetchingIssueDetails(peekIssue.issueId)}
       isError={error}
-      is_archived={!!peekIssue.isArchived}
+      is_archived={is_archived}
       disabled={!isEditable}
       embedIssue={embedIssue}
       embedRemoveCurrentNotification={embedRemoveCurrentNotification}

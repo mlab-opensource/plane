@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef, Fragment, Ref } from "react";
 import { Placement } from "@popperjs/core";
+import { useParams } from "next/navigation";
 import { Controller, useForm } from "react-hook-form"; // services
 import { usePopper } from "react-popper";
 import { AlertCircle } from "lucide-react";
@@ -22,8 +23,6 @@ type Props = {
   prompt?: string;
   button: JSX.Element;
   className?: string;
-  workspaceSlug: string;
-  projectId: string;
 };
 
 type FormData = {
@@ -34,18 +33,7 @@ type FormData = {
 const aiService = new AIService();
 
 export const GptAssistantPopover: React.FC<Props> = (props) => {
-  const {
-    isOpen,
-    handleClose,
-    onResponse,
-    onError,
-    placement,
-    prompt,
-    button,
-    className = "",
-    workspaceSlug,
-    projectId,
-  } = props;
+  const { isOpen, handleClose, onResponse, onError, placement, prompt, button, className = "" } = props;
   // states
   const [response, setResponse] = useState("");
   const [invalidResponse, setInvalidResponse] = useState(false);
@@ -53,6 +41,8 @@ export const GptAssistantPopover: React.FC<Props> = (props) => {
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
   const editorRef = useRef<any>(null);
   const responseRef = useRef<any>(null);
+  // router
+  const { workspaceSlug } = useParams();
   // popper
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
     placement: placement ?? "auto",
@@ -218,8 +208,6 @@ export const GptAssistantPopover: React.FC<Props> = (props) => {
                   initialValue={prompt}
                   containerClassName="-m-3"
                   ref={editorRef}
-                  workspaceSlug={workspaceSlug}
-                  projectId={projectId}
                 />
               </div>
             )}
@@ -230,8 +218,6 @@ export const GptAssistantPopover: React.FC<Props> = (props) => {
                   id="ai-assistant-response"
                   initialValue={`<p>${response}</p>`}
                   ref={responseRef}
-                  workspaceSlug={workspaceSlug}
-                  projectId={projectId}
                 />
               </div>
             )}

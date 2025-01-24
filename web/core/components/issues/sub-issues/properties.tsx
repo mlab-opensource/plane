@@ -1,5 +1,4 @@
 import React from "react";
-import { TIssueServiceType } from "@plane/types";
 // hooks
 import { PriorityDropdown, MemberDropdown, StateDropdown } from "@/components/dropdowns";
 import { useIssueDetail } from "@/hooks/store";
@@ -13,15 +12,14 @@ export interface IIssueProperty {
   issueId: string;
   disabled: boolean;
   subIssueOperations: TSubIssueOperations;
-  issueServiceType?: TIssueServiceType;
 }
 
 export const IssueProperty: React.FC<IIssueProperty> = (props) => {
-  const { workspaceSlug, parentIssueId, issueId, disabled, subIssueOperations, issueServiceType } = props;
+  const { workspaceSlug, parentIssueId, issueId, disabled, subIssueOperations } = props;
   // hooks
   const {
     issue: { getIssueById },
-  } = useIssueDetail(issueServiceType);
+  } = useIssueDetail();
 
   const issue = getIssueById(issueId);
 

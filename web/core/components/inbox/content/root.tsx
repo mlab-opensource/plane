@@ -1,7 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import useSWR from "swr";
-import { TNameDescriptionLoader } from "@plane/types";
 // components
 import { ContentWrapper } from "@plane/ui";
 import { InboxIssueActionsHeader, InboxIssueMainContent } from "@/components/inbox";
@@ -33,7 +32,7 @@ export const InboxContentRoot: FC<TInboxContentRoot> = observer((props) => {
   /// router
   const router = useAppRouter();
   // states
-  const [isSubmitting, setIsSubmitting] = useState<TNameDescriptionLoader>("saved");
+  const [isSubmitting, setIsSubmitting] = useState<"submitting" | "submitted" | "saved">("saved");
   // hooks
   const { data: currentUser } = useUser();
   const { currentTab, fetchInboxIssueById, getIssueInboxByIssueId, getIsIssueAvailable } = useProjectInbox();
@@ -64,8 +63,8 @@ export const InboxContentRoot: FC<TInboxContentRoot> = observer((props) => {
   );
 
   const isEditable =
-    allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT, workspaceSlug, projectId) ||
-    inboxIssue?.issue.created_by === currentUser?.id;
+    allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT) ||
+    inboxIssue.created_by === currentUser?.id;
 
   const isGuest = projectPermissionsByWorkspaceSlugAndProjectId(workspaceSlug, projectId) === EUserPermissions.GUEST;
   const isOwner = inboxIssue?.issue.created_by === currentUser?.id;

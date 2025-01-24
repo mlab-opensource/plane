@@ -15,7 +15,6 @@ import { copyUrlToClipboard } from "@/helpers/string.helper";
 // hooks
 import { useCycle, useEventTracker, useUserPermissions } from "@/hooks/store";
 import { useAppRouter } from "@/hooks/use-app-router";
-import { useEndCycle, EndCycleModal } from "@/plane-web/components/cycles";
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 
 type Props = {
@@ -41,7 +40,6 @@ export const CycleQuickActions: React.FC<Props> = observer((props) => {
   const cycleDetails = getCycleById(cycleId);
   const isArchived = !!cycleDetails?.archived_at;
   const isCompleted = cycleDetails?.status?.toLowerCase() === "completed";
-  const isCurrentCycle = cycleDetails?.status?.toLowerCase() === "current";
   // auth
   const isEditingAllowed = allowPermissions(
     [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
@@ -49,8 +47,6 @@ export const CycleQuickActions: React.FC<Props> = observer((props) => {
     workspaceSlug,
     projectId
   );
-
-  const { isEndCycleModalOpen, setEndCycleModalOpen, endCycleContextMenu } = useEndCycle(isCurrentCycle);
 
   const cycleLink = `${workspaceSlug}/projects/${projectId}/cycles/${cycleId}`;
   const handleCopyText = () =>
@@ -119,7 +115,7 @@ export const CycleQuickActions: React.FC<Props> = observer((props) => {
       key: "archive",
       action: handleArchiveCycle,
       title: "Archive",
-      description: isCompleted ? undefined : "Only completed cycles can\nbe archived.",
+      description: isCompleted ? undefined : "Only completed cycle can\nbe archived.",
       icon: ArchiveIcon,
       className: "items-start",
       iconClassName: "mt-1",
@@ -141,8 +137,6 @@ export const CycleQuickActions: React.FC<Props> = observer((props) => {
       shouldRender: isEditingAllowed && !isCompleted && !isArchived,
     },
   ];
-
-  if (endCycleContextMenu) MENU_ITEMS.splice(3, 0, endCycleContextMenu);
 
   return (
     <>
@@ -169,21 +163,10 @@ export const CycleQuickActions: React.FC<Props> = observer((props) => {
             workspaceSlug={workspaceSlug}
             projectId={projectId}
           />
-          {isCurrentCycle && (
-            <EndCycleModal
-              isOpen={isEndCycleModalOpen}
-              handleClose={() => setEndCycleModalOpen(false)}
-              cycleId={cycleId}
-              projectId={projectId}
-              workspaceSlug={workspaceSlug}
-              transferrableIssuesCount={cycleDetails.pending_issues}
-              cycleName={cycleDetails.name}
-            />
-          )}
         </div>
       )}
       <ContextMenu parentRef={parentRef} items={MENU_ITEMS} />
-      <CustomMenu ellipsis placement="bottom-end" closeOnSelect maxHeight="lg">
+      <CustomMenu ellipsis placement="bottom-end" closeOnSelect>
         {MENU_ITEMS.map((item) => {
           if (item.shouldRender === false) return null;
           return (

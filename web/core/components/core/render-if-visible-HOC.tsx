@@ -13,7 +13,6 @@ type Props = {
   defaultValue?: boolean;
   shouldRecordHeights?: boolean;
   useIdletime?: boolean;
-  forceRender?: boolean;
 };
 
 const RenderIfVisible: React.FC<Props> = (props) => {
@@ -30,13 +29,12 @@ const RenderIfVisible: React.FC<Props> = (props) => {
     placeholderChildren = null, //placeholder children
     defaultValue = false,
     useIdletime = false,
-    forceRender = false,
   } = props;
   const [shouldVisible, setShouldVisible] = useState<boolean>(defaultValue);
   const placeholderHeight = useRef<string>(defaultHeight);
   const intersectionRef = useRef<HTMLElement | null>(null);
 
-  const isVisible = shouldVisible || forceRender;
+  const isVisible = shouldVisible;
 
   // Set visibility with intersection observer
   useEffect(() => {

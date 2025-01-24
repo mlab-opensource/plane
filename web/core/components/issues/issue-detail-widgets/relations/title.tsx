@@ -1,33 +1,28 @@
 "use client";
 import React, { FC, useMemo } from "react";
 import { observer } from "mobx-react";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssueServiceType } from "@plane/types";
 import { CollapsibleButton } from "@plane/ui";
 // components
 import { RelationActionButton } from "@/components/issues/issue-detail-widgets";
 // hooks
 import { useIssueDetail } from "@/hooks/store";
-// Plane-web
-import { useTimeLineRelationOptions } from "@/plane-web/components/relations";
 
 type Props = {
   isOpen: boolean;
   issueId: string;
   disabled: boolean;
-  issueServiceType?: TIssueServiceType;
 };
 
 export const RelationsCollapsibleTitle: FC<Props> = observer((props) => {
-  const { isOpen, issueId, disabled, issueServiceType = EIssueServiceType.ISSUES } = props;
+  const { isOpen, issueId, disabled } = props;
   // store hook
   const {
-    relation: { getRelationCountByIssueId },
-  } = useIssueDetail(issueServiceType);
+    relation: { getRelationsByIssueId },
+  } = useIssueDetail();
 
-  const ISSUE_RELATION_OPTIONS = useTimeLineRelationOptions();
   // derived values
-  const relationsCount = getRelationCountByIssueId(issueId, ISSUE_RELATION_OPTIONS);
+  const issueRelations = getRelationsByIssueId(issueId);
+  const relationsCount = Object.values(issueRelations ?? {}).reduce((acc, curr) => acc + curr.length, 0);
 
   // indicator element
   const indicatorElement = useMemo(
@@ -44,9 +39,7 @@ export const RelationsCollapsibleTitle: FC<Props> = observer((props) => {
       isOpen={isOpen}
       title="Relations"
       indicatorElement={indicatorElement}
-      actionItemElement={
-        !disabled && <RelationActionButton issueId={issueId} disabled={disabled} issueServiceType={issueServiceType} />
-      }
+      actionItemElement={!disabled && <RelationActionButton issueId={issueId} disabled={disabled} />}
     />
   );
 });

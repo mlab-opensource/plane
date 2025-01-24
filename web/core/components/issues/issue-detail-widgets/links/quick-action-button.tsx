@@ -2,21 +2,18 @@
 import React, { FC } from "react";
 import { observer } from "mobx-react";
 import { Plus } from "lucide-react";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssueServiceType } from "@plane/types";
 // hooks
 import { useIssueDetail } from "@/hooks/store";
 
 type Props = {
   customButton?: React.ReactNode;
   disabled?: boolean;
-  issueServiceType?: TIssueServiceType;
 };
 
 export const IssueLinksActionButton: FC<Props> = observer((props) => {
-  const { customButton, disabled = false, issueServiceType = EIssueServiceType.ISSUES } = props;
+  const { customButton, disabled = false } = props;
   // store hooks
-  const { toggleIssueLinkModal } = useIssueDetail(issueServiceType);
+  const { toggleIssueLinkModal } = useIssueDetail();
 
   // handlers
   const handleOnClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

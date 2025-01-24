@@ -1,9 +1,6 @@
-import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
-import isEmpty from "lodash/isEmpty";
+import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import set from "lodash/set";
 import { v4 as uuidv4 } from "uuid";
-// plane constants
-import { EIssueLayoutTypes } from "@plane/constants";
 // types
 import {
   IIssueDisplayFilterOptions,
@@ -19,7 +16,7 @@ import {
 } from "@plane/types";
 import { IGanttBlock } from "@/components/gantt-chart";
 // constants
-import { ISSUE_DISPLAY_FILTERS_BY_LAYOUT } from "@/constants/issue";
+import { EIssueLayoutTypes, ISSUE_DISPLAY_FILTERS_BY_LAYOUT } from "@/constants/issue";
 import { STATE_GROUPS } from "@/constants/state";
 // helpers
 import { orderArrayBy } from "@/helpers/array.helper";
@@ -99,7 +96,7 @@ export const handleIssuesMutation: THandleIssuesMutation = (
 
 export const handleIssueQueryParamsByLayout = (
   layout: EIssueLayoutTypes | undefined,
-  viewType: "my_issues" | "issues" | "profile_issues" | "archived_issues" | "draft_issues" | "team_issues"
+  viewType: "my_issues" | "issues" | "profile_issues" | "archived_issues" | "draft_issues"
 ): TIssueParams[] | null => {
   const queryParams: TIssueParams[] = [];
 
@@ -177,10 +174,9 @@ export const shouldHighlightIssueDueDate = (
 export const getIssueBlocksStructure = (block: TIssue): IGanttBlock => ({
   data: block,
   id: block?.id,
-  name: block?.name,
   sort_order: block?.sort_order,
-  start_date: block?.start_date ?? undefined,
-  target_date: block?.target_date ?? undefined,
+  start_date: getDate(block?.start_date),
+  target_date: getDate(block?.target_date),
 });
 
 export function getChangedIssuefields(formData: Partial<TIssue>, dirtyFields: { [key: string]: boolean | undefined }) {
@@ -311,17 +307,3 @@ export const getComputedDisplayProperties = (
   cycle: displayProperties?.cycle ?? true,
   issue_type: displayProperties?.issue_type ?? true,
 });
-
-/**
- * This is to check if the issues list api should fall back to server or use local db
- * @param queries
- * @returns
- */
-export const getIssuesShouldFallbackToServer = (queries: any) => {
-  // If there is expand query and is not grouped then fallback to server
-  if (!isEmpty(queries.expand as string) && !queries.group_by) return true;
-  // If query has mentions then fallback to server
-  if (!isEmpty(queries.mentions)) return true;
-
-  return false;
-};

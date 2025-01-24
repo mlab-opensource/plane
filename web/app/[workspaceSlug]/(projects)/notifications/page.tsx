@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
@@ -62,11 +62,6 @@ const WorkspaceDashboardPage = observer(() => {
     workspace_slug && project_id && is_inbox_issue ? () => fetchUserProjectInfo(workspace_slug, project_id) : null
   );
 
-  const embedRemoveCurrentNotification = useCallback(
-    () => setCurrentSelectedNotificationId(undefined),
-    [setCurrentSelectedNotificationId]
-  );
-
   // clearing up the selected notifications when unmounting the page
   useEffect(
     () => () => {
@@ -100,12 +95,15 @@ const WorkspaceDashboardPage = observer(() => {
                     projectId={project_id}
                     inboxIssueId={issue_id}
                     isNotificationEmbed
-                    embedRemoveCurrentNotification={embedRemoveCurrentNotification}
+                    embedRemoveCurrentNotification={() => setCurrentSelectedNotificationId(undefined)}
                   />
                 )}
               </>
             ) : (
-              <IssuePeekOverview embedIssue embedRemoveCurrentNotification={embedRemoveCurrentNotification} />
+              <IssuePeekOverview
+                embedIssue
+                embedRemoveCurrentNotification={() => setCurrentSelectedNotificationId(undefined)}
+              />
             )}
           </>
         )}

@@ -4,8 +4,7 @@ import { FC, ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { useTheme, ThemeProvider } from "next-themes";
 import { SWRConfig } from "swr";
-// Plane Imports
-import { TranslationProvider } from "@plane/i18n";
+// ui
 import { Toast } from "@plane/ui";
 // constants
 import { SWR_CONFIG } from "@/constants/swr-config";
@@ -42,17 +41,15 @@ export const AppProvider: FC<IAppProvider> = (props) => {
       <StoreProvider>
         <ThemeProvider themes={["light", "dark", "light-contrast", "dark-contrast", "custom"]} defaultTheme="system">
           <ToastWithTheme />
-          <TranslationProvider>
-            <StoreWrapper>
-              <InstanceWrapper>
-                <IntercomProvider>
-                  <PostHogProvider>
-                    <SWRConfig value={SWR_CONFIG}>{children}</SWRConfig>
-                  </PostHogProvider>
-                </IntercomProvider>
-              </InstanceWrapper>
-            </StoreWrapper>
-          </TranslationProvider>
+          <StoreWrapper>
+            <InstanceWrapper>
+              <IntercomProvider>
+                <PostHogProvider>
+                  <SWRConfig value={SWR_CONFIG}>{children}</SWRConfig>
+                </PostHogProvider>
+              </IntercomProvider>
+            </InstanceWrapper>
+          </StoreWrapper>
         </ThemeProvider>
       </StoreProvider>
     </>

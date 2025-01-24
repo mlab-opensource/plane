@@ -5,10 +5,12 @@ import { observer } from "mobx-react";
 import Link from "next/link";
 // icons
 import { Settings2 } from "lucide-react";
-// plane internal packages
+// types
 import { TInstanceAuthenticationMethodKeys } from "@plane/types";
+// ui
 import { ToggleSwitch, getButtonStyling } from "@plane/ui";
-import { cn } from "@plane/utils";
+// helpers
+import { cn } from "@/helpers/common.helper";
 // hooks
 import { useInstance } from "@/hooks/store";
 

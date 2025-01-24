@@ -1,13 +1,14 @@
 import { createContext, useContext } from "react";
 import { useParams } from "next/navigation";
-import { EIssuesStoreType } from "@plane/constants";
+import { EIssuesStoreType } from "@/constants/issue";
 import { useIssues } from "./store";
 
 export const IssuesStoreContext = createContext<EIssuesStoreType | undefined>(undefined);
 
 export const useIssueStoreType = () => {
   const storeType = useContext(IssuesStoreContext);
-  const { globalViewId, viewId, projectId, cycleId, moduleId, userId, epicId, teamId } = useParams();
+
+  const { globalViewId, viewId, projectId, cycleId, moduleId, userId } = useParams();
 
   // If store type exists in context, use that store type
   if (storeType) return storeType;
@@ -23,13 +24,7 @@ export const useIssueStoreType = () => {
 
   if (moduleId) return EIssuesStoreType.MODULE;
 
-  if (epicId) return EIssuesStoreType.EPIC;
-
   if (projectId) return EIssuesStoreType.PROJECT;
-
-  if (teamId) return EIssuesStoreType.TEAM;
-
-  if (teamId && viewId) return EIssuesStoreType.TEAM_VIEW;
 
   return EIssuesStoreType.PROJECT;
 };

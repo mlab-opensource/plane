@@ -1,14 +1,12 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { RefreshCw } from "lucide-react";
-// types
-import { TNameDescriptionLoader } from "@plane/types";
 
 type Props = {
-  isSubmitting: TNameDescriptionLoader;
+  isSubmitting: "submitting" | "submitted" | "saved";
 };
 
-export const NameDescriptionUpdateStatus: React.FC<Props> = observer((props) => {
+export const IssueUpdateStatus: React.FC<Props> = observer((props) => {
   const { isSubmitting } = props;
 
   return (
@@ -19,7 +17,7 @@ export const NameDescriptionUpdateStatus: React.FC<Props> = observer((props) => 
         }`}
       >
         {isSubmitting !== "submitted" && isSubmitting !== "saved" && (
-          <RefreshCw className="animate-spin size-3.5 stroke-custom-text-300" />
+          <RefreshCw className="h-4 w-4 stroke-custom-text-300" />
         )}
         <span className="text-sm text-custom-text-300">{isSubmitting === "submitting" ? "Saving..." : "Saved"}</span>
       </div>

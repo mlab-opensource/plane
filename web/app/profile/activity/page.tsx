@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { observer } from "mobx-react";
-import { useTranslation } from "@plane/i18n";
 // ui
 import { Button } from "@plane/ui";
 // components
@@ -19,7 +18,6 @@ import { EmptyStateType } from "@/constants/empty-state";
 const PER_PAGE = 100;
 
 const ProfileActivityPage = observer(() => {
-  const { t } = useTranslation();
   // states
   const [pageCount, setPageCount] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
@@ -57,12 +55,12 @@ const ProfileActivityPage = observer(() => {
     <>
       <PageHead title="Profile - Activity" />
       <ProfileSettingContentWrapper>
-        <ProfileSettingContentHeader title={t("activity")} />
+        <ProfileSettingContentHeader title="Activity" />
         {activityPages}
         {isLoadMoreVisible && (
           <div className="flex w-full items-center justify-center text-xs">
             <Button variant="accent-primary" size="sm" onClick={handleLoadMore}>
-              {t("load_more")}
+              Load more
             </Button>
           </div>
         )}

@@ -1,22 +1,20 @@
 import { FC } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
-// components
-import { ProjectIssueQuickActions } from "@/components/issues";
 // hooks
-import { useUserPermissions } from "@/hooks/store";
-// plane web constants
-import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
+import { ProjectIssueQuickActions } from "@/components/issues";
 // components
+// types
+// constants
+import { useUserPermissions } from "@/hooks/store";
+import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 import { BaseListRoot } from "../base-list-root";
 
 export const ListLayout: FC = observer(() => {
-  // router
-  const { workspaceSlug } = useParams();
-  // hooks
+  const { workspaceSlug, projectId } = useParams();
   const { allowPermissions } = useUserPermissions();
 
-  if (!workspaceSlug) return null;
+  if (!workspaceSlug || !projectId) return null;
 
   const canEditPropertiesBasedOnProject = (projectId: string) =>
     allowPermissions(

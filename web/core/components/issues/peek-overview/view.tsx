@@ -1,10 +1,5 @@
 import { FC, useRef, useState } from "react";
 import { observer } from "mobx-react";
-// constants
-import { EIssueServiceType } from "@plane/constants";
-// types
-import { TNameDescriptionLoader } from "@plane/types";
-// components
 import {
   DeleteIssueModal,
   IssuePeekOverviewHeader,
@@ -54,7 +49,7 @@ export const IssueView: FC<IIssueView> = observer((props) => {
   } = props;
   // states
   const [peekMode, setPeekMode] = useState<TPeekModes>("side-peek");
-  const [isSubmitting, setIsSubmitting] = useState<TNameDescriptionLoader>("saved");
+  const [isSubmitting, setIsSubmitting] = useState<"submitting" | "submitted" | "saved">("saved");
   // ref
   const issuePeekOverviewRef = useRef<HTMLDivElement>(null);
   // store hooks
@@ -67,12 +62,11 @@ export const IssueView: FC<IIssueView> = observer((props) => {
     toggleArchiveIssueModal,
     issue: { getIssueById, getIsLocalDBIssueDescription },
   } = useIssueDetail();
-  const { isAnyModalOpen: isAnyEpicModalOpen } = useIssueDetail(EIssueServiceType.EPICS);
   const issue = getIssueById(issueId);
   // remove peek id
   const removeRoutePeekId = () => {
     setPeekIssue(undefined);
-    if (embedIssue && embedRemoveCurrentNotification) embedRemoveCurrentNotification();
+    if (embedIssue) embedRemoveCurrentNotification && embedRemoveCurrentNotification();
   };
 
   const isLocalDBIssueDescription = getIsLocalDBIssueDescription(issueId);
@@ -81,7 +75,7 @@ export const IssueView: FC<IIssueView> = observer((props) => {
     issuePeekOverviewRef,
     () => {
       if (!embedIssue) {
-        if (!isAnyModalOpen && !isAnyEpicModalOpen) {
+        if (!isAnyModalOpen) {
           removeRoutePeekId();
         }
       }

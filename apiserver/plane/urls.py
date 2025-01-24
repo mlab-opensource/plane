@@ -1,4 +1,6 @@
-"""plane URL Configuration"""
+"""plane URL Configuration
+
+"""
 
 from django.conf import settings
 from django.urls import include, path, re_path
@@ -22,7 +24,7 @@ if settings.DEBUG:
         import debug_toolbar
 
         urlpatterns = [
-            re_path(r"^__debug__/", include(debug_toolbar.urls))
+            re_path(r"^__debug__/", include(debug_toolbar.urls)),
         ] + urlpatterns
     except ImportError:
         pass

@@ -1,10 +1,7 @@
 import set from "lodash/set";
 import { action, computed, makeObservable, observable, runInAction } from "mobx";
-// plane imports
-import { SitesModuleService } from "@plane/services";
-// types
 import { TPublicModule } from "@/types/modules";
-// root store
+import { ModuleService } from "../services/module.service";
 import { CoreRootStore } from "./root.store";
 
 export interface IIssueModuleStore {
@@ -19,7 +16,7 @@ export interface IIssueModuleStore {
 
 export class ModuleStore implements IIssueModuleStore {
   moduleMap: Record<string, TPublicModule> = {};
-  moduleService: SitesModuleService;
+  moduleService: ModuleService;
   rootStore: CoreRootStore;
 
   constructor(_rootStore: CoreRootStore) {
@@ -31,7 +28,7 @@ export class ModuleStore implements IIssueModuleStore {
       // fetch action
       fetchModules: action,
     });
-    this.moduleService = new SitesModuleService();
+    this.moduleService = new ModuleService();
     this.rootStore = _rootStore;
   }
 
@@ -55,7 +52,7 @@ export class ModuleStore implements IIssueModuleStore {
 
   fetchModules = async (anchor: string) => {
     try {
-      const modulesResponse = await this.moduleService.list(anchor);
+      const modulesResponse = await this.moduleService.getModules(anchor);
       runInAction(() => {
         this.moduleMap = {};
         for (const issueModule of modulesResponse) {

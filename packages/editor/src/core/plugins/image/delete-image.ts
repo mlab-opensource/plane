@@ -47,9 +47,10 @@ export const TrackImageDeletionPlugin = (editor: Editor, deleteImage: DeleteImag
   });
 
 async function onNodeDeleted(src: string, deleteImage: DeleteImage): Promise<void> {
-  if (!src) return;
   try {
-    await deleteImage(src);
+    if (!src) return;
+    const assetUrlWithWorkspaceId = new URL(src).pathname.substring(1);
+    await deleteImage(assetUrlWithWorkspaceId);
   } catch (error) {
     console.error("Error deleting image: ", error);
   }

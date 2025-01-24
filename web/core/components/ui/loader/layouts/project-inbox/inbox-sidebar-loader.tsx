@@ -1,9 +1,8 @@
 import React from "react";
-import range from "lodash/range";
 
 export const InboxSidebarLoader = () => (
   <div className="flex flex-col">
-    {range(6).map((index) => (
+    {[...Array(6)].map((i, index) => (
       <div key={index} className="flex flex-col gap-2.5 h-[105px] space-y-3 border-b border-custom-border-200 p-4">
         <div className="flex flex-col gap-2">
           <span className="h-5 w-16 bg-custom-background-80 rounded" />

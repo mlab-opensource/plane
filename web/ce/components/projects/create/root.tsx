@@ -3,7 +3,6 @@
 import { useState, FC } from "react";
 import { observer } from "mobx-react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useTranslation } from "@plane/i18n";
 // ui
 import { setToast, TOAST_TYPE } from "@plane/ui";
 // constants
@@ -17,21 +16,19 @@ import { getRandomEmoji } from "@/helpers/emoji.helper";
 // hooks
 import { useEventTracker, useProject } from "@/hooks/store";
 import { usePlatformOS } from "@/hooks/use-platform-os";
-// plane web types
 import { TProject } from "@/plane-web/types/projects";
 import ProjectAttributes from "./attributes";
 
-export type TCreateProjectFormProps = {
+type Props = {
   setToFavorite?: boolean;
   workspaceSlug: string;
   onClose: () => void;
   handleNextStep: (projectId: string) => void;
   data?: Partial<TProject>;
-  updateCoverImageStatus: (projectId: string, coverImage: string) => Promise<void>;
 };
 
 const defaultValues: Partial<TProject> = {
-  cover_image_url: PROJECT_UNSPLASH_COVERS[Math.floor(Math.random() * PROJECT_UNSPLASH_COVERS.length)],
+  cover_image: PROJECT_UNSPLASH_COVERS[Math.floor(Math.random() * PROJECT_UNSPLASH_COVERS.length)],
   description: "",
   logo_props: {
     in_use: "emoji",
@@ -45,10 +42,9 @@ const defaultValues: Partial<TProject> = {
   project_lead: null,
 };
 
-export const CreateProjectForm: FC<TCreateProjectFormProps> = observer((props) => {
-  const { setToFavorite, workspaceSlug, onClose, handleNextStep, updateCoverImageStatus } = props;
+export const CreateProjectForm: FC<Props> = observer((props) => {
+  const { setToFavorite, workspaceSlug, onClose, handleNextStep } = props;
   // store
-  const { t } = useTranslation();
   const { captureProjectEvent } = useEventTracker();
   const { addProjectToFavorites, createProject } = useProject();
   // states
@@ -66,8 +62,8 @@ export const CreateProjectForm: FC<TCreateProjectFormProps> = observer((props) =
     addProjectToFavorites(workspaceSlug.toString(), projectId).catch(() => {
       setToast({
         type: TOAST_TYPE.ERROR,
-        title: t("error"),
-        message: t("failed_to_remove_project_from_favorites"),
+        title: "Error!",
+        message: "Couldn't remove the project from favorites. Please try again.",
       });
     });
   };
@@ -75,18 +71,9 @@ export const CreateProjectForm: FC<TCreateProjectFormProps> = observer((props) =
   const onSubmit = async (formData: Partial<TProject>) => {
     // Upper case identifier
     formData.identifier = formData.identifier?.toUpperCase();
-    const coverImage = formData.cover_image_url;
-    // if unsplash or a pre-defined image is uploaded, delete the old uploaded asset
-    if (coverImage?.startsWith("http")) {
-      formData.cover_image = coverImage;
-      formData.cover_image_asset = null;
-    }
 
     return createProject(workspaceSlug.toString(), formData)
-      .then(async (res) => {
-        if (coverImage) {
-          await updateCoverImageStatus(res.id, coverImage);
-        }
+      .then((res) => {
         const newPayload = {
           ...res,
           state: "SUCCESS",
@@ -97,8 +84,8 @@ export const CreateProjectForm: FC<TCreateProjectFormProps> = observer((props) =
         });
         setToast({
           type: TOAST_TYPE.SUCCESS,
-          title: t("success"),
-          message: t("project_created_successfully"),
+          title: "Success!",
+          message: "Project created successfully.",
         });
         if (setToFavorite) {
           handleAddToFavorites(res.id);
@@ -109,7 +96,7 @@ export const CreateProjectForm: FC<TCreateProjectFormProps> = observer((props) =
         Object.keys(err.data).map((key) => {
           setToast({
             type: TOAST_TYPE.ERROR,
-            title: t("error"),
+            title: "Error!",
             message: err.data[key],
           });
           captureProjectEvent({

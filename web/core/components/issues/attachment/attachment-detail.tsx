@@ -13,25 +13,24 @@ import { IssueAttachmentDeleteModal } from "@/components/issues";
 // helpers
 import { convertBytesToSize, getFileExtension, getFileName } from "@/helpers/attachment.helper";
 import { renderFormattedDate } from "@/helpers/date-time.helper";
-import { getFileURL } from "@/helpers/file.helper";
 import { truncateText } from "@/helpers/string.helper";
 // hooks
 import { useIssueDetail, useMember } from "@/hooks/store";
 import { usePlatformOS } from "@/hooks/use-platform-os";
 // types
-import { TAttachmentHelpers } from "../issue-detail-widgets/attachments/helper";
+import { TAttachmentOperations } from "./root";
 
-type TAttachmentOperationsRemoveModal = Exclude<TAttachmentHelpers, "create">;
+type TAttachmentOperationsRemoveModal = Exclude<TAttachmentOperations, "create">;
 
 type TIssueAttachmentsDetail = {
   attachmentId: string;
-  attachmentHelpers: TAttachmentOperationsRemoveModal;
+  handleAttachmentOperations: TAttachmentOperationsRemoveModal;
   disabled?: boolean;
 };
 
 export const IssueAttachmentsDetail: FC<TIssueAttachmentsDetail> = observer((props) => {
   // props
-  const { attachmentId, attachmentHelpers, disabled } = props;
+  const { attachmentId, handleAttachmentOperations, disabled } = props;
   // store hooks
   const { getUserDetails } = useMember();
   const {
@@ -41,10 +40,6 @@ export const IssueAttachmentsDetail: FC<TIssueAttachmentsDetail> = observer((pro
   const [isDeleteIssueAttachmentModalOpen, setIsDeleteIssueAttachmentModalOpen] = useState(false);
   // derived values
   const attachment = attachmentId ? getAttachmentById(attachmentId) : undefined;
-  const fileName = getFileName(attachment?.attributes.name ?? "");
-  const fileExtension = getFileExtension(attachment?.asset_url ?? "");
-  const fileIcon = getFileIcon(fileExtension, 28);
-  const fileURL = getFileURL(attachment?.asset_url ?? "");
   // hooks
   const { isMobile } = usePlatformOS();
 
@@ -56,18 +51,18 @@ export const IssueAttachmentsDetail: FC<TIssueAttachmentsDetail> = observer((pro
         <IssueAttachmentDeleteModal
           isOpen={isDeleteIssueAttachmentModalOpen}
           onClose={() => setIsDeleteIssueAttachmentModalOpen(false)}
-          attachmentOperations={attachmentHelpers.operations}
+          handleAttachmentOperations={handleAttachmentOperations}
           attachmentId={attachmentId}
         />
       )}
       <div className="flex h-[60px] items-center justify-between gap-1 rounded-md border-[2px] border-custom-border-200 bg-custom-background-100 px-4 py-2 text-sm">
-        <Link href={fileURL ?? ""} target="_blank" rel="noopener noreferrer">
+        <Link href={attachment.asset} target="_blank" rel="noopener noreferrer">
           <div className="flex items-center gap-3">
-            <div className="h-7 w-7">{fileIcon}</div>
+            <div className="h-7 w-7">{getFileIcon(getFileExtension(attachment.asset), 28)}</div>
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                <Tooltip tooltipContent={fileName} isMobile={isMobile}>
-                  <span className="text-sm">{truncateText(`${fileName}`, 10)}</span>
+                <Tooltip tooltipContent={getFileName(attachment.attributes.name)} isMobile={isMobile}>
+                  <span className="text-sm">{truncateText(`${getFileName(attachment.attributes.name)}`, 10)}</span>
                 </Tooltip>
                 <Tooltip
                   isMobile={isMobile}
@@ -82,7 +77,7 @@ export const IssueAttachmentsDetail: FC<TIssueAttachmentsDetail> = observer((pro
               </div>
 
               <div className="flex items-center gap-3 text-xs text-custom-text-200">
-                <span>{fileExtension.toUpperCase()}</span>
+                <span>{getFileExtension(attachment.asset).toUpperCase()}</span>
                 <span>{convertBytesToSize(attachment.attributes.size)}</span>
               </div>
             </div>

@@ -1,10 +1,8 @@
 import { FC } from "react";
 import { ChevronDown, ListFilter } from "lucide-react";
-// plane ui
-import { getButtonStyling } from "@plane/ui";
-// plane utils
-import { cn } from "@plane/utils";
 // components
+import { cn } from "@plane/editor";
+import { getButtonStyling } from "@plane/ui";
 import { InboxIssueFilterSelection, InboxIssueOrderByDropdown } from "@/components/inbox/inbox-filter";
 import { FiltersDropdown } from "@/components/issues";
 import useSize from "@/hooks/use-window-size";

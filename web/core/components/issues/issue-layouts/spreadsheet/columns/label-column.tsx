@@ -37,7 +37,6 @@ export const SpreadsheetLabelColumn: React.FC<Props> = observer((props: Props) =
         onClose={onClose}
         noLabelBorder
         fullWidth
-        fullHeight
       />
     </div>
   );

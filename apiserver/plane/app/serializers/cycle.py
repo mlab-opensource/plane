@@ -4,8 +4,11 @@ from rest_framework import serializers
 # Module imports
 from .base import BaseSerializer
 from .issue import IssueStateSerializer
-from plane.db.models import Cycle, CycleIssue, CycleUserProperties
-from plane.utils.timezone_converter import convert_to_utc
+from plane.db.models import (
+    Cycle,
+    CycleIssue,
+    CycleUserProperties,
+)
 
 
 class CycleWriteSerializer(BaseSerializer):
@@ -15,37 +18,20 @@ class CycleWriteSerializer(BaseSerializer):
             and data.get("end_date", None) is not None
             and data.get("start_date", None) > data.get("end_date", None)
         ):
-            raise serializers.ValidationError("Start date cannot exceed end date")
-        if (
-            data.get("start_date", None) is not None
-            and data.get("end_date", None) is not None
-        ):
-            project_id = (
-                self.initial_data.get("project_id", None)
-                or (self.instance and self.instance.project_id)
-                or self.context.get("project_id", None)
-            )
-            is_start_date_end_date_equal = (
-                True
-                if str(data.get("start_date")) == str(data.get("end_date"))
-                else False
-            )
-            data["start_date"] = convert_to_utc(
-                date=str(data.get("start_date").date()),
-                project_id=project_id,
-                is_start_date=True,
-            )
-            data["end_date"] = convert_to_utc(
-                date=str(data.get("end_date", None).date()),
-                project_id=project_id,
-                is_start_date_end_date_equal=is_start_date_end_date_equal,
+            raise serializers.ValidationError(
+                "Start date cannot exceed end date"
             )
         return data
 
     class Meta:
         model = Cycle
         fields = "__all__"
-        read_only_fields = ["workspace", "project", "owned_by", "archived_at"]
+        read_only_fields = [
+            "workspace",
+            "project",
+            "owned_by",
+            "archived_at",
+        ]
 
 
 class CycleSerializer(BaseSerializer):
@@ -101,11 +87,18 @@ class CycleIssueSerializer(BaseSerializer):
     class Meta:
         model = CycleIssue
         fields = "__all__"
-        read_only_fields = ["workspace", "project", "cycle"]
-
+        read_only_fields = [
+            "workspace",
+            "project",
+            "cycle",
+        ]
 
 class CycleUserPropertiesSerializer(BaseSerializer):
     class Meta:
         model = CycleUserProperties
         fields = "__all__"
-        read_only_fields = ["workspace", "project", "cycle" "user"]
+        read_only_fields = [
+            "workspace",
+            "project",
+            "cycle" "user",
+        ]

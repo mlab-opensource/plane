@@ -79,9 +79,9 @@ export const SPREADSHEET_PROPERTY_DETAILS: {
   },
   estimate: {
     title: "Estimate",
-    ascendingOrderKey: "estimate_point__key",
+    ascendingOrderKey: "estimate_point",
     ascendingOrderTitle: "Low",
-    descendingOrderKey: "-estimate_point__key",
+    descendingOrderKey: "-estimate_point",
     descendingOrderTitle: "High",
     icon: Triangle,
     Column: SpreadsheetEstimateColumn,

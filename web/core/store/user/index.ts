@@ -9,6 +9,7 @@ import { TUserPermissions } from "@plane/types/src/enums";
 import { API_BASE_URL } from "@/helpers/common.helper";
 // local
 import { persistence } from "@/local-db/storage.sqlite";
+import { ENABLE_LOCAL_DB_CACHE } from "@/plane-web/constants/issues";
 import { EUserPermissions } from "@/plane-web/constants/user-permissions";
 // services
 import { AuthService } from "@/services/auth.service";
@@ -231,7 +232,7 @@ export class UserStore implements IUserStore {
    */
   signOut = async (): Promise<void> => {
     await this.authService.signOut(API_BASE_URL);
-    await persistence.clearStorage(true);
+    await persistence.clearStorage();
     this.store.resetOnSignOut();
   };
 
@@ -277,6 +278,6 @@ export class UserStore implements IUserStore {
   }
 
   get localDBEnabled() {
-    return this.userSettings.canUseLocalDB;
+    return ENABLE_LOCAL_DB_CACHE && this.userSettings.canUseLocalDB;
   }
 }

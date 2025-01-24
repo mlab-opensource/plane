@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { observer } from "mobx-react";
-import { useParams } from "next/navigation";
 import { Search } from "lucide-react";
 // hooks
 // components
@@ -15,8 +14,6 @@ import { useEventTracker, useMember, useUserPermissions } from "@/hooks/store";
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 
 export const ProjectMemberList: React.FC = observer(() => {
-  // router
-  const { projectId } = useParams();
   // states
   const [inviteModal, setInviteModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,7 +24,7 @@ export const ProjectMemberList: React.FC = observer(() => {
   } = useMember();
   const { allowPermissions } = useUserPermissions();
   const searchedMembers = (projectMemberIds ?? []).filter((userId) => {
-    const memberDetails = projectId ? getProjectMemberDetails(userId, projectId.toString()) : null;
+    const memberDetails = getProjectMemberDetails(userId);
 
     if (!memberDetails?.member) return false;
 
@@ -36,9 +33,7 @@ export const ProjectMemberList: React.FC = observer(() => {
 
     return displayName?.includes(searchQuery.toLowerCase()) || fullName.includes(searchQuery.toLowerCase());
   });
-  const memberDetails = searchedMembers?.map((memberId) =>
-    projectId ? getProjectMemberDetails(memberId, projectId.toString()) : null
-  );
+  const memberDetails = searchedMembers?.map((memberId) => getProjectMemberDetails(memberId));
 
   const isAdmin = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT);
 

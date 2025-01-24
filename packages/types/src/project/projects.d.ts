@@ -15,15 +15,10 @@ export interface IProject {
   archived_at: string | null;
   archived_issues: number;
   archived_sub_issues: number;
-  completed_issues: number;
   close_in: number;
   created_at: Date;
   created_by: string;
-  // only for uploading the cover image
-  cover_image_asset?: null;
-  cover_image?: string;
-  // only for rendering the cover image
-  cover_image_url: readonly string;
+  cover_image: string | null;
   cycle_view: boolean;
   issue_views_view: boolean;
   module_view: boolean;
@@ -59,7 +54,6 @@ export interface IProject {
   updated_by: string;
   workspace: IWorkspace | string;
   workspace_detail: IWorkspaceLite;
-  timezone: string;
 }
 
 export interface IProjectLite {
@@ -81,7 +75,7 @@ export interface IProjectMap {
 
 export interface IProjectMemberLite {
   id: string;
-  member__avatar_url: string;
+  member__avatar: string;
   member__display_name: string;
   member_id: string;
 }
@@ -137,7 +131,6 @@ export type TProjectIssuesSearchParams = {
   issue_id?: string;
   workspace_search: boolean;
   target_date?: string;
-  epic?: boolean;
 };
 
 export interface ISearchIssueResponse {

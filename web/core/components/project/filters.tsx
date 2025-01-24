@@ -2,10 +2,9 @@ import { useCallback } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { ListFilter } from "lucide-react";
-// plane types
+// types
+import { cn } from "@plane/editor";
 import { TProjectFilters } from "@plane/types";
-// plane utils
-import { cn } from "@plane/utils";
 // components
 import { FiltersDropdown } from "@/components/issues";
 import { ProjectFiltersSelection, ProjectOrderByDropdown } from "@/components/project";

@@ -9,7 +9,7 @@ import { ChevronDown, Pencil } from "lucide-react";
 // headless ui
 import { Disclosure, Transition } from "@headlessui/react";
 // plane helpers
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 // types
 import { IUserProfileProjectSegregation } from "@plane/types";
 // plane ui
@@ -19,7 +19,6 @@ import { Logo } from "@/components/common";
 // helpers
 import { cn } from "@/helpers/common.helper";
 import { renderFormattedDate } from "@/helpers/date-time.helper";
-import { getFileURL } from "@/helpers/file.helper";
 // hooks
 import { useAppTheme, useProject, useUser } from "@/hooks/store";
 import { usePlatformOS } from "@/hooks/use-platform-os";
@@ -42,8 +41,6 @@ export const ProfileSidebar: FC<TProfileSidebar> = observer((props) => {
   const { profileSidebarCollapsed, toggleProfileSidebar } = useAppTheme();
   const { getProjectById } = useProject();
   const { isMobile } = usePlatformOS();
-  // derived values
-  const userData = userProjectsData?.user_data;
 
   useOutsideClickDetector(ref, () => {
     if (profileSidebarCollapsed === false) {
@@ -56,11 +53,11 @@ export const ProfileSidebar: FC<TProfileSidebar> = observer((props) => {
   const userDetails = [
     {
       label: "Joined on",
-      value: renderFormattedDate(userData?.date_joined ?? ""),
+      value: renderFormattedDate(userProjectsData?.user_data.date_joined ?? ""),
     },
     {
       label: "Timezone",
-      value: <ProfileSidebarTime timeZone={userData?.user_timezone} />,
+      value: <ProfileSidebarTime timeZone={userProjectsData?.user_data.user_timezone} />,
     },
   ];
 
@@ -100,24 +97,20 @@ export const ProfileSidebar: FC<TProfileSidebar> = observer((props) => {
               </div>
             )}
             <img
-              src={
-                userData?.cover_image_url
-                  ? getFileURL(userData?.cover_image_url)
-                  : "/users/user-profile-cover-default-img.png"
-              }
-              alt={userData?.display_name}
+              src={userProjectsData.user_data?.cover_image ?? "/users/user-profile-cover-default-img.png"}
+              alt={userProjectsData.user_data?.display_name}
               className="h-[110px] w-full object-cover"
             />
             <div className="absolute -bottom-[26px] left-5 h-[52px] w-[52px] rounded">
-              {userData?.avatar_url && userData?.avatar_url !== "" ? (
+              {userProjectsData.user_data?.avatar && userProjectsData.user_data?.avatar !== "" ? (
                 <img
-                  src={getFileURL(userData?.avatar_url)}
-                  alt={userData?.display_name}
+                  src={userProjectsData.user_data?.avatar}
+                  alt={userProjectsData.user_data?.display_name}
                   className="h-full w-full rounded object-cover"
                 />
               ) : (
                 <div className="flex h-[52px] w-[52px] items-center justify-center rounded bg-custom-background-90 capitalize text-custom-text-100">
-                  {userData?.first_name?.[0]}
+                  {userProjectsData.user_data?.first_name?.[0]}
                 </div>
               )}
             </div>
@@ -125,9 +118,9 @@ export const ProfileSidebar: FC<TProfileSidebar> = observer((props) => {
           <div className="px-5">
             <div className="mt-[38px]">
               <h4 className="text-lg font-semibold">
-                {userData?.first_name} {userData?.last_name}
+                {userProjectsData.user_data?.first_name} {userProjectsData.user_data?.last_name}
               </h4>
-              <h6 className="text-sm text-custom-text-200">({userData?.display_name})</h6>
+              <h6 className="text-sm text-custom-text-200">({userProjectsData.user_data?.display_name})</h6>
             </div>
             <div className="mt-6 space-y-5">
               {userDetails.map((detail) => (

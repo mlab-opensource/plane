@@ -11,4 +11,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "plane.settings.production")
 # is populated before importing code that may import ORM models.
 
 
-application = ProtocolTypeRouter({"http": get_asgi_application()})
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+    }
+)

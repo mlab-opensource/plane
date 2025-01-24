@@ -58,7 +58,6 @@ export class ProfileStore implements IUserProfileStore {
     has_billing_address: false,
     created_at: "",
     updated_at: "",
-    language: ""
   };
 
   // services

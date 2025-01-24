@@ -54,11 +54,11 @@ export const InboxIssueSnoozeModal: FC<InboxIssueSnoozeModalProps> = (props) => 
                     }}
                     mode="single"
                     className="rounded-md border border-custom-border-200 p-3"
-                    disabled={[
-                      {
-                        before: new Date(),
-                      },
-                    ]}
+                    // disabled={[
+                    //   {
+                    //     before: tomorrow,
+                    //   },
+                    // ]}
                   />
                   <Button
                     variant="primary"

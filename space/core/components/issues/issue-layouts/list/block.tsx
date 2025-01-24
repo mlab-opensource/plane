@@ -4,12 +4,10 @@ import { useRef } from "react";
 import { observer } from "mobx-react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-// plane types
+// types
+import { cn } from "@plane/editor";
 import { IIssueDisplayProperties } from "@plane/types";
-// plane ui
 import { Tooltip } from "@plane/ui";
-// plane utils
-import { cn } from "@plane/utils";
 // helpers
 import { queryParamGenerator } from "@/helpers/query-param-generator";
 // hooks

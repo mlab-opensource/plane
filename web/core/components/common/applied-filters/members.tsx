@@ -2,10 +2,8 @@
 
 import { observer } from "mobx-react";
 import { X } from "lucide-react";
-// plane ui
+// ui
 import { Avatar } from "@plane/ui";
-// helpers
-import { getFileURL } from "@/helpers/file.helper";
 // types
 import { useMember } from "@/hooks/store";
 
@@ -31,12 +29,7 @@ export const AppliedMembersFilters: React.FC<Props> = observer((props) => {
 
         return (
           <div key={memberId} className="flex items-center gap-1 rounded bg-custom-background-80 py-1 px-1.5 text-xs">
-            <Avatar
-              name={memberDetails.display_name}
-              src={getFileURL(memberDetails.avatar_url)}
-              showTooltip={false}
-              size={"sm"}
-            />
+            <Avatar name={memberDetails.display_name} src={memberDetails.avatar} showTooltip={false} size={"sm"} />
             <span className="normal-case">{memberDetails.display_name}</span>
             {editable && (
               <button

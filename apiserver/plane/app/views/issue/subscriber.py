@@ -4,22 +4,37 @@ from rest_framework import status
 
 # Module imports
 from .. import BaseViewSet
-from plane.app.serializers import IssueSubscriberSerializer, ProjectMemberLiteSerializer
-from plane.app.permissions import ProjectEntityPermission, ProjectLitePermission
-from plane.db.models import IssueSubscriber, ProjectMember
+from plane.app.serializers import (
+    IssueSubscriberSerializer,
+    ProjectMemberLiteSerializer,
+)
+from plane.app.permissions import (
+    ProjectEntityPermission,
+    ProjectLitePermission,
+)
+from plane.db.models import (
+    IssueSubscriber,
+    ProjectMember,
+)
 
 
 class IssueSubscriberViewSet(BaseViewSet):
     serializer_class = IssueSubscriberSerializer
     model = IssueSubscriber
 
-    permission_classes = [ProjectEntityPermission]
+    permission_classes = [
+        ProjectEntityPermission,
+    ]
 
     def get_permissions(self):
         if self.action in ["subscribe", "unsubscribe", "subscription_status"]:
-            self.permission_classes = [ProjectLitePermission]
+            self.permission_classes = [
+                ProjectLitePermission,
+            ]
         else:
-            self.permission_classes = [ProjectEntityPermission]
+            self.permission_classes = [
+                ProjectEntityPermission,
+            ]
 
         return super(IssueSubscriberViewSet, self).get_permissions()
 
@@ -47,7 +62,9 @@ class IssueSubscriberViewSet(BaseViewSet):
 
     def list(self, request, slug, project_id, issue_id):
         members = ProjectMember.objects.filter(
-            workspace__slug=slug, project_id=project_id, is_active=True
+            workspace__slug=slug,
+            project_id=project_id,
+            is_active=True,
         ).select_related("member")
         serializer = ProjectMemberLiteSerializer(members, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -60,7 +77,9 @@ class IssueSubscriberViewSet(BaseViewSet):
             issue=issue_id,
         )
         issue_subscriber.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
     def subscribe(self, request, slug, project_id, issue_id):
         if IssueSubscriber.objects.filter(
@@ -75,7 +94,9 @@ class IssueSubscriberViewSet(BaseViewSet):
             )
 
         subscriber = IssueSubscriber.objects.create(
-            issue_id=issue_id, subscriber_id=request.user.id, project_id=project_id
+            issue_id=issue_id,
+            subscriber_id=request.user.id,
+            project_id=project_id,
         )
         serializer = IssueSubscriberSerializer(subscriber)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -88,7 +109,9 @@ class IssueSubscriberViewSet(BaseViewSet):
             issue=issue_id,
         )
         issue_subscriber.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
     def subscription_status(self, request, slug, project_id, issue_id):
         issue_subscriber = IssueSubscriber.objects.filter(
@@ -97,4 +120,6 @@ class IssueSubscriberViewSet(BaseViewSet):
             workspace__slug=slug,
             project=project_id,
         ).exists()
-        return Response({"subscribed": issue_subscriber}, status=status.HTTP_200_OK)
+        return Response(
+            {"subscribed": issue_subscriber}, status=status.HTTP_200_OK
+        )

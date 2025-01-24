@@ -1,7 +1,6 @@
 import { FC, Fragment } from "react";
 import { observer } from "mobx-react";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssue, TIssueServiceType } from "@plane/types";
+import { TIssue } from "@plane/types";
 // hooks
 import { useIssueDetail } from "@/hooks/store";
 // components
@@ -22,7 +21,6 @@ export interface IIssueList {
     issue?: TIssue | null
   ) => void;
   subIssueOperations: TSubIssueOperations;
-  issueServiceType?: TIssueServiceType;
 }
 
 export const IssueList: FC<IIssueList> = observer((props) => {
@@ -35,12 +33,11 @@ export const IssueList: FC<IIssueList> = observer((props) => {
     disabled,
     handleIssueCrudState,
     subIssueOperations,
-    issueServiceType = EIssueServiceType.ISSUES,
   } = props;
   // hooks
   const {
     subIssues: { subIssuesByIssueId },
-  } = useIssueDetail(issueServiceType);
+  } = useIssueDetail();
 
   const subIssueIds = subIssuesByIssueId(parentIssueId);
 
@@ -60,7 +57,6 @@ export const IssueList: FC<IIssueList> = observer((props) => {
               disabled={disabled}
               handleIssueCrudState={handleIssueCrudState}
               subIssueOperations={subIssueOperations}
-              issueServiceType={issueServiceType}
             />
           </Fragment>
         ))}

@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { X } from "lucide-react";
-import { useTranslation } from "@plane/i18n";
-// plane types
 import { IProject } from "@plane/types";
-// plane ui
+// ui
 import { CustomEmojiIconPicker, EmojiIconPickerTypes, Logo } from "@plane/ui";
 // components
 import { ImagePickerPopover } from "@/components/core";
@@ -12,7 +10,6 @@ import { ImagePickerPopover } from "@/components/core";
 import { ETabIndices } from "@/constants/tab-indices";
 // helpers
 import { convertHexEmojiToDecimal } from "@/helpers/emoji.helper";
-import { getFileURL } from "@/helpers/file.helper";
 import { getTabIndex } from "@/helpers/tab-indices.helper";
 
 type Props = {
@@ -22,20 +19,17 @@ type Props = {
 const ProjectCreateHeader: React.FC<Props> = (props) => {
   const { handleClose, isMobile = false } = props;
   const { watch, control } = useFormContext<IProject>();
-  const { t } = useTranslation();
-  // derived values
-  const coverImage = watch("cover_image_url");
 
   const [isOpen, setIsOpen] = useState(false);
   const { getIndex } = getTabIndex(ETabIndices.PROJECT_CREATE, isMobile);
 
   return (
     <div className="group relative h-44 w-full rounded-lg bg-custom-background-80">
-      {coverImage && (
+      {watch("cover_image") && (
         <img
-          src={getFileURL(coverImage)}
+          src={watch("cover_image")!}
           className="absolute left-0 top-0 h-full w-full rounded-lg object-cover"
-          alt={t("project_cover_image_alt")}
+          alt="Cover image"
         />
       )}
 
@@ -46,11 +40,11 @@ const ProjectCreateHeader: React.FC<Props> = (props) => {
       </div>
       <div className="absolute bottom-2 right-2">
         <Controller
-          name="cover_image_url"
+          name="cover_image"
           control={control}
           render={({ field: { value, onChange } }) => (
             <ImagePickerPopover
-              label={t("change_cover")}
+              label="Change Cover"
               onChange={onChange}
               control={control}
               value={value}

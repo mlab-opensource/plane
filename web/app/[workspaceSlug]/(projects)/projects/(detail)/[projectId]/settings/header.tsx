@@ -7,12 +7,12 @@ import { useParams } from "next/navigation";
 import { Settings } from "lucide-react";
 import { Breadcrumbs, CustomMenu, Header } from "@plane/ui";
 // components
-import { BreadcrumbLink } from "@/components/common";
+import { BreadcrumbLink, Logo } from "@/components/common";
+// constants
 // hooks
 import { useProject, useUserPermissions } from "@/hooks/store";
 import { useAppRouter } from "@/hooks/use-app-router";
-// plane web
-import { ProjectBreadcrumb } from "@/plane-web/components/breadcrumbs";
+// plane web constants
 import { PROJECT_SETTINGS_LINKS } from "@/plane-web/constants/project";
 import { EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 
@@ -22,7 +22,7 @@ export const ProjectSettingHeader: FC = observer(() => {
   const { workspaceSlug, projectId } = useParams();
   // store hooks
   const { allowPermissions } = useUserPermissions();
-  const { loader } = useProject();
+  const { currentProjectDetails, loader } = useProject();
 
   return (
     <Header>
@@ -30,7 +30,22 @@ export const ProjectSettingHeader: FC = observer(() => {
         <div>
           <div className="z-50">
             <Breadcrumbs onBack={router.back} isLoading={loader}>
-              <ProjectBreadcrumb />
+              <Breadcrumbs.BreadcrumbItem
+                type="text"
+                link={
+                  <BreadcrumbLink
+                    href={`/${workspaceSlug}/projects/${currentProjectDetails?.id}/issues`}
+                    label={currentProjectDetails?.name ?? "Project"}
+                    icon={
+                      currentProjectDetails && (
+                        <span className="grid place-items-center flex-shrink-0 h-4 w-4">
+                          <Logo logo={currentProjectDetails?.logo_props} size={16} />
+                        </span>
+                      )
+                    }
+                  />
+                }
+              />
               <div className="hidden sm:hidden md:block lg:block">
                 <Breadcrumbs.BreadcrumbItem
                   type="text"

@@ -50,7 +50,7 @@ export interface IWorkspaceNotificationStore {
   // actions
   setCurrentNotificationTab: (tab: TNotificationTab) => void;
   setCurrentSelectedNotificationId: (notificationId: string | undefined) => void;
-  setUnreadNotificationsCount: (type: "increment" | "decrement", newCount?: number) => void;
+  setUnreadNotificationsCount: (type: "increment" | "decrement") => void;
   getUnreadNotificationsCount: (workspaceSlug: string) => Promise<TUnreadNotificationsCount | undefined>;
   getNotifications: (
     workspaceSlug: string,
@@ -62,7 +62,7 @@ export interface IWorkspaceNotificationStore {
 
 export class WorkspaceNotificationStore implements IWorkspaceNotificationStore {
   // constants
-  paginatedCount = 300;
+  paginatedCount = 30;
   // observables
   loader: TNotificationLoader = undefined;
   unreadNotificationsCount: TUnreadNotificationsCount = {
@@ -84,7 +84,7 @@ export class WorkspaceNotificationStore implements IWorkspaceNotificationStore {
     read: false,
   };
 
-  constructor(protected store: CoreRootStore) {
+  constructor(private store: CoreRootStore) {
     makeObservable(this, {
       // observables
       loader: observable.ref,
@@ -285,22 +285,16 @@ export class WorkspaceNotificationStore implements IWorkspaceNotificationStore {
    * @param { "increment" | "decrement" } type
    * @returns { void }
    */
-  setUnreadNotificationsCount = (type: "increment" | "decrement", newCount: number = 1): void => {
-    const validCount = Math.max(0, Math.abs(newCount));
-
+  setUnreadNotificationsCount = (type: "increment" | "decrement"): void => {
     switch (this.currentNotificationTab) {
       case ENotificationTab.ALL:
-        update(
-          this.unreadNotificationsCount,
-          "total_unread_notifications_count",
-          (count: number) => +Math.max(0, type === "increment" ? count + validCount : count - validCount)
+        update(this.unreadNotificationsCount, "total_unread_notifications_count", (count: 0) =>
+          type === "increment" ? count + 1 : count - 1
         );
         break;
       case ENotificationTab.MENTIONS:
-        update(
-          this.unreadNotificationsCount,
-          "mention_unread_notifications_count",
-          (count: number) => +Math.max(0, type === "increment" ? count + validCount : count - validCount)
+        update(this.unreadNotificationsCount, "mention_unread_notifications_count", (count: 0) =>
+          type === "increment" ? count + 1 : count - 1
         );
         break;
       default:

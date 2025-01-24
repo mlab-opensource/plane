@@ -3,8 +3,6 @@
 import React, { FC, useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { useSearchParams } from "next/navigation";
-// plane imports
-import { SitesAuthService } from "@plane/services";
 import { IEmailCheckData } from "@plane/types";
 // components
 import {
@@ -25,10 +23,12 @@ import {
 } from "@/helpers/authentication.helper";
 // hooks
 import { useInstance } from "@/hooks/store";
+// services
+import { AuthService } from "@/services/auth.service";
 // types
 import { EAuthModes, EAuthSteps } from "@/types/auth";
 
-const authService = new SitesAuthService();
+const authService = new AuthService();
 
 export const AuthRoot: FC = observer(() => {
   // router params

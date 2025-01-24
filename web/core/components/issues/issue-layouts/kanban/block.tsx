@@ -6,8 +6,7 @@ import { draggable, dropTargetForElements } from "@atlaskit/pragmatic-drag-and-d
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // plane helpers
-import { EIssueServiceType } from "@plane/constants";
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 // types
 import { TIssue, IIssueDisplayProperties, IIssueMap } from "@plane/types";
 // ui
@@ -36,13 +35,11 @@ interface IssueBlockProps {
   displayProperties: IIssueDisplayProperties | undefined;
   draggableId: string;
   canDropOverIssue: boolean;
-  canDragIssuesInCurrentGrouping: boolean;
   updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
   quickActions: TRenderQuickActions;
   canEditProperties: (projectId: string | undefined) => boolean;
   scrollableContainerRef?: MutableRefObject<HTMLDivElement | null>;
   shouldRenderByDefault?: boolean;
-  isEpic?: boolean;
 }
 
 interface IssueDetailsBlockProps {
@@ -52,11 +49,10 @@ interface IssueDetailsBlockProps {
   updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
   quickActions: TRenderQuickActions;
   isReadOnly: boolean;
-  isEpic?: boolean;
 }
 
 const KanbanIssueDetailsBlock: React.FC<IssueDetailsBlockProps> = observer((props) => {
-  const { cardRef, issue, updateIssue, quickActions, isReadOnly, displayProperties, isEpic = false } = props;
+  const { cardRef, issue, updateIssue, quickActions, isReadOnly, displayProperties } = props;
   // hooks
   const { isMobile } = usePlatformOS();
 
@@ -102,7 +98,6 @@ const KanbanIssueDetailsBlock: React.FC<IssueDetailsBlockProps> = observer((prop
         activeLayout="Kanban"
         updateIssue={updateIssue}
         isReadOnly={isReadOnly}
-        isEpic={isEpic}
       />
     </>
   );
@@ -116,13 +111,11 @@ export const KanbanIssueBlock: React.FC<IssueBlockProps> = observer((props) => {
     issuesMap,
     displayProperties,
     canDropOverIssue,
-    canDragIssuesInCurrentGrouping,
     updateIssue,
     quickActions,
     canEditProperties,
     scrollableContainerRef,
     shouldRenderByDefault,
-    isEpic = false,
   } = props;
 
   const cardRef = useRef<HTMLAnchorElement | null>(null);
@@ -130,8 +123,8 @@ export const KanbanIssueBlock: React.FC<IssueBlockProps> = observer((props) => {
   const { workspaceSlug: routerWorkspaceSlug } = useParams();
   const workspaceSlug = routerWorkspaceSlug?.toString();
   // hooks
-  const { getIsIssuePeeked } = useIssueDetail(isEpic ? EIssueServiceType.EPICS : EIssueServiceType.ISSUES);
-  const { handleRedirection } = useIssuePeekOverviewRedirection(isEpic);
+  const { getIsIssuePeeked } = useIssueDetail();
+  const { handleRedirection } = useIssuePeekOverviewRedirection();
   const { isMobile } = usePlatformOS();
 
   // handlers
@@ -146,7 +139,7 @@ export const KanbanIssueBlock: React.FC<IssueBlockProps> = observer((props) => {
 
   const canEditIssueProperties = canEditProperties(issue?.project_id ?? undefined);
 
-  const isDragAllowed = canDragIssuesInCurrentGrouping && !issue?.tempId && canEditIssueProperties;
+  const isDragAllowed = !issue?.tempId && canEditIssueProperties;
 
   useOutsideClickDetector(cardRef, () => {
     cardRef?.current?.classList?.remove(HIGHLIGHT_CLASS);
@@ -202,20 +195,17 @@ export const KanbanIssueBlock: React.FC<IssueBlockProps> = observer((props) => {
         className={cn("group/kanban-block relative mb-2", { "z-[1]": isCurrentBlockDragging })}
         onDragStart={() => {
           if (isDragAllowed) setIsCurrentBlockDragging(true);
-          else {
+          else
             setToast({
               type: TOAST_TYPE.WARNING,
               title: "Cannot move issue",
-              message: !canEditIssueProperties
-                ? "You are not allowed to move this issue"
-                : "Drag and drop is disabled for the current grouping",
+              message: "Drag and drop is disabled for the current grouping",
             });
-          }
         }}
       >
         <ControlLink
           id={getIssueBlockId(issueId, groupId, subGroupId)}
-          href={`/${workspaceSlug}/projects/${issue.project_id}/${issue.archived_at ? "archives/" : ""}${isEpic ? "epics" : "issues"}/${
+          href={`/${workspaceSlug}/projects/${issue.project_id}/${issue.archived_at ? "archives/" : ""}issues/${
             issue.id
           }`}
           ref={cardRef}
@@ -243,7 +233,6 @@ export const KanbanIssueBlock: React.FC<IssueBlockProps> = observer((props) => {
               updateIssue={updateIssue}
               quickActions={quickActions}
               isReadOnly={!canEditIssueProperties}
-              isEpic={isEpic}
             />
           </RenderIfVisible>
         </ControlLink>

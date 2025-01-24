@@ -13,16 +13,13 @@ from .user import (
 from .workspace import (
     WorkSpaceSerializer,
     WorkSpaceMemberSerializer,
+    TeamSerializer,
     WorkSpaceMemberInviteSerializer,
     WorkspaceLiteSerializer,
     WorkspaceThemeSerializer,
     WorkspaceMemberAdminSerializer,
     WorkspaceMemberMeSerializer,
     WorkspaceUserPropertiesSerializer,
-    WorkspaceUserLinkSerializer,
-    WorkspaceRecentVisitSerializer,
-    WorkspaceHomePreferenceSerializer,
-    StickySerializer,
 )
 from .project import (
     ProjectSerializer,
@@ -39,7 +36,9 @@ from .project import (
     ProjectMemberRoleSerializer,
 )
 from .state import StateSerializer, StateLiteSerializer
-from .view import IssueViewSerializer
+from .view import (
+    IssueViewSerializer,
+)
 from .cycle import (
     CycleSerializer,
     CycleIssueSerializer,
@@ -58,7 +57,7 @@ from .issue import (
     IssueFlatSerializer,
     IssueStateSerializer,
     IssueLinkSerializer,
-    IssueIntakeSerializer,
+    IssueInboxSerializer,
     IssueLiteSerializer,
     IssueAttachmentSerializer,
     IssueSubscriberSerializer,
@@ -72,8 +71,6 @@ from .issue import (
     IssueReactionLiteSerializer,
     IssueAttachmentLiteSerializer,
     IssueLinkLiteSerializer,
-    IssueVersionDetailSerializer,
-    IssueDescriptionVersionDetailSerializer,
 )
 
 from .module import (
@@ -105,17 +102,20 @@ from .estimate import (
     WorkspaceEstimateSerializer,
 )
 
-from .intake import (
-    IntakeSerializer,
-    IntakeIssueSerializer,
-    IssueStateIntakeSerializer,
-    IntakeIssueLiteSerializer,
-    IntakeIssueDetailSerializer,
+from .inbox import (
+    InboxSerializer,
+    InboxIssueSerializer,
+    IssueStateInboxSerializer,
+    InboxIssueLiteSerializer,
+    InboxIssueDetailSerializer,
 )
 
 from .analytic import AnalyticViewSerializer
 
-from .notification import NotificationSerializer, UserNotificationPreferenceSerializer
+from .notification import (
+    NotificationSerializer,
+    UserNotificationPreferenceSerializer,
+)
 
 from .exporter import ExporterHistorySerializer
 
@@ -124,9 +124,3 @@ from .webhook import WebhookSerializer, WebhookLogSerializer
 from .dashboard import DashboardSerializer, WidgetSerializer
 
 from .favorite import UserFavoriteSerializer
-
-from .draft import (
-    DraftIssueCreateSerializer,
-    DraftIssueSerializer,
-    DraftIssueDetailSerializer,
-)

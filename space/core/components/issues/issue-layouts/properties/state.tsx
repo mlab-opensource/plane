@@ -1,10 +1,9 @@
 "use client";
 
 import { observer } from "mobx-react";
-// plane ui
+// ui
+import { cn } from "@plane/editor";
 import { StateGroupIcon, Tooltip } from "@plane/ui";
-// plane utils
-import { cn } from "@plane/utils";
 //hooks
 import { useStates } from "@/hooks/store";
 

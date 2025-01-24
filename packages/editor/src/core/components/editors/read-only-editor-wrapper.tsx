@@ -12,20 +12,16 @@ import { IReadOnlyEditorProps } from "@/types";
 export const ReadOnlyEditorWrapper = (props: IReadOnlyEditorProps) => {
   const {
     containerClassName,
-    disabledExtensions,
     displayConfig = DEFAULT_DISPLAY_CONFIG,
     editorClassName = "",
-    fileHandler,
-    forwardedRef,
     id,
     initialValue,
+    forwardedRef,
     mentionHandler,
   } = props;
 
   const editor = useReadOnlyEditor({
-    disabledExtensions,
     editorClassName,
-    fileHandler,
     forwardedRef,
     initialValue,
     mentionHandler,

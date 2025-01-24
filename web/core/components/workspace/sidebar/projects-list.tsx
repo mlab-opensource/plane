@@ -7,7 +7,8 @@ import { observer } from "mobx-react";
 import { useParams, usePathname } from "next/navigation";
 import { Briefcase, ChevronRight, Plus } from "lucide-react";
 import { Disclosure, Transition } from "@headlessui/react";
-import { useTranslation } from "@plane/i18n";
+// types
+import { IProject } from "@plane/types";
 // ui
 import { TOAST_TYPE, Tooltip, setToast } from "@plane/ui";
 // components
@@ -19,10 +20,7 @@ import { orderJoinedProjects } from "@/helpers/project.helper";
 import { copyUrlToClipboard } from "@/helpers/string.helper";
 // hooks
 import { useAppTheme, useCommandPalette, useEventTracker, useProject, useUserPermissions } from "@/hooks/store";
-// plane web constants
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
-// plane web types
-import { TProject } from "@/plane-web/types";
 
 export const SidebarProjectsList: FC = observer(() => {
   // get local storage data for isFavoriteProjectsListOpen and isAllProjectsListOpen
@@ -35,7 +33,6 @@ export const SidebarProjectsList: FC = observer(() => {
   // refs
   const containerRef = useRef<HTMLDivElement | null>(null);
   // store hooks
-  const { t } = useTranslation();
   const { toggleCreateProjectModal } = useCommandPalette();
   const { sidebarCollapsed } = useAppTheme();
   const { setTrackElement } = useEventTracker();
@@ -56,8 +53,8 @@ export const SidebarProjectsList: FC = observer(() => {
     copyUrlToClipboard(`${workspaceSlug}/projects/${projectId}/issues`).then(() => {
       setToast({
         type: TOAST_TYPE.SUCCESS,
-        title: t("link_copied"),
-        message: t("project_link_copied_to_clipboard"),
+        title: "Link Copied!",
+        message: "Project link copied to clipboard.",
       });
     });
   };
@@ -70,7 +67,7 @@ export const SidebarProjectsList: FC = observer(() => {
     if (!sourceId || !destinationId || !workspaceSlug) return;
     if (sourceId === destinationId) return;
 
-    const joinedProjectsList: TProject[] = [];
+    const joinedProjectsList: IProject[] = [];
     joinedProjects.map((projectId) => {
       const projectDetails = getProjectById(projectId);
       if (projectDetails) joinedProjectsList.push(projectDetails);
@@ -86,8 +83,8 @@ export const SidebarProjectsList: FC = observer(() => {
       updateProjectView(workspaceSlug.toString(), sourceId, { sort_order: updatedSortOrder }).catch(() => {
         setToast({
           type: TOAST_TYPE.ERROR,
-          title: t("error"),
-          message: t("something_went_wrong"),
+          title: "Error!",
+          message: "Something went wrong. Please try again.",
         });
       });
   };
@@ -177,17 +174,12 @@ export const SidebarProjectsList: FC = observer(() => {
                 )}
                 onClick={() => toggleListDisclosure(!isAllProjectsListOpen)}
               >
-                <Tooltip
-                  tooltipHeading={t("your_projects").toUpperCase()}
-                  tooltipContent=""
-                  position="right"
-                  disabled={!isCollapsed}
-                >
+                <Tooltip tooltipHeading="YOUR PROJECTS" tooltipContent="" position="right" disabled={!isCollapsed}>
                   <>
                     {isCollapsed ? (
                       <Briefcase className="flex-shrink-0 size-3" />
                     ) : (
-                      <span className="text-xs font-semibold">{t("your_projects").toUpperCase()}</span>
+                      <span className="text-xs font-semibold">YOUR PROJECTS</span>
                     )}
                   </>
                 </Tooltip>
@@ -195,7 +187,7 @@ export const SidebarProjectsList: FC = observer(() => {
               {!isCollapsed && (
                 <div className="flex items-center opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto">
                   {isAuthorizedUser && (
-                    <Tooltip tooltipHeading={t("create_project")} tooltipContent="">
+                    <Tooltip tooltipHeading="Create project" tooltipContent="">
                       <button
                         type="button"
                         className="p-0.5 rounded hover:bg-custom-sidebar-background-80 flex-shrink-0"
@@ -272,7 +264,7 @@ export const SidebarProjectsList: FC = observer(() => {
               toggleCreateProjectModal(true);
             }}
           >
-            {!isCollapsed && t("add_project")}
+            {!isCollapsed && "Add project"}
           </button>
         )}
       </div>

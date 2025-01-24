@@ -17,7 +17,10 @@ def posthogConfiguration():
                 "key": "POSTHOG_API_KEY",
                 "default": os.environ.get("POSTHOG_API_KEY", None),
             },
-            {"key": "POSTHOG_HOST", "default": os.environ.get("POSTHOG_HOST", None)},
+            {
+                "key": "POSTHOG_HOST",
+                "default": os.environ.get("POSTHOG_HOST", None),
+            },
         ]
     )
     if POSTHOG_API_KEY and POSTHOG_HOST:
@@ -39,7 +42,10 @@ def auth_events(user, email, user_agent, ip, event_name, medium, first_time):
                 properties={
                     "event_id": uuid.uuid4().hex,
                     "user": {"email": email, "id": str(user)},
-                    "device_ctx": {"ip": ip, "user_agent": user_agent},
+                    "device_ctx": {
+                        "ip": ip,
+                        "user_agent": user_agent,
+                    },
                     "medium": medium,
                     "first_time": first_time,
                 },
@@ -50,7 +56,9 @@ def auth_events(user, email, user_agent, ip, event_name, medium, first_time):
 
 
 @shared_task
-def workspace_invite_event(user, email, user_agent, ip, event_name, accepted_from):
+def workspace_invite_event(
+    user, email, user_agent, ip, event_name, accepted_from
+):
     try:
         POSTHOG_API_KEY, POSTHOG_HOST = posthogConfiguration()
 
@@ -62,7 +70,10 @@ def workspace_invite_event(user, email, user_agent, ip, event_name, accepted_fro
                 properties={
                     "event_id": uuid.uuid4().hex,
                     "user": {"email": email, "id": str(user)},
-                    "device_ctx": {"ip": ip, "user_agent": user_agent},
+                    "device_ctx": {
+                        "ip": ip,
+                        "user_agent": user_agent,
+                    },
                     "accepted_from": accepted_from,
                 },
             )

@@ -22,8 +22,6 @@ declare module "@tiptap/core" {
     imageComponent: {
       insertImageComponent: ({ file, pos, event }: InsertImageComponentProps) => ReturnType;
       uploadImage: (file: File) => () => Promise<string> | undefined;
-      getImageSource?: (path: string) => () => Promise<string>;
-      restoreImage: (src: string) => () => Promise<void>;
     };
   }
 }
@@ -38,13 +36,7 @@ export interface UploadImageExtensionStorage {
 export type UploadEntity = ({ event: "insert" } | { event: "drop"; file: File }) & { hasOpenedFileInputOnce?: boolean };
 
 export const CustomImageExtension = (props: TFileHandler) => {
-  const {
-    getAssetSrc,
-    upload,
-    delete: deleteImageFn,
-    restore: restoreImageFn,
-    validation: { maxFileSize },
-  } = props;
+  const { upload, delete: deleteImage, restore: restoreImage } = props;
 
   return Image.extend<Record<string, unknown>, UploadImageExtensionStorage>({
     name: "imageComponent",
@@ -86,6 +78,23 @@ export const CustomImageExtension = (props: TFileHandler) => {
       return ["image-component", mergeAttributes(HTMLAttributes)];
     },
 
+    onCreate(this) {
+      const imageSources = new Set<string>();
+      this.editor.state.doc.descendants((node) => {
+        if (node.type.name === this.name) {
+          imageSources.add(node.attrs.src);
+        }
+      });
+      imageSources.forEach(async (src) => {
+        try {
+          const assetUrlWithWorkspaceId = new URL(src).pathname.substring(1);
+          await restoreImage(assetUrlWithWorkspaceId);
+        } catch (error) {
+          console.error("Error restoring image: ", error);
+        }
+      });
+    },
+
     addKeyboardShortcuts() {
       return {
         ArrowDown: insertEmptyParagraphAtNodeBoundaries("down", this.name),
@@ -95,27 +104,9 @@ export const CustomImageExtension = (props: TFileHandler) => {
 
     addProseMirrorPlugins() {
       return [
-        TrackImageDeletionPlugin(this.editor, deleteImageFn, this.name),
-        TrackImageRestorationPlugin(this.editor, restoreImageFn, this.name),
+        TrackImageDeletionPlugin(this.editor, deleteImage, this.name),
+        TrackImageRestorationPlugin(this.editor, restoreImage, this.name),
       ];
-    },
-
-    onCreate(this) {
-      const imageSources = new Set<string>();
-      this.editor.state.doc.descendants((node) => {
-        if (node.type.name === this.name) {
-          if (!node.attrs.src?.startsWith("http")) return;
-
-          imageSources.add(node.attrs.src);
-        }
-      });
-      imageSources.forEach(async (src) => {
-        try {
-          await restoreImageFn(src);
-        } catch (error) {
-          console.error("Error restoring image: ", error);
-        }
-      });
     },
 
     addStorage() {
@@ -123,11 +114,6 @@ export const CustomImageExtension = (props: TFileHandler) => {
         fileMap: new Map(),
         deletedImageSet: new Map<string, boolean>(),
         uploadInProgress: false,
-        maxFileSize,
-        // escape markdown for images
-        markdown: {
-          serialize() {},
-        },
       };
     },
 
@@ -137,13 +123,7 @@ export const CustomImageExtension = (props: TFileHandler) => {
           (props: { file?: File; pos?: number; event: "insert" | "drop" }) =>
           ({ commands }) => {
             // Early return if there's an invalid file being dropped
-            if (
-              props?.file &&
-              !isFileValid({
-                file: props.file,
-                maxFileSize,
-              })
-            ) {
+            if (props?.file && !isFileValid(props.file)) {
               return false;
             }
 
@@ -185,10 +165,6 @@ export const CustomImageExtension = (props: TFileHandler) => {
         uploadImage: (file: File) => async () => {
           const fileUrl = await upload(file);
           return fileUrl;
-        },
-        getImageSource: (path: string) => async () => await getAssetSrc(path),
-        restoreImage: (src: string) => async () => {
-          await restoreImageFn(src);
         },
       };
     },

@@ -9,7 +9,9 @@ from .project import ProjectBaseModel
 
 class Estimate(ProjectBaseModel):
     name = models.CharField(max_length=255)
-    description = models.TextField(verbose_name="Estimate Description", blank=True)
+    description = models.TextField(
+        verbose_name="Estimate Description", blank=True
+    )
     type = models.CharField(max_length=255, default="categories")
     last_used = models.BooleanField(default=False)
 
@@ -34,7 +36,9 @@ class Estimate(ProjectBaseModel):
 
 class EstimatePoint(ProjectBaseModel):
     estimate = models.ForeignKey(
-        "db.Estimate", on_delete=models.CASCADE, related_name="points"
+        "db.Estimate",
+        on_delete=models.CASCADE,
+        related_name="points",
     )
     key = models.IntegerField(
         default=0, validators=[MinValueValidator(0), MaxValueValidator(12)]

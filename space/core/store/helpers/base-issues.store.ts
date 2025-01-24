@@ -5,9 +5,9 @@ import uniq from "lodash/uniq";
 import update from "lodash/update";
 import { action, makeObservable, observable, runInAction } from "mobx";
 import { computedFn } from "mobx-utils";
-// plane imports
+// plane constants
 import { ALL_ISSUES } from "@plane/constants";
-import { SitesIssueService } from "@plane/services";
+// types
 import {
   TIssueGroupByOptions,
   TGroupedIssues,
@@ -19,13 +19,14 @@ import {
   TGroupedIssueCount,
   TPaginationData,
 } from "@plane/types";
-// types
+// services
+import IssueService from "@/services/issue.service";
 import { IIssue, TIssuesResponse } from "@/types/issue";
 import { CoreRootStore } from "../root.store";
 // constants
 // helpers
 
-export type TIssueDisplayFilterOptions = Exclude<TIssueGroupByOptions, null | "team_project"> | "target_date";
+export type TIssueDisplayFilterOptions = Exclude<TIssueGroupByOptions, null> | "target_date";
 
 export enum EIssueGroupedAction {
   ADD = "ADD",
@@ -97,7 +98,7 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
       setLoader: action.bound,
     });
     this.rootIssueStore = _rootStore;
-    this.issueService = new SitesIssueService();
+    this.issueService = new IssueService();
   }
 
   getIssueIds = (groupId?: string, subGroupId?: string) => {

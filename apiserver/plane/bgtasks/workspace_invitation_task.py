@@ -16,9 +16,9 @@ from plane.utils.exception_logger import log_exception
 
 
 @shared_task
-def workspace_invitation(email, workspace_id, token, current_site, inviter):
+def workspace_invitation(email, workspace_id, token, current_site, invitor):
     try:
-        user = User.objects.get(email=inviter)
+        user = User.objects.get(email=invitor)
 
         workspace = Workspace.objects.get(pk=workspace_id)
         workspace_member_invite = WorkspaceMemberInvite.objects.get(
@@ -26,7 +26,7 @@ def workspace_invitation(email, workspace_id, token, current_site, inviter):
         )
 
         # Relative link
-        relative_link = f"/workspace-invitations/?invitation_id={workspace_member_invite.id}&email={email}&slug={workspace.slug}"  # noqa: E501
+        relative_link = f"/workspace-invitations/?invitation_id={workspace_member_invite.id}&email={email}&slug={workspace.slug}"
 
         # The complete url including the domain
         abs_url = str(current_site) + relative_link
@@ -42,7 +42,7 @@ def workspace_invitation(email, workspace_id, token, current_site, inviter):
         ) = get_email_configuration()
 
         # Subject of the email
-        subject = f"{user.first_name or user.display_name or user.email} has invited you to join them in {workspace.name} on Plane"  # noqa: E501
+        subject = f"{user.first_name or user.display_name or user.email} has invited you to join them in {workspace.name} on Plane"
 
         context = {
             "email": email,
@@ -78,9 +78,11 @@ def workspace_invitation(email, workspace_id, token, current_site, inviter):
         )
         msg.attach_alternative(html_content, "text/html")
         msg.send()
-        logging.getLogger("plane").info("Email sent successfully")
+        logging.getLogger("plane").info("Email sent succesfully")
+
         return
-    except (Workspace.DoesNotExist, WorkspaceMemberInvite.DoesNotExist):
+    except (Workspace.DoesNotExist, WorkspaceMemberInvite.DoesNotExist) as e:
+        log_exception(e)
         return
     except Exception as e:
         log_exception(e)

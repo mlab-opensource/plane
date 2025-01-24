@@ -1,32 +1,29 @@
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
-// types
-import { EIssueFilterType, EIssuesStoreType } from "@plane/constants";
 import { IIssueFilterOptions } from "@plane/types";
-// ui
-import { Header, EHeaderVariant } from "@plane/ui";
+// hooks
 // components
+import { Header, EHeaderVariant } from "@plane/ui";
 import { AppliedFiltersList, SaveFilterView } from "@/components/issues";
 // constants
-// hooks
+import { EIssueFilterType, EIssuesStoreType } from "@/constants/issue";
 import { useLabel, useProjectState, useUserPermissions } from "@/hooks/store";
 import { useIssues } from "@/hooks/store/use-issues";
-// plane web constants
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 
-type TProjectAppliedFiltersRootProps = {
-  storeType?: EIssuesStoreType.PROJECT | EIssuesStoreType.EPIC;
-};
+// types
 
-export const ProjectAppliedFiltersRoot: React.FC<TProjectAppliedFiltersRootProps> = observer((props) => {
-  const { storeType = EIssuesStoreType.PROJECT } = props;
+export const ProjectAppliedFiltersRoot: React.FC = observer(() => {
   // router
-  const { workspaceSlug, projectId } = useParams();
+  const { workspaceSlug, projectId } = useParams() as {
+    workspaceSlug: string;
+    projectId: string;
+  };
   // store hooks
   const { projectLabels } = useLabel();
   const {
     issuesFilter: { issueFilters, updateFilters },
-  } = useIssues(storeType);
+  } = useIssues(EIssuesStoreType.PROJECT);
   const { allowPermissions } = useUserPermissions();
 
   const { projectStates } = useProjectState();
@@ -87,8 +84,8 @@ export const ProjectAppliedFiltersRoot: React.FC<TProjectAppliedFiltersRootProps
       <Header.RightItem>
         {isEditingAllowed && (
           <SaveFilterView
-            workspaceSlug={workspaceSlug?.toString()}
-            projectId={projectId?.toString()}
+            workspaceSlug={workspaceSlug}
+            projectId={projectId}
             filterParams={{
               filters: appliedFilters,
               display_filters: issueFilters?.displayFilters,

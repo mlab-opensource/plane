@@ -4,8 +4,9 @@ import { FC } from "react";
 import { observer } from "mobx-react";
 import { useRouter, useSearchParams } from "next/navigation";
 // ui
-import { SITES_ISSUE_LAYOUTS } from "@plane/constants";
 import { Tooltip } from "@plane/ui";
+// constants
+import { ISSUE_LAYOUTS } from "@/constants/issue";
 // helpers
 import { queryParamGenerator } from "@/helpers/query-param-generator";
 // hooks
@@ -41,7 +42,7 @@ export const IssuesLayoutSelection: FC<Props> = observer((props) => {
 
   return (
     <div className="flex items-center gap-1 rounded bg-custom-background-80 p-1">
-      {SITES_ISSUE_LAYOUTS.map((layout) => {
+      {ISSUE_LAYOUTS.map((layout) => {
         if (!layoutOptions[layout.key]) return;
 
         return (

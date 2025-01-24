@@ -10,11 +10,10 @@ type TCreateIssueToastActionItems = {
   workspaceSlug: string;
   projectId: string;
   issueId: string;
-  isEpic?: boolean;
 };
 
 export const CreateIssueToastActionItems: FC<TCreateIssueToastActionItems> = observer((props) => {
-  const { workspaceSlug, projectId, issueId, isEpic = false } = props;
+  const { workspaceSlug, projectId, issueId } = props;
   // state
   const [copied, setCopied] = useState(false);
   // store hooks
@@ -27,7 +26,7 @@ export const CreateIssueToastActionItems: FC<TCreateIssueToastActionItems> = obs
 
   if (!issue) return null;
 
-  const issueLink = `${workspaceSlug}/projects/${projectId}/${isEpic ? "epics" : "issues"}/${issueId}`;
+  const issueLink = `${workspaceSlug}/projects/${projectId}/issues/${issueId}`;
 
   const copyToClipboard = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     try {
@@ -44,12 +43,12 @@ export const CreateIssueToastActionItems: FC<TCreateIssueToastActionItems> = obs
   return (
     <div className="flex items-center gap-1 text-xs text-custom-text-200">
       <a
-        href={`/${workspaceSlug}/projects/${projectId}/${isEpic ? "epics" : "issues"}/${issueId}/`}
+        href={`/${workspaceSlug}/projects/${projectId}/issues/${issueId}/`}
         target="_blank"
         rel="noopener noreferrer"
         className="text-custom-primary px-2 py-1 hover:bg-custom-background-90 font-medium rounded"
       >
-        {`View ${isEpic ? "epic" : "issue"}`}
+        View issue
       </a>
 
       {copied ? (

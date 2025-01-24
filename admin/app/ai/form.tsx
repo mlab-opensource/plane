@@ -121,12 +121,7 @@ export const InstanceAIForm: FC<IInstanceAIForm> = (props) => {
 
         <div className="relative inline-flex items-center gap-2 rounded border border-custom-primary-100/20 bg-custom-primary-100/10 px-4 py-2 text-xs text-custom-primary-200">
           <Lightbulb height="14" width="14" />
-          <div>
-            If you have a preferred AI models vendor, please get in{" "}
-            <a className="underline font-medium" href="https://plane.so/contact">
-              touch with us.
-            </a>
-          </div>
+          <div>If you have a preferred AI models vendor, please get in touch with us.</div>
         </div>
       </div>
     </div>

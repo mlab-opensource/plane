@@ -1,8 +1,6 @@
 "use client";
 import React, { FC, useMemo } from "react";
 import { observer } from "mobx-react";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssueServiceType } from "@plane/types";
 import { CollapsibleButton } from "@plane/ui";
 // components
 import { IssueAttachmentActionButton } from "@/components/issues/issue-detail-widgets";
@@ -15,15 +13,14 @@ type Props = {
   projectId: string;
   issueId: string;
   disabled: boolean;
-  issueServiceType?: TIssueServiceType;
 };
 
 export const IssueAttachmentsCollapsibleTitle: FC<Props> = observer((props) => {
-  const { isOpen, workspaceSlug, projectId, issueId, disabled, issueServiceType = EIssueServiceType.ISSUES } = props;
+  const { isOpen, workspaceSlug, projectId, issueId, disabled } = props;
   // store hooks
   const {
     issue: { getIssueById },
-  } = useIssueDetail(issueServiceType);
+  } = useIssueDetail();
 
   // derived values
   const issue = getIssueById(issueId);
@@ -51,7 +48,6 @@ export const IssueAttachmentsCollapsibleTitle: FC<Props> = observer((props) => {
             projectId={projectId}
             issueId={issueId}
             disabled={disabled}
-            issueServiceType={issueServiceType}
           />
         )
       }

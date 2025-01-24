@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 // plane helpers
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 // components
 import { ContextMenuItem } from "./item";
 // helpers
@@ -11,8 +11,7 @@ import { usePlatformOS } from "../../hooks/use-platform-os";
 
 export type TContextMenuItem = {
   key: string;
-  customContent?: React.ReactNode;
-  title?: string;
+  title: string;
   description?: string;
   icon?: React.FC<any>;
   action: () => void;

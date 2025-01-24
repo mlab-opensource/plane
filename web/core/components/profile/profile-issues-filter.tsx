@@ -1,14 +1,17 @@
 import { useCallback } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
-// plane constants
-import { EIssueLayoutTypes, EIssuesStoreType, EIssueFilterType } from "@plane/constants";
 // types
 import { IIssueDisplayFilterOptions, IIssueDisplayProperties, IIssueFilterOptions } from "@plane/types";
 // components
 import { DisplayFiltersSelection, FilterSelection, FiltersDropdown, LayoutSelection } from "@/components/issues";
 // constants
-import { ISSUE_DISPLAY_FILTERS_BY_LAYOUT } from "@/constants/issue";
+import {
+  EIssuesStoreType,
+  EIssueFilterType,
+  ISSUE_DISPLAY_FILTERS_BY_LAYOUT,
+  EIssueLayoutTypes,
+} from "@/constants/issue";
 // helpers
 import { isIssueFilterActive } from "@/helpers/filter.helper";
 // hooks

@@ -1,36 +1,27 @@
 import { useCallback, useMemo } from "react";
 import { observer } from "mobx-react";
 import { Check } from "lucide-react";
-// plane constants
-import { EIssueLayoutTypes } from "@plane/constants";
-// plane ui
+// plane packages
+import { cn } from "@plane/editor";
 import { Dropdown } from "@plane/ui";
-// plane utils
-import { cn } from "@plane/utils";
 // constants
-import { ISSUE_LAYOUT_MAP } from "@/constants/issue";
+import { EIssueLayoutTypes, ISSUE_LAYOUT_MAP } from "@/constants/issue";
 
 type TLayoutDropDown = {
   onChange: (value: EIssueLayoutTypes) => void;
   value: EIssueLayoutTypes;
-  disabledLayouts?: EIssueLayoutTypes[];
 };
 
 export const LayoutDropDown = observer((props: TLayoutDropDown) => {
-  const { onChange, value = EIssueLayoutTypes.LIST, disabledLayouts = [] } = props;
-  // derived values
-  const availableLayouts = useMemo(
-    () => Object.values(ISSUE_LAYOUT_MAP).filter((layout) => !disabledLayouts.includes(layout.key)),
-    [disabledLayouts]
-  );
+  const { onChange, value = EIssueLayoutTypes.LIST } = props;
 
   const options = useMemo(
     () =>
-      availableLayouts.map((issueLayout) => ({
+      Object.values(ISSUE_LAYOUT_MAP).map((issueLayout) => ({
         data: issueLayout.key,
         value: issueLayout.key,
       })),
-    [availableLayouts]
+    []
   );
 
   const buttonContent = useCallback((isOpen: boolean, buttonValue: string | string[] | undefined) => {

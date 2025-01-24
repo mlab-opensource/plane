@@ -4,11 +4,8 @@ import { FC, Fragment } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
-// plane constants
-import { EIssueLayoutTypes, EIssuesStoreType } from "@plane/constants";
 // components
 import { Spinner } from "@plane/ui";
-import { LogoSpinner } from "@/components/common";
 import {
   ListLayout,
   CalendarLayout,
@@ -18,6 +15,8 @@ import {
   ProjectSpreadsheetLayout,
   IssuePeekOverview,
 } from "@/components/issues";
+// constants
+import { EIssueLayoutTypes, EIssuesStoreType } from "@/constants/issue";
 // hooks
 import { useIssues } from "@/hooks/store";
 import { IssuesStoreContext } from "@/hooks/use-issue-layout-store";
@@ -45,7 +44,7 @@ export const ProjectLayoutRoot: FC = observer(() => {
   // hooks
   const { issues, issuesFilter } = useIssues(EIssuesStoreType.PROJECT);
 
-  const { isLoading } = useSWR(
+  useSWR(
     workspaceSlug && projectId ? `PROJECT_ISSUES_${workspaceSlug}_${projectId}` : null,
     async () => {
       if (workspaceSlug && projectId) {
@@ -55,17 +54,9 @@ export const ProjectLayoutRoot: FC = observer(() => {
     { revalidateIfStale: false, revalidateOnFocus: false }
   );
 
-  const issueFilters = issuesFilter?.getIssueFilters(projectId?.toString());
-  const activeLayout = issueFilters?.displayFilters?.layout;
+  const activeLayout = issuesFilter?.issueFilters?.displayFilters?.layout;
 
   if (!workspaceSlug || !projectId) return <></>;
-
-  if (isLoading && !issueFilters)
-    return (
-      <div className="h-full w-full flex items-center justify-center">
-        <LogoSpinner />
-      </div>
-    );
 
   return (
     <IssuesStoreContext.Provider value={EIssuesStoreType.PROJECT}>

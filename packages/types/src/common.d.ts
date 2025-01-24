@@ -22,5 +22,3 @@ export type TLogoProps = {
     background_color?: string;
   };
 };
-
-export type TNameDescriptionLoader = "submitting" | "submitted" | "saved";

@@ -2,14 +2,14 @@ import { useState } from "react";
 import { usePopper } from "react-popper";
 import { List } from "lucide-react";
 // document editor
-import { EditorRefApi } from "@plane/editor";
+import { EditorReadOnlyRefApi, EditorRefApi } from "@plane/editor";
 // helpers
 import { cn } from "@/helpers/common.helper";
 // components
 import { PageContentBrowser } from "./content-browser";
 
 type Props = {
-  editorRef: EditorRefApi | null;
+  editorRef: EditorRefApi | EditorReadOnlyRefApi | null;
   isFullWidth: boolean;
   sidePeekVisible: boolean;
   setSidePeekVisible: (sidePeekState: boolean) => void;

@@ -18,7 +18,6 @@ export const Popover = (props: TPopover) => {
     panelClassName = "",
     children,
     popoverButtonRef,
-    buttonRefClassName = "",
   } = props;
   // states
   const [referenceElement, setReferenceElement] = useState<HTMLDivElement | null>(null);
@@ -39,7 +38,7 @@ export const Popover = (props: TPopover) => {
 
   return (
     <HeadlessReactPopover className={cn("relative flex h-full w-full items-center justify-center", popoverClassName)}>
-      <div ref={setReferenceElement} className={cn("w-full", buttonRefClassName)}>
+      <div ref={setReferenceElement} className="w-full">
         <HeadlessReactPopover.Button
           ref={popoverButtonRef as Ref<HTMLButtonElement>}
           className={cn(

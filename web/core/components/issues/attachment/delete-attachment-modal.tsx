@@ -1,9 +1,6 @@
 import { FC, useState } from "react";
 import { observer } from "mobx-react";
-// constants
-import { EIssueServiceType } from "@plane/constants";
 // types
-import { TIssueServiceType } from "@plane/types";
 // ui
 import { AlertModalCore } from "@plane/ui";
 // helper
@@ -11,27 +8,26 @@ import { getFileName } from "@/helpers/attachment.helper";
 // hooks
 import { useIssueDetail } from "@/hooks/store";
 // types
-import { TAttachmentOperations } from "../issue-detail-widgets/attachments/helper";
+import { TAttachmentOperations } from "./root";
 
-export type TAttachmentOperationsRemoveModal = Pick<TAttachmentOperations, "remove">;
+export type TAttachmentOperationsRemoveModal = Exclude<TAttachmentOperations, "create">;
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   attachmentId: string;
-  attachmentOperations: TAttachmentOperationsRemoveModal;
-  issueServiceType?: TIssueServiceType;
+  handleAttachmentOperations: TAttachmentOperationsRemoveModal;
 };
 
 export const IssueAttachmentDeleteModal: FC<Props> = observer((props) => {
-  const { isOpen, onClose, attachmentId, attachmentOperations, issueServiceType = EIssueServiceType.ISSUES } = props;
+  const { isOpen, onClose, attachmentId, handleAttachmentOperations } = props;
   // states
   const [loader, setLoader] = useState(false);
 
   // store hooks
   const {
     attachment: { getAttachmentById },
-  } = useIssueDetail(issueServiceType);
+  } = useIssueDetail();
 
   // derived values
   const attachment = attachmentId ? getAttachmentById(attachmentId) : undefined;
@@ -44,7 +40,7 @@ export const IssueAttachmentDeleteModal: FC<Props> = observer((props) => {
 
   const handleDeletion = async (assetId: string) => {
     setLoader(true);
-    attachmentOperations.remove(assetId).finally(() => handleClose());
+    handleAttachmentOperations.remove(assetId).finally(() => handleClose());
   };
 
   if (!attachment) return <></>;

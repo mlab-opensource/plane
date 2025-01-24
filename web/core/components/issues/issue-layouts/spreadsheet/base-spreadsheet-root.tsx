@@ -1,16 +1,22 @@
 import { FC, useCallback, useEffect } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
-// plane imports
-import { ALL_ISSUES, EIssueLayoutTypes, EIssuesStoreType, EIssueFilterType } from "@plane/constants";
+// plane constants
+import { ALL_ISSUES } from "@plane/constants";
 import { IIssueDisplayFilterOptions } from "@plane/types";
+// hooks
+import { EIssueFilterType, EIssueLayoutTypes, EIssuesStoreType } from "@/constants/issue";
 // hooks
 import { useIssues, useUserPermissions } from "@/hooks/store";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import { useIssuesActions } from "@/hooks/use-issues-actions";
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
-// local imports
+// views
+// stores
+// components
 import { IssueLayoutHOC } from "../issue-layout-HOC";
+// types
+// constants
 import { IQuickActionProps, TRenderQuickActions } from "../list/list-view-types";
 import { SpreadsheetView } from "./spreadsheet-view";
 
@@ -18,21 +24,16 @@ export type SpreadsheetStoreType =
   | EIssuesStoreType.PROJECT
   | EIssuesStoreType.MODULE
   | EIssuesStoreType.CYCLE
-  | EIssuesStoreType.PROJECT_VIEW
-  | EIssuesStoreType.TEAM
-  | EIssuesStoreType.TEAM_VIEW
-  | EIssuesStoreType.EPIC;
-
+  | EIssuesStoreType.PROJECT_VIEW;
 interface IBaseSpreadsheetRoot {
   QuickActions: FC<IQuickActionProps>;
   canEditPropertiesBasedOnProject?: (projectId: string) => boolean;
   isCompletedCycle?: boolean;
   viewId?: string | undefined;
-  isEpic?: boolean;
 }
 
 export const BaseSpreadsheetRoot = observer((props: IBaseSpreadsheetRoot) => {
-  const { QuickActions, canEditPropertiesBasedOnProject, isCompletedCycle = false, viewId, isEpic = false } = props;
+  const { QuickActions, canEditPropertiesBasedOnProject, isCompletedCycle = false, viewId } = props;
   // router
   const { projectId } = useParams();
   // store hooks
@@ -77,7 +78,9 @@ export const BaseSpreadsheetRoot = observer((props: IBaseSpreadsheetRoot) => {
 
   const handleDisplayFiltersUpdate = useCallback(
     (updatedDisplayFilter: Partial<IIssueDisplayFilterOptions>) => {
-      updateFilters(projectId?.toString() ?? "", EIssueFilterType.DISPLAY_FILTERS, {
+      if (!projectId) return;
+
+      updateFilters(projectId.toString(), EIssueFilterType.DISPLAY_FILTERS, {
         ...updatedDisplayFilter,
       });
     },
@@ -96,11 +99,11 @@ export const BaseSpreadsheetRoot = observer((props: IBaseSpreadsheetRoot) => {
         handleArchive={async () => archiveIssue && archiveIssue(issue.project_id, issue.id)}
         handleRestore={async () => restoreIssue && restoreIssue(issue.project_id, issue.id)}
         portalElement={portalElement}
-        readOnly={!canEditProperties(issue.project_id ?? undefined) || isCompletedCycle}
+        readOnly={!isEditingAllowed || isCompletedCycle}
         placements={placement}
       />
     ),
-    [isCompletedCycle, canEditProperties, removeIssue, updateIssue, removeIssueFromView, archiveIssue, restoreIssue]
+    [isEditingAllowed, isCompletedCycle, removeIssue, updateIssue, removeIssueFromView, archiveIssue, restoreIssue]
   );
 
   if (!Array.isArray(issueIds)) return null;
@@ -120,7 +123,6 @@ export const BaseSpreadsheetRoot = observer((props: IBaseSpreadsheetRoot) => {
         disableIssueCreation={!enableIssueCreation || !isEditingAllowed || isCompletedCycle}
         canLoadMoreIssues={!!nextPageResults}
         loadMoreIssues={fetchNextIssues}
-        isEpic={isEpic}
       />
     </IssueLayoutHOC>
   );

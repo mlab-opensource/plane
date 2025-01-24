@@ -13,7 +13,6 @@ import { RecentActivityEmptyState, WidgetLoader, WidgetProps } from "@/component
 // helpers
 import { cn } from "@/helpers/common.helper";
 import { calculateTimeAgo } from "@/helpers/date-time.helper";
-import { getFileURL } from "@/helpers/file.helper";
 // hooks
 import { useDashboard, useUser } from "@/hooks/store";
 
@@ -55,9 +54,9 @@ export const RecentActivityWidget: React.FC<WidgetProps> = observer((props) => {
                       <ActivityIcon activity={activity} />
                     </div>
                   )
-                ) : activity.actor_detail.avatar_url && activity.actor_detail.avatar_url !== "" ? (
+                ) : activity.actor_detail.avatar && activity.actor_detail.avatar !== "" ? (
                   <Avatar
-                    src={getFileURL(activity.actor_detail.avatar_url)}
+                    src={activity.actor_detail.avatar}
                     name={activity.actor_detail.display_name}
                     size={24}
                     className="h-full w-full rounded-full object-cover"

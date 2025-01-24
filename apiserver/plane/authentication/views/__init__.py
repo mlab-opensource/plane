@@ -1,4 +1,8 @@
-from .common import ChangePasswordEndpoint, CSRFTokenEndpoint, SetUserPasswordEndpoint
+from .common import (
+    ChangePasswordEndpoint,
+    CSRFTokenEndpoint,
+    SetUserPasswordEndpoint,
+)
 
 from .app.check import EmailCheckEndpoint
 
@@ -33,11 +37,20 @@ from .app.signout import SignOutAuthEndpoint
 
 from .space.email import SignInAuthSpaceEndpoint, SignUpAuthSpaceEndpoint
 
-from .space.github import GitHubCallbackSpaceEndpoint, GitHubOauthInitiateSpaceEndpoint
+from .space.github import (
+    GitHubCallbackSpaceEndpoint,
+    GitHubOauthInitiateSpaceEndpoint,
+)
 
-from .space.gitlab import GitLabCallbackSpaceEndpoint, GitLabOauthInitiateSpaceEndpoint
+from .space.gitlab import (
+    GitLabCallbackSpaceEndpoint,
+    GitLabOauthInitiateSpaceEndpoint,
+)
 
-from .space.google import GoogleCallbackSpaceEndpoint, GoogleOauthInitiateSpaceEndpoint
+from .space.google import (
+    GoogleCallbackSpaceEndpoint,
+    GoogleOauthInitiateSpaceEndpoint,
+)
 
 from .space.oidc import (
     OpenIDConnectCallbackSpaceEndpoint,
@@ -58,4 +71,7 @@ from .space.password_management import (
     ForgotPasswordSpaceEndpoint,
     ResetPasswordSpaceEndpoint,
 )
-from .app.password_management import ForgotPasswordEndpoint, ResetPasswordEndpoint
+from .app.password_management import (
+    ForgotPasswordEndpoint,
+    ResetPasswordEndpoint,
+)

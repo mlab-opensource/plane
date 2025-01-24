@@ -8,6 +8,3 @@ export * from "./activity-filter";
 
 // issue comment
 export * from "./comments";
-
-// sort
-export * from "./sort-root";

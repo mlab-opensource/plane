@@ -15,18 +15,18 @@ import {
   MoveRight,
   Copy,
 } from "lucide-react";
-import { TNameDescriptionLoader } from "@plane/types";
 import { Button, ControlLink, CustomMenu, Row, TOAST_TYPE, setToast } from "@plane/ui";
 // components
 import {
   DeclineIssueModal,
   DeleteInboxIssueModal,
   InboxIssueActionsMobileHeader,
+  InboxIssueCreateEditModalRoot,
   InboxIssueSnoozeModal,
   InboxIssueStatus,
   SelectDuplicateInboxIssueModal,
 } from "@/components/inbox";
-import { CreateUpdateIssueModal, NameDescriptionUpdateStatus } from "@/components/issues";
+import { IssueUpdateStatus } from "@/components/issues";
 // helpers
 import { findHowManyDaysLeft } from "@/helpers/date-time.helper";
 import { EInboxIssueStatus } from "@/helpers/inbox.helper";
@@ -42,7 +42,7 @@ type TInboxIssueActionsHeader = {
   workspaceSlug: string;
   projectId: string;
   inboxIssue: IInboxIssueStore | undefined;
-  isSubmitting: TNameDescriptionLoader;
+  isSubmitting: "submitting" | "submitted" | "saved";
   isMobileSidebar: boolean;
   setIsMobileSidebar: (value: boolean) => void;
   isNotificationEmbed: boolean;
@@ -70,7 +70,6 @@ export const InboxIssueActionsHeader: FC<TInboxIssueActionsHeader> = observer((p
   const { currentTab, deleteInboxIssue, filteredInboxIssueIds } = useProjectInbox();
   const { data: currentUser } = useUser();
   const { allowPermissions } = useUserPermissions();
-  const { currentProjectDetails } = useProject();
 
   const router = useAppRouter();
   const { getProjectById } = useProject();
@@ -218,12 +217,11 @@ export const InboxIssueActionsHeader: FC<TInboxIssueActionsHeader> = observer((p
   };
 
   useEffect(() => {
-    if (isSubmitting === "submitting") return;
     if (!isNotificationEmbed) document.addEventListener("keydown", onKeyDown);
     return () => {
       if (!isNotificationEmbed) document.removeEventListener("keydown", onKeyDown);
     };
-  }, [onKeyDown, isNotificationEmbed, isSubmitting]);
+  }, [onKeyDown, isNotificationEmbed]);
 
   if (!inboxIssue) return null;
 
@@ -236,19 +234,16 @@ export const InboxIssueActionsHeader: FC<TInboxIssueActionsHeader> = observer((p
           value={inboxIssue?.duplicate_to}
           onSubmit={handleInboxIssueDuplicate}
         />
-        <CreateUpdateIssueModal
-          data={inboxIssue?.issue}
-          isOpen={acceptIssueModal}
-          onClose={() => setAcceptIssueModal(false)}
-          beforeFormSubmit={handleInboxIssueAccept}
-          withDraftIssueWrapper={false}
-          fetchIssueDetails={false}
-          modalTitle={`Move ${currentProjectDetails?.identifier}-${issue?.sequence_id} to project issues`}
-          primaryButtonText={{
-            default: "Add to project",
-            loading: "Adding",
-          }}
+
+        <InboxIssueCreateEditModalRoot
+          workspaceSlug={workspaceSlug.toString()}
+          projectId={projectId.toString()}
+          modalState={acceptIssueModal}
+          handleModalClose={() => setAcceptIssueModal(false)}
+          issue={inboxIssue?.issue}
+          onSubmit={handleInboxIssueAccept}
         />
+
         <DeclineIssueModal
           data={inboxIssue?.issue || {}}
           isOpen={declineIssueModal}
@@ -283,7 +278,7 @@ export const InboxIssueActionsHeader: FC<TInboxIssueActionsHeader> = observer((p
           )}
           <InboxIssueStatus inboxIssue={inboxIssue} iconSize={12} />
           <div className="flex items-center justify-end w-full">
-            <NameDescriptionUpdateStatus isSubmitting={isSubmitting} />
+            <IssueUpdateStatus isSubmitting={isSubmitting} />
           </div>
         </div>
 

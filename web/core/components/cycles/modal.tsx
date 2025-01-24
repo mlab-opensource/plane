@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { format } from "date-fns";
 import { mutate } from "swr";
 // types
 import type { CycleDateCheckData, ICycle, TCycleTabOptions } from "@plane/types";
@@ -132,8 +131,8 @@ export const CycleCreateUpdateModal: React.FC<CycleModalProps> = (props) => {
     if (payload.start_date && payload.end_date) {
       if (data?.start_date && data?.end_date)
         isDateValid = await dateChecker(payload.project_id ?? projectId, {
-          start_date: format(payload.start_date, "yyyy-MM-dd"),
-          end_date: format(payload.end_date, "yyyy-MM-dd"),
+          start_date: payload.start_date,
+          end_date: payload.end_date,
           cycle_id: data.id,
         });
       else

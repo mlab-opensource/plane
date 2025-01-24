@@ -20,8 +20,6 @@ import {
 } from "@plane/types";
 // helpers
 import { getDistributionPathsPostUpdate } from "@/helpers/distribution-update.helper";
-//local
-import { persistence } from "@/local-db/storage.sqlite";
 import { BaseIssuesStore, IBaseIssuesStore } from "../helpers/base-issues.store";
 //
 import { IIssueRootStore } from "../root.store";
@@ -309,11 +307,8 @@ export class CycleIssues extends BaseIssuesStore implements ICycleIssues {
       payload
     );
     // call fetch issues
-    if (this.paginationOptions) {
-      await persistence.syncIssues(projectId.toString());
-      await this.fetchIssues(workspaceSlug, projectId, "mutation", this.paginationOptions, cycleId);
-    }
-
+    this.paginationOptions &&
+      (await this.fetchIssues(workspaceSlug, projectId, "mutation", this.paginationOptions, cycleId));
     return response;
   };
 

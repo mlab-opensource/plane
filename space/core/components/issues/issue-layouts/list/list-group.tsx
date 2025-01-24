@@ -2,10 +2,9 @@
 
 import { Fragment, MutableRefObject, forwardRef, useRef, useState } from "react";
 import { observer } from "mobx-react";
-// plane types
+import { cn } from "@plane/editor";
+// plane
 import { IGroupByColumn, TIssueGroupByOptions, IIssueDisplayProperties, TPaginationData, TLoader } from "@plane/types";
-// plane utils
-import { cn } from "@plane/utils";
 // hooks
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 //

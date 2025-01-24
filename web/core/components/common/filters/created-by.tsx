@@ -7,8 +7,6 @@ import { observer } from "mobx-react";
 import { Avatar, Loader } from "@plane/ui";
 // components
 import { FilterHeader, FilterOption } from "@/components/issues";
-// helpers
-import { getFileURL } from "@/helpers/file.helper";
 // hooks
 import { useMember, useUser } from "@/hooks/store";
 
@@ -71,14 +69,7 @@ export const FilterCreatedBy: React.FC<Props> = observer((props: Props) => {
                       key={`member-${member.id}`}
                       isChecked={appliedFilters?.includes(member.id) ? true : false}
                       onClick={() => handleUpdate(member.id)}
-                      icon={
-                        <Avatar
-                          name={member.display_name}
-                          src={getFileURL(member.avatar_url)}
-                          showTooltip={false}
-                          size="md"
-                        />
-                      }
+                      icon={<Avatar name={member.display_name} src={member.avatar} showTooltip={false} size="md" />}
                       title={currentUser?.id === member.id ? "You" : member?.display_name}
                     />
                   );

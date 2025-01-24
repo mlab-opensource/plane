@@ -1,6 +1,6 @@
 import { EditorState, Selection } from "@tiptap/pm/state";
-// plane utils
-import { cn } from "@plane/utils";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 interface EditorClassNames {
   noBorder?: boolean;
@@ -17,6 +17,10 @@ export const getEditorClassNames = ({ noBorder, borderOnFocus, containerClassNam
     },
     containerClassName
   );
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 // Helper function to find the parent node of a specific type
 export function findParentNodeOfType(selection: Selection, typeName: string) {

@@ -19,7 +19,6 @@ interface Props {
   isDragAllowed: boolean;
   canDropOverIssue: boolean;
   selectionHelpers: TSelectionHelper;
-  isEpic?: boolean;
 }
 
 export const IssueBlocksList: FC<Props> = (props) => {
@@ -35,7 +34,6 @@ export const IssueBlocksList: FC<Props> = (props) => {
     selectionHelpers,
     isDragAllowed,
     canDropOverIssue,
-    isEpic = false,
   } = props;
 
   return (
@@ -59,7 +57,6 @@ export const IssueBlocksList: FC<Props> = (props) => {
             isLastChild={index === issueIds.length - 1}
             isDragAllowed={isDragAllowed}
             canDropOverIssue={canDropOverIssue}
-            isEpic={isEpic}
           />
         ))}
     </div>

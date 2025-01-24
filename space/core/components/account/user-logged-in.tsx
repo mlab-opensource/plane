@@ -4,7 +4,6 @@ import { observer } from "mobx-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 // components
-import { PoweredBy } from "@/components/common";
 import { UserAvatar } from "@/components/issues";
 // hooks
 import { useUser } from "@/hooks/store";
@@ -46,7 +45,6 @@ export const UserLoggedIn = observer(() => {
           </p>
         </div>
       </div>
-      <PoweredBy />
     </div>
   );
 });

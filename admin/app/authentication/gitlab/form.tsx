@@ -2,11 +2,10 @@ import { FC, useState } from "react";
 import isEmpty from "lodash/isEmpty";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-// plane internal packages
-import { API_BASE_URL } from "@plane/constants";
+// types
 import { IFormattedInstanceConfiguration, TInstanceGitlabAuthenticationConfigurationKeys } from "@plane/types";
+// ui
 import { Button, TOAST_TYPE, getButtonStyling, setToast } from "@plane/ui";
-import { cn } from "@plane/utils";
 // components
 import {
   CodeBlock,
@@ -16,6 +15,8 @@ import {
   TControllerInputFormField,
   TCopyField,
 } from "@/components/common";
+// helpers
+import { API_BASE_URL, cn } from "@/helpers/common.helper";
 // hooks
 import { useInstance } from "@/hooks/store";
 
@@ -116,7 +117,8 @@ export const InstanceGitlabConfigForm: FC<Props> = (props) => {
       url: `${originURL}/auth/gitlab/callback/`,
       description: (
         <>
-          We will auto-generate this. Paste this into the <CodeBlock darkerShade>Redirect URI</CodeBlock> field of your{" "}
+          We will auto-generate this. Paste this into the{" "}
+          <CodeBlock darkerShade>Redirect URI</CodeBlock> field of your{" "}
           <a
             tabIndex={-1}
             href="https://docs.gitlab.com/ee/integration/oauth_provider.html"
@@ -189,7 +191,7 @@ export const InstanceGitlabConfigForm: FC<Props> = (props) => {
                 </Button>
                 <Link
                   href="/authentication"
-                  className={cn(getButtonStyling("neutral-primary", "md"), "font-medium")}
+                  className={cn(getButtonStyling("link-neutral", "md"), "font-medium")}
                   onClick={handleGoBack}
                 >
                   Go back

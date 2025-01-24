@@ -1,17 +1,15 @@
 "use client";
-
 import React, { FC, useCallback, useState } from "react";
 import { observer } from "mobx-react";
 import { FileRejection, useDropzone } from "react-dropzone";
 import { Plus } from "lucide-react";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssueServiceType } from "@plane/types";
-// plane ui
-import { TOAST_TYPE, setToast } from "@plane/ui";
+import {TOAST_TYPE, setToast } from "@plane/ui";
+// constants
+import { MAX_FILE_SIZE } from "@/constants/common";
+// helper
+import { generateFileName } from "@/helpers/attachment.helper";
 // hooks
-import { useIssueDetail } from "@/hooks/store";
-// plane web hooks
-import { useFileSize } from "@/plane-web/hooks/use-file-size";
+import { useInstance, useIssueDetail } from "@/hooks/store";
 
 import { useAttachmentOperations } from "./helper";
 
@@ -21,93 +19,80 @@ type Props = {
   issueId: string;
   customButton?: React.ReactNode;
   disabled?: boolean;
-  issueServiceType?: TIssueServiceType;
 };
 
 export const IssueAttachmentActionButton: FC<Props> = observer((props) => {
-  const {
-    workspaceSlug,
-    projectId,
-    issueId,
-    customButton,
-    disabled = false,
-    issueServiceType = EIssueServiceType.ISSUES,
-  } = props;
+  const { workspaceSlug, projectId, issueId, customButton, disabled = false } = props;
   // state
   const [isLoading, setIsLoading] = useState(false);
   // store hooks
-  const { setLastWidgetAction, fetchActivities } = useIssueDetail(issueServiceType);
-  // file size
-  const { maxFileSize } = useFileSize();
-  // operations
-  const { operations: attachmentOperations } = useAttachmentOperations(
-    workspaceSlug,
-    projectId,
-    issueId,
-    issueServiceType
-  );
-  // handlers
-  const handleFetchPropertyActivities = useCallback(() => {
-    fetchActivities(workspaceSlug, projectId, issueId);
-  }, [fetchActivities, workspaceSlug, projectId, issueId]);
+  const { config } = useInstance();
+  const { setLastWidgetAction } = useIssueDetail();
 
+  // operations
+  const handleAttachmentOperations = useAttachmentOperations(workspaceSlug, projectId, issueId);
+
+  // handlers
   const onDrop = useCallback(
-    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
+    (acceptedFiles: File[], rejectedFiles:FileRejection[] ) => {
       const totalAttachedFiles = acceptedFiles.length + rejectedFiles.length;
 
-      if (rejectedFiles.length === 0) {
+      if(rejectedFiles.length===0){
         const currentFile: File = acceptedFiles[0];
         if (!currentFile || !workspaceSlug) return;
 
-        setIsLoading(true);
-        attachmentOperations
-          .create(currentFile)
-          .catch(() => {
-            setToast({
-              type: TOAST_TYPE.ERROR,
-              title: "Error!",
-              message: "File could not be attached. Try uploading again.",
-            });
+        const uploadedFile: File = new File([currentFile], generateFileName(currentFile.name), {
+          type: currentFile.type,
+        });
+        const formData = new FormData();
+        formData.append("asset", uploadedFile);
+        formData.append(
+          "attributes",
+          JSON.stringify({
+            name: uploadedFile.name,
+            size: uploadedFile.size,
           })
-          .finally(() => {
-            handleFetchPropertyActivities();
-            setLastWidgetAction("attachments");
-            setIsLoading(false);
-          });
-        return;
+        );
+        setIsLoading(true);
+        handleAttachmentOperations.create(formData)
+        .catch(()=>{
+          setToast({
+            type: TOAST_TYPE.ERROR,
+            title: "Error!",
+            message: "File could not be attached. Try uploading again.",
+          })
+        })
+        .finally(() => {
+          setLastWidgetAction("attachments");
+          setIsLoading(false);
+      });
+      return;
       }
 
       setToast({
         type: TOAST_TYPE.ERROR,
         title: "Error!",
-        message:
-          totalAttachedFiles > 1
-            ? "Only one file can be uploaded at a time."
-            : `File must be of ${maxFileSize / 1024 / 1024}MB or less in size.`,
-      });
+        message: (totalAttachedFiles>1)?
+        "Only one file can be uploaded at a time." :
+        "File must be 5MB or less.",
+      })
       return;
     },
-    [attachmentOperations, maxFileSize, workspaceSlug, handleFetchPropertyActivities, setLastWidgetAction]
+    [handleAttachmentOperations, workspaceSlug]
   );
+
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    maxSize: maxFileSize,
+    maxSize: config?.file_size_limit ?? MAX_FILE_SIZE,
     multiple: false,
     disabled: isLoading || disabled,
   });
 
   return (
-    <div
-      onClick={(e) => {
-        // TODO: Remove extra div and move event propagation to button
-        e.stopPropagation();
-      }}
-    >
-      <button {...getRootProps()} type="button" disabled={disabled}>
-        <input {...getInputProps()} />
-        {customButton ? customButton : <Plus className="h-4 w-4" />}
-      </button>
-    </div>
+    <button {...getRootProps()} type="button" disabled={disabled}>
+      <input {...getInputProps()} />
+      {customButton ? customButton : <Plus className="h-4 w-4" />}
+    </button>
   );
 });

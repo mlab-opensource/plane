@@ -1,6 +1,6 @@
 # Module imports
 from .base import BaseSerializer
-from plane.db.models import DeprecatedDashboard, DeprecatedWidget
+from plane.db.models import Dashboard, Widget
 
 # Third party frameworks
 from rest_framework import serializers
@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 class DashboardSerializer(BaseSerializer):
     class Meta:
-        model = DeprecatedDashboard
+        model = Dashboard
         fields = "__all__"
 
 
@@ -17,5 +17,5 @@ class WidgetSerializer(BaseSerializer):
     widget_filters = serializers.JSONField(read_only=True)
 
     class Meta:
-        model = DeprecatedWidget
+        model = Widget
         fields = ["id", "key", "is_visible", "widget_filters"]

@@ -7,11 +7,11 @@ const userService = new UserService();
 
 type Props = {
   cookie: string;
-  userId: string;
+  token: string;
 };
 
 export const handleAuthentication = async (props: Props) => {
-  const { cookie, userId } = props;
+  const { cookie, token } = props;
   // fetch current user info
   let response;
   try {
@@ -20,7 +20,7 @@ export const handleAuthentication = async (props: Props) => {
     manualLogger.error("Failed to fetch current user:", error);
     throw error;
   }
-  if (response.id !== userId) {
+  if (response.id !== token) {
     throw Error("Authentication failed: Token doesn't match the current user.");
   }
 

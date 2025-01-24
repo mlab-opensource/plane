@@ -2,42 +2,86 @@
 
 import React, { useCallback, useEffect, FC, useMemo } from "react";
 import { observer } from "mobx-react";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
+import useSWR from "swr";
 // ui
 import { TOAST_TYPE, setToast } from "@plane/ui";
 // components
 import { CommandModal, ShortcutsModal } from "@/components/command-palette";
+import { BulkDeleteIssuesModal } from "@/components/core";
+import { CycleCreateUpdateModal } from "@/components/cycles";
+import { CreateUpdateIssueModal, DeleteIssueModal } from "@/components/issues";
+import { CreateUpdateModuleModal } from "@/components/modules";
+import { CreatePageModal } from "@/components/pages";
+import { CreateProjectModal } from "@/components/project";
+import { CreateUpdateProjectViewModal } from "@/components/views";
+// constants
+import { ISSUE_DETAILS } from "@/constants/fetch-keys";
 // helpers
 import { copyTextToClipboard } from "@/helpers/string.helper";
 // hooks
 import { useEventTracker, useUser, useAppTheme, useCommandPalette, useUserPermissions } from "@/hooks/store";
+import { useAppRouter } from "@/hooks/use-app-router";
+import { useIssuesStore } from "@/hooks/use-issue-layout-store";
 import { usePlatformOS } from "@/hooks/use-platform-os";
-// plane web components
-import {
-  IssueLevelModals,
-  ProjectLevelModals,
-  WorkspaceLevelModals,
-} from "@/plane-web/components/command-palette/modals";
-// plane web constants
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
-// plane web helpers
-import {
-  getGlobalShortcutsList,
-  getProjectShortcutsList,
-  getWorkspaceShortcutsList,
-  handleAdditionalKeyDownEvents,
-} from "@/plane-web/helpers/command-palette";
+// services
+import { IssueService } from "@/services/issue";
+
+// services
+const issueService = new IssueService();
 
 export const CommandPalette: FC = observer(() => {
+  // router
+  const router = useAppRouter();
   // router params
-  const { workspaceSlug, projectId, issueId } = useParams();
+  const { workspaceSlug, projectId, issueId, cycleId, moduleId } = useParams();
+  // pathname
+  const pathname = usePathname();
   // store hooks
   const { toggleSidebar } = useAppTheme();
   const { setTrackElement } = useEventTracker();
   const { platform } = usePlatformOS();
-  const { data: currentUser, canPerformAnyCreateAction } = useUser();
-  const { toggleCommandPaletteModal, isShortcutModalOpen, toggleShortcutModal, isAnyModalOpen } = useCommandPalette();
+  const {
+    data: currentUser,
+    // canPerformProjectMemberActions,
+    // canPerformWorkspaceMemberActions,
+    canPerformAnyCreateAction,
+    // canPerformProjectAdminActions,
+  } = useUser();
+  const {
+    issues: { removeIssue },
+  } = useIssuesStore();
+  const {
+    toggleCommandPaletteModal,
+    isCreateIssueModalOpen,
+    toggleCreateIssueModal,
+    isCreateCycleModalOpen,
+    toggleCreateCycleModal,
+    createPageModal,
+    toggleCreatePageModal,
+    isCreateProjectModalOpen,
+    toggleCreateProjectModal,
+    isCreateModuleModalOpen,
+    toggleCreateModuleModal,
+    isCreateViewModalOpen,
+    toggleCreateViewModal,
+    isShortcutModalOpen,
+    toggleShortcutModal,
+    isBulkDeleteIssueModalOpen,
+    toggleBulkDeleteIssueModal,
+    isDeleteIssueModalOpen,
+    toggleDeleteIssueModal,
+    isAnyModalOpen,
+  } = useCommandPalette();
   const { allowPermissions } = useUserPermissions();
+
+  const { data: issueDetails } = useSWR(
+    workspaceSlug && projectId && issueId ? ISSUE_DETAILS(issueId as string) : null,
+    workspaceSlug && projectId && issueId
+      ? () => issueService.retrieve(workspaceSlug as string, projectId as string, issueId as string)
+      : null
+  );
 
   // derived values
   const canPerformWorkspaceMemberActions = allowPermissions(
@@ -126,11 +170,62 @@ export const CommandPalette: FC = observer(() => {
     project: Record<string, { title: string; description: string; action: () => void }>;
   } = useMemo(
     () => ({
-      global: getGlobalShortcutsList(),
-      workspace: getWorkspaceShortcutsList(),
-      project: getProjectShortcutsList(),
+      global: {
+        c: {
+          title: "Create a new issue",
+          description: "Create a new issue in the current project",
+          action: () => toggleCreateIssueModal(true),
+        },
+      },
+      workspace: {
+        p: {
+          title: "Create a new project",
+          description: "Create a new project in the current workspace",
+          action: () => toggleCreateProjectModal(true),
+        },
+      },
+      project: {
+        d: {
+          title: "Create a new page",
+          description: "Create a new page in the current project",
+          action: () => toggleCreatePageModal({ isOpen: true }),
+        },
+        m: {
+          title: "Create a new module",
+          description: "Create a new module in the current project",
+          action: () => toggleCreateModuleModal(true),
+        },
+        q: {
+          title: "Create a new cycle",
+          description: "Create a new cycle in the current project",
+          action: () => toggleCreateCycleModal(true),
+        },
+        v: {
+          title: "Create a new view",
+          description: "Create a new view in the current project",
+          action: () => toggleCreateViewModal(true),
+        },
+        backspace: {
+          title: "Bulk delete issues",
+          description: "Bulk delete issues in the current project",
+          action: () => toggleBulkDeleteIssueModal(true),
+        },
+        delete: {
+          title: "Bulk delete issues",
+          description: "Bulk delete issues in the current project",
+          action: () => toggleBulkDeleteIssueModal(true),
+        },
+      },
     }),
-    []
+    [
+      toggleBulkDeleteIssueModal,
+      toggleCreateCycleModal,
+      toggleCreateIssueModal,
+      toggleCreateModuleModal,
+      toggleCreatePageModal,
+      toggleCreateProjectModal,
+      toggleCreateViewModal,
+    ]
   );
 
   const handleKeyDown = useCallback(
@@ -201,8 +296,6 @@ export const CommandPalette: FC = observer(() => {
           shortcutsList.project[keyPressed].action();
         }
       }
-      // Additional keydown events
-      handleAdditionalKeyDownEvents(e);
     },
     [
       copyIssueUrlToClipboard,
@@ -227,16 +320,75 @@ export const CommandPalette: FC = observer(() => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  const isDraftIssue = pathname?.includes("draft-issues") || false;
+
   if (!currentUser) return null;
 
   return (
     <>
       <ShortcutsModal isOpen={isShortcutModalOpen} onClose={() => toggleShortcutModal(false)} />
-      {workspaceSlug && <WorkspaceLevelModals workspaceSlug={workspaceSlug.toString()} />}
-      {workspaceSlug && projectId && (
-        <ProjectLevelModals workspaceSlug={workspaceSlug.toString()} projectId={projectId.toString()} />
+      {workspaceSlug && (
+        <CreateProjectModal
+          isOpen={isCreateProjectModalOpen}
+          onClose={() => toggleCreateProjectModal(false)}
+          workspaceSlug={workspaceSlug.toString()}
+        />
       )}
-      <IssueLevelModals />
+      {workspaceSlug && projectId && (
+        <>
+          <CycleCreateUpdateModal
+            isOpen={isCreateCycleModalOpen}
+            handleClose={() => toggleCreateCycleModal(false)}
+            workspaceSlug={workspaceSlug.toString()}
+            projectId={projectId.toString()}
+          />
+          <CreateUpdateModuleModal
+            isOpen={isCreateModuleModalOpen}
+            onClose={() => toggleCreateModuleModal(false)}
+            workspaceSlug={workspaceSlug.toString()}
+            projectId={projectId.toString()}
+          />
+          <CreateUpdateProjectViewModal
+            isOpen={isCreateViewModalOpen}
+            onClose={() => toggleCreateViewModal(false)}
+            workspaceSlug={workspaceSlug.toString()}
+            projectId={projectId.toString()}
+          />
+          <CreatePageModal
+            workspaceSlug={workspaceSlug.toString()}
+            projectId={projectId.toString()}
+            isModalOpen={createPageModal.isOpen}
+            pageAccess={createPageModal.pageAccess}
+            handleModalClose={() => toggleCreatePageModal({ isOpen: false })}
+            redirectionEnabled
+          />
+        </>
+      )}
+
+      <CreateUpdateIssueModal
+        isOpen={isCreateIssueModalOpen}
+        onClose={() => toggleCreateIssueModal(false)}
+        data={cycleId ? { cycle_id: cycleId.toString() } : moduleId ? { module_ids: [moduleId.toString()] } : undefined}
+        isDraft={isDraftIssue}
+      />
+
+      {workspaceSlug && projectId && issueId && issueDetails && (
+        <DeleteIssueModal
+          handleClose={() => toggleDeleteIssueModal(false)}
+          isOpen={isDeleteIssueModalOpen}
+          data={issueDetails}
+          onSubmit={async () => {
+            await removeIssue(workspaceSlug.toString(), projectId.toString(), issueId.toString());
+            router.push(`/${workspaceSlug}/projects/${projectId}/issues`);
+          }}
+        />
+      )}
+
+      <BulkDeleteIssuesModal
+        isOpen={isBulkDeleteIssueModalOpen}
+        onClose={() => toggleBulkDeleteIssueModal(false)}
+        user={currentUser}
+      />
       <CommandModal />
     </>
   );

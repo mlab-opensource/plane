@@ -3,7 +3,14 @@ import json
 
 # Django imports
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import F, Func, OuterRef, Q, Prefetch, Exists, Subquery
+from django.db.models import (
+    F,
+    Func,
+    OuterRef,
+    Q,
+    Prefetch,
+    Exists,
+)
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.gzip import gzip_page
@@ -12,7 +19,9 @@ from django.views.decorators.gzip import gzip_page
 from rest_framework import status
 from rest_framework.response import Response
 
-from plane.app.permissions import ProjectEntityPermission
+from plane.app.permissions import (
+    ProjectEntityPermission,
+)
 from plane.app.serializers import (
     IssueFlatSerializer,
     IssueSerializer,
@@ -21,11 +30,10 @@ from plane.app.serializers import (
 from plane.bgtasks.issue_activities_task import issue_activity
 from plane.db.models import (
     Issue,
-    FileAsset,
+    IssueAttachment,
     IssueLink,
     IssueSubscriber,
     IssueReaction,
-    CycleIssue,
 )
 from plane.utils.grouper import (
     issue_group_values,
@@ -34,7 +42,10 @@ from plane.utils.grouper import (
 )
 from plane.utils.issue_filters import issue_filters
 from plane.utils.order_queryset import order_issue_queryset
-from plane.utils.paginator import GroupedOffsetPaginator, SubGroupedOffsetPaginator
+from plane.utils.paginator import (
+    GroupedOffsetPaginator,
+    SubGroupedOffsetPaginator,
+)
 from plane.app.permissions import allow_permission, ROLE
 from plane.utils.error_codes import ERROR_CODES
 
@@ -60,13 +71,7 @@ class IssueArchiveViewSet(BaseViewSet):
             .filter(workspace__slug=self.kwargs.get("slug"))
             .select_related("workspace", "project", "state", "parent")
             .prefetch_related("assignees", "labels", "issue_module__module")
-            .annotate(
-                cycle_id=Subquery(
-                    CycleIssue.objects.filter(
-                        issue=OuterRef("id"), deleted_at__isnull=True
-                    ).values("cycle_id")[:1]
-                )
-            )
+            .annotate(cycle_id=F("issue_cycle__cycle_id"))
             .annotate(
                 link_count=IssueLink.objects.filter(issue=OuterRef("id"))
                 .order_by()
@@ -74,16 +79,17 @@ class IssueArchiveViewSet(BaseViewSet):
                 .values("count")
             )
             .annotate(
-                attachment_count=FileAsset.objects.filter(
-                    issue_id=OuterRef("id"),
-                    entity_type=FileAsset.EntityTypeContext.ISSUE_ATTACHMENT,
+                attachment_count=IssueAttachment.objects.filter(
+                    issue=OuterRef("id")
                 )
                 .order_by()
                 .annotate(count=Func(F("id"), function="Count"))
                 .values("count")
             )
             .annotate(
-                sub_issues_count=Issue.issue_objects.filter(parent=OuterRef("id"))
+                sub_issues_count=Issue.issue_objects.filter(
+                    parent=OuterRef("id")
+                )
                 .order_by()
                 .annotate(count=Func(F("id"), function="Count"))
                 .values("count")
@@ -91,7 +97,12 @@ class IssueArchiveViewSet(BaseViewSet):
         )
 
     @method_decorator(gzip_page)
-    @allow_permission([ROLE.ADMIN, ROLE.MEMBER])
+    @allow_permission(
+        [
+            ROLE.ADMIN,
+            ROLE.MEMBER,
+        ]
+    )
     def list(self, request, slug, project_id):
         filters = issue_filters(request.query_params, "GET")
         show_sub_issues = request.GET.get("show_sub_issues", "true")
@@ -107,7 +118,8 @@ class IssueArchiveViewSet(BaseViewSet):
         )
         # Issue queryset
         issue_queryset, order_by_param = order_issue_queryset(
-            issue_queryset=issue_queryset, order_by_param=order_by_param
+            issue_queryset=issue_queryset,
+            order_by_param=order_by_param,
         )
 
         # Group by
@@ -116,7 +128,9 @@ class IssueArchiveViewSet(BaseViewSet):
 
         # issue queryset
         issue_queryset = issue_queryset_grouper(
-            queryset=issue_queryset, group_by=group_by, sub_group_by=sub_group_by
+            queryset=issue_queryset,
+            group_by=group_by,
+            sub_group_by=sub_group_by,
         )
 
         if group_by:
@@ -136,7 +150,9 @@ class IssueArchiveViewSet(BaseViewSet):
                         order_by=order_by_param,
                         queryset=issue_queryset,
                         on_results=lambda issues: issue_on_results(
-                            group_by=group_by, issues=issues, sub_group_by=sub_group_by
+                            group_by=group_by,
+                            issues=issues,
+                            sub_group_by=sub_group_by,
                         ),
                         paginator_cls=SubGroupedOffsetPaginator,
                         group_by_fields=issue_group_values(
@@ -154,10 +170,10 @@ class IssueArchiveViewSet(BaseViewSet):
                         group_by_field_name=group_by,
                         sub_group_by_field_name=sub_group_by,
                         count_filter=Q(
-                            Q(issue_intake__status=1)
-                            | Q(issue_intake__status=-1)
-                            | Q(issue_intake__status=2)
-                            | Q(issue_intake__isnull=True),
+                            Q(issue_inbox__status=1)
+                            | Q(issue_inbox__status=-1)
+                            | Q(issue_inbox__status=2)
+                            | Q(issue_inbox__isnull=True),
                             archived_at__isnull=True,
                             is_draft=False,
                         ),
@@ -170,7 +186,9 @@ class IssueArchiveViewSet(BaseViewSet):
                     order_by=order_by_param,
                     queryset=issue_queryset,
                     on_results=lambda issues: issue_on_results(
-                        group_by=group_by, issues=issues, sub_group_by=sub_group_by
+                        group_by=group_by,
+                        issues=issues,
+                        sub_group_by=sub_group_by,
                     ),
                     paginator_cls=GroupedOffsetPaginator,
                     group_by_fields=issue_group_values(
@@ -181,10 +199,10 @@ class IssueArchiveViewSet(BaseViewSet):
                     ),
                     group_by_field_name=group_by,
                     count_filter=Q(
-                        Q(issue_intake__status=1)
-                        | Q(issue_intake__status=-1)
-                        | Q(issue_intake__status=2)
-                        | Q(issue_intake__isnull=True),
+                        Q(issue_inbox__status=1)
+                        | Q(issue_inbox__status=-1)
+                        | Q(issue_inbox__status=2)
+                        | Q(issue_inbox__isnull=True),
                         archived_at__isnull=True,
                         is_draft=False,
                     ),
@@ -200,7 +218,12 @@ class IssueArchiveViewSet(BaseViewSet):
                 ),
             )
 
-    @allow_permission([ROLE.ADMIN, ROLE.MEMBER])
+    @allow_permission(
+        [
+            ROLE.ADMIN,
+            ROLE.MEMBER,
+        ]
+    )
     def retrieve(self, request, slug, project_id, pk=None):
         issue = (
             self.get_queryset()
@@ -208,7 +231,15 @@ class IssueArchiveViewSet(BaseViewSet):
             .prefetch_related(
                 Prefetch(
                     "issue_reactions",
-                    queryset=IssueReaction.objects.select_related("issue", "actor"),
+                    queryset=IssueReaction.objects.select_related(
+                        "issue", "actor"
+                    ),
+                )
+            )
+            .prefetch_related(
+                Prefetch(
+                    "issue_attachment",
+                    queryset=IssueAttachment.objects.select_related("issue"),
                 )
             )
             .prefetch_related(
@@ -239,17 +270,24 @@ class IssueArchiveViewSet(BaseViewSet):
     @allow_permission([ROLE.ADMIN, ROLE.MEMBER])
     def archive(self, request, slug, project_id, pk=None):
         issue = Issue.issue_objects.get(
-            workspace__slug=slug, project_id=project_id, pk=pk
+            workspace__slug=slug,
+            project_id=project_id,
+            pk=pk,
         )
         if issue.state.group not in ["completed", "cancelled"]:
             return Response(
-                {"error": "Can only archive completed or cancelled state group issue"},
+                {
+                    "error": "Can only archive completed or cancelled state group issue"
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         issue_activity.delay(
             type="issue.activity.updated",
             requested_data=json.dumps(
-                {"archived_at": str(timezone.now().date()), "automation": False}
+                {
+                    "archived_at": str(timezone.now().date()),
+                    "automation": False,
+                }
             ),
             actor_id=str(request.user.id),
             issue_id=str(issue.id),
@@ -296,7 +334,9 @@ class IssueArchiveViewSet(BaseViewSet):
 
 
 class BulkArchiveIssuesEndpoint(BaseAPIView):
-    permission_classes = [ProjectEntityPermission]
+    permission_classes = [
+        ProjectEntityPermission,
+    ]
 
     @allow_permission([ROLE.ADMIN, ROLE.MEMBER])
     def post(self, request, slug, project_id):
@@ -304,7 +344,8 @@ class BulkArchiveIssuesEndpoint(BaseAPIView):
 
         if not len(issue_ids):
             return Response(
-                {"error": "Issue IDs are required"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Issue IDs are required"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         issues = Issue.objects.filter(
@@ -315,7 +356,9 @@ class BulkArchiveIssuesEndpoint(BaseAPIView):
             if issue.state.group not in ["completed", "cancelled"]:
                 return Response(
                     {
-                        "error_code": ERROR_CODES["INVALID_ARCHIVE_STATE_GROUP"],
+                        "error_code": ERROR_CODES[
+                            "INVALID_ARCHIVE_STATE_GROUP"
+                        ],
                         "error_message": "INVALID_ARCHIVE_STATE_GROUP",
                     },
                     status=status.HTTP_400_BAD_REQUEST,
@@ -323,7 +366,10 @@ class BulkArchiveIssuesEndpoint(BaseAPIView):
             issue_activity.delay(
                 type="issue.activity.updated",
                 requested_data=json.dumps(
-                    {"archived_at": str(timezone.now().date()), "automation": False}
+                    {
+                        "archived_at": str(timezone.now().date()),
+                        "automation": False,
+                    }
                 ),
                 actor_id=str(request.user.id),
                 issue_id=str(issue.id),
@@ -340,5 +386,6 @@ class BulkArchiveIssuesEndpoint(BaseAPIView):
         Issue.objects.bulk_update(bulk_archive_issues, ["archived_at"])
 
         return Response(
-            {"archived_at": str(timezone.now().date())}, status=status.HTTP_200_OK
+            {"archived_at": str(timezone.now().date())},
+            status=status.HTTP_200_OK,
         )

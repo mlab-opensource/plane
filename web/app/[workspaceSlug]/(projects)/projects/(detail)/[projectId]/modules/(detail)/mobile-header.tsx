@@ -5,17 +5,21 @@ import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // icons
 import { Calendar, ChevronDown, Kanban, List } from "lucide-react";
-// plane constants
-import { EIssueLayoutTypes, EIssueFilterType, EIssuesStoreType } from "@plane/constants";
 // types
 import { IIssueDisplayFilterOptions, IIssueDisplayProperties, IIssueFilterOptions } from "@plane/types";
 // ui
 import { CustomMenu } from "@plane/ui";
 // components
 import { ProjectAnalyticsModal } from "@/components/analytics";
-import { DisplayFiltersSelection, FilterSelection, FiltersDropdown } from "@/components/issues/issue-layouts";
+import { DisplayFiltersSelection, FilterSelection, FiltersDropdown } from "@/components/issues";
 // constants
-import { ISSUE_DISPLAY_FILTERS_BY_LAYOUT, ISSUE_LAYOUTS } from "@/constants/issue";
+import {
+  EIssueFilterType,
+  EIssueLayoutTypes,
+  EIssuesStoreType,
+  ISSUE_DISPLAY_FILTERS_BY_LAYOUT,
+  ISSUE_LAYOUTS,
+} from "@/constants/issue";
 // helpers
 import { isIssueFilterActive } from "@/helpers/filter.helper";
 // hooks
@@ -27,7 +31,7 @@ export const ModuleIssuesMobileHeader = observer(() => {
   const { getModuleById } = useModule();
   const layouts = [
     { key: "list", title: "List", icon: List },
-    { key: "kanban", title: "Board", icon: Kanban },
+    { key: "kanban", title: "Kanban", icon: Kanban },
     { key: "calendar", title: "Calendar", icon: Calendar },
   ];
   const { workspaceSlug, projectId, moduleId } = useParams() as {

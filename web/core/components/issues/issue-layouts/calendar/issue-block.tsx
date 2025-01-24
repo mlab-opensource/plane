@@ -6,7 +6,7 @@ import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 // plane helpers
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 // types
 import { TIssue } from "@plane/types";
 // ui
@@ -28,12 +28,11 @@ type Props = {
   issue: TIssue;
   quickActions: TRenderQuickActions;
   isDragging?: boolean;
-  isEpic?: boolean;
 };
 
 export const CalendarIssueBlock = observer(
   forwardRef<HTMLAnchorElement, Props>((props, ref) => {
-    const { issue, quickActions, isDragging = false, isEpic = false } = props;
+    const { issue, quickActions, isDragging = false } = props;
     // states
     const [isMenuActive, setIsMenuActive] = useState(false);
     // refs
@@ -43,7 +42,7 @@ export const CalendarIssueBlock = observer(
     const { workspaceSlug, projectId } = useParams();
     const { getProjectStates } = useProjectState();
     const { getIsIssuePeeked } = useIssueDetail();
-    const { handleRedirection } = useIssuePeekOverviewRedirection(isEpic);
+    const { handleRedirection } = useIssuePeekOverviewRedirection();
     const { isMobile } = usePlatformOS();
     const storeType = useIssueStoreType() as CalendarStoreType;
     const { issuesFilter } = useIssues(storeType);

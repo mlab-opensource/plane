@@ -47,9 +47,13 @@ class WebhookSerializer(DynamicBaseSerializer):
 
         # Additional validation for multiple request domains and their subdomains
         request = self.context.get("request")
-        disallowed_domains = ["plane.so"]  # Add your disallowed domains here
+        disallowed_domains = [
+            "plane.so",
+        ]  # Add your disallowed domains here
         if request:
-            request_host = request.get_host().split(":")[0]  # Remove port if present
+            request_host = request.get_host().split(":")[
+                0
+            ]  # Remove port if present
             disallowed_domains.append(request_host)
 
         # Check if hostname is a subdomain or exact match of any disallowed domain
@@ -95,7 +99,9 @@ class WebhookSerializer(DynamicBaseSerializer):
 
             # Additional validation for multiple request domains and their subdomains
             request = self.context.get("request")
-            disallowed_domains = ["plane.so"]  # Add your disallowed domains here
+            disallowed_domains = [
+                "plane.so",
+            ]  # Add your disallowed domains here
             if request:
                 request_host = request.get_host().split(":")[
                     0
@@ -116,7 +122,10 @@ class WebhookSerializer(DynamicBaseSerializer):
     class Meta:
         model = Webhook
         fields = "__all__"
-        read_only_fields = ["workspace", "secret_key", "deleted_at"]
+        read_only_fields = [
+            "workspace",
+            "secret_key",
+        ]
 
 
 class WebhookLogSerializer(DynamicBaseSerializer):

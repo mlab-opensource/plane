@@ -1,7 +1,6 @@
 "use client";
 import { FC } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { useTranslation } from "@plane/i18n";
 import { IProject } from "@plane/types";
 // ui
 import { CustomSelect } from "@plane/ui";
@@ -19,7 +18,6 @@ type Props = {
 
 const ProjectAttributes: FC<Props> = (props) => {
   const { isMobile = false } = props;
-  const { t } = useTranslation();
   const { control } = useFormContext<IProject>();
   const { getIndex } = getTabIndex(ETabIndices.PROJECT_CREATE, isMobile);
   return (
@@ -43,7 +41,7 @@ const ProjectAttributes: FC<Props> = (props) => {
                         {currentNetwork.label}
                       </>
                     ) : (
-                      <span className="text-custom-text-400">{t("select_network")}</span>
+                      <span className="text-custom-text-400">Select network</span>
                     )}
                   </div>
                 }
@@ -79,7 +77,7 @@ const ProjectAttributes: FC<Props> = (props) => {
                 <MemberDropdown
                   value={value}
                   onChange={(lead) => onChange(lead === value ? null : lead)}
-                  placeholder={t("lead")}
+                  placeholder="Lead"
                   multiple={false}
                   buttonVariant="border-with-text"
                   tabIndex={5}

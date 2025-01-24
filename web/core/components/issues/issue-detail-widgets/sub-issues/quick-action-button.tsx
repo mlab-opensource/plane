@@ -2,8 +2,7 @@
 import React, { FC } from "react";
 import { observer } from "mobx-react";
 import { LayersIcon, Plus } from "lucide-react";
-import { EIssueServiceType } from "@plane/constants";
-import { TIssue, TIssueServiceType } from "@plane/types";
+import { TIssue } from "@plane/types";
 import { CustomMenu } from "@plane/ui";
 // hooks
 import { useEventTracker, useIssueDetail } from "@/hooks/store";
@@ -12,11 +11,10 @@ type Props = {
   issueId: string;
   customButton?: React.ReactNode;
   disabled?: boolean;
-  issueServiceType?: TIssueServiceType;
 };
 
 export const SubIssuesActionButton: FC<Props> = observer((props) => {
-  const { issueId, customButton, disabled = false, issueServiceType = EIssueServiceType.ISSUES } = props;
+  const { issueId, customButton, disabled = false } = props;
   // store hooks
   const {
     issue: { getIssueById },
@@ -24,7 +22,7 @@ export const SubIssuesActionButton: FC<Props> = observer((props) => {
     toggleSubIssuesModal,
     setIssueCrudOperationState,
     issueCrudOperationState,
-  } = useIssueDetail(issueServiceType);
+  } = useIssueDetail();
   const { setTrackElement } = useEventTracker();
 
   // derived values

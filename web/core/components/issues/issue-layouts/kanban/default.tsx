@@ -18,7 +18,7 @@ import { ContentWrapper } from "@plane/ui";
 import RenderIfVisible from "@/components/core/render-if-visible-HOC";
 import { KanbanColumnLoader } from "@/components/ui";
 // hooks
-import { useKanbanView } from "@/hooks/store";
+import { useCycle, useKanbanView, useLabel, useMember, useModule, useProject, useProjectState } from "@/hooks/store";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 // types
 // parent components
@@ -58,7 +58,6 @@ export interface IKanBan {
   handleOnDrop: (source: GroupDropLocation, destination: GroupDropLocation) => Promise<void>;
   showEmptyGroup?: boolean;
   subGroupIndex?: number;
-  isEpic?: boolean;
 }
 
 export const KanBan: React.FC<IKanBan> = observer((props) => {
@@ -87,19 +86,31 @@ export const KanBan: React.FC<IKanBan> = observer((props) => {
     isDropDisabled,
     dropErrorMessage,
     subGroupIndex = 0,
-    isEpic = false,
   } = props;
-  // store hooks
+
   const storeType = useIssueStoreType();
+
+  const member = useMember();
+  const project = useProject();
+  const label = useLabel();
+  const cycle = useCycle();
+  const moduleInfo = useModule();
+  const projectState = useProjectState();
   const issueKanBanView = useKanbanView();
-  // derived values
+
   const isDragDisabled = !issueKanBanView?.getCanUserDragDrop(group_by, sub_group_by);
-  const list = getGroupByColumns({
-    groupBy: group_by as GroupByColumnTypes,
-    includeNone: true,
-    isWorkspaceLevel: isWorkspaceLevel(storeType),
-    isEpic: isEpic,
-  });
+
+  const list = getGroupByColumns(
+    group_by as GroupByColumnTypes,
+    project,
+    cycle,
+    moduleInfo,
+    label,
+    projectState,
+    member,
+    true,
+    isWorkspaceLevel(storeType)
+  );
 
   if (!list) return null;
 
@@ -167,7 +178,6 @@ export const KanBan: React.FC<IKanBan> = observer((props) => {
                     addIssuesToView={addIssuesToView}
                     collapsedGroups={collapsedGroups}
                     handleCollapsedGroups={handleCollapsedGroups}
-                    isEpic={isEpic}
                   />
                 </div>
               )}
@@ -211,7 +221,6 @@ export const KanBan: React.FC<IKanBan> = observer((props) => {
                     scrollableContainerRef={scrollableContainerRef}
                     loadMoreIssues={loadMoreIssues}
                     handleOnDrop={handleOnDrop}
-                    isEpic={isEpic}
                   />
                 </RenderIfVisible>
               )}

@@ -7,9 +7,6 @@ PLANE_INSTALL_DIR=$PWD/$SERVICE_FOLDER
 export APP_RELEASE="stable"
 export DOCKERHUB_USER=ghcr.io/mlab-opensource/plane
 export PULL_POLICY=${PULL_POLICY:-if_not_present}
-export GH_REPO=makeplane/plane
-export RELEASE_DOWNLOAD_URL="https://github.com/$GH_REPO/releases/download"
-export FALLBACK_DOWNLOAD_URL="https://raw.githubusercontent.com/$GH_REPO/$BRANCH/deploy/selfhost"
 
 CPU_ARCH=$(uname -m)
 OS_NAME=$(uname)
@@ -18,6 +15,13 @@ UPPER_CPU_ARCH=$(tr '[:lower:]' '[:upper:]' <<< "$CPU_ARCH")
 mkdir -p $PLANE_INSTALL_DIR/archive
 DOCKER_FILE_PATH=$PLANE_INSTALL_DIR/docker-compose.yaml
 DOCKER_ENV_PATH=$PLANE_INSTALL_DIR/plane.env
+
+SED_PREFIX=()
+if [ "$OS_NAME" == "Darwin" ]; then
+  SED_PREFIX=("-i" "")
+else
+  SED_PREFIX=("-i")
+fi
 
 function print_header() {
 clear
@@ -53,17 +57,6 @@ function spinner() {
         printf "\b\b\b\b\b\b" >&2
     done
     printf "    \b\b\b\b" >&2
-}
-
-function checkLatestRelease(){
-    echo "Checking for the latest release..." >&2
-    local latest_release=$(curl -s https://api.github.com/repos/$GH_REPO/releases/latest |  grep -o '"tag_name": "[^"]*"' | sed 's/"tag_name": "//;s/"//g')
-    if [ -z "$latest_release" ]; then
-        echo "Failed to check for the latest release. Exiting..." >&2
-        exit 1
-    fi
-
-    echo $latest_release    
 }
 
 function initialize(){
@@ -137,12 +130,8 @@ function updateEnvFile() {
             echo "$key=$value" >> "$file"
             return
         else 
-            if [ "$OS_NAME" == "Darwin" ]; then
-                value=$(echo "$value" | sed 's/|/\\|/g')
-                sed -i '' "s|^$key=.*|$key=$value|g" "$file"
-            else
-                sed -i "s/^$key=.*/$key=$value/g" "$file"
-            fi
+            # if key exists, update the value
+            sed "${SED_PREFIX[@]}" "s/^$key=.*/$key=$value/g" "$file"
         fi
     else
         echo "File not found: $file"
@@ -193,7 +182,7 @@ function buildYourOwnImage(){
     local PLANE_TEMP_CODE_DIR=~/tmp/plane
     rm -rf $PLANE_TEMP_CODE_DIR
     mkdir -p $PLANE_TEMP_CODE_DIR
-    REPO=https://github.com/$GH_REPO.git
+    REPO=https://github.com/makeplane/plane.git
     git clone "$REPO" "$PLANE_TEMP_CODE_DIR"  --branch "$BRANCH" --single-branch --depth 1
 
     cp "$PLANE_TEMP_CODE_DIR/deploy/selfhost/build.yml" "$PLANE_TEMP_CODE_DIR/build.yml"
@@ -214,10 +203,6 @@ function buildYourOwnImage(){
 function install() {
     echo "Begin Installing Plane"
     echo ""
-
-    if [ "$APP_RELEASE" == "stable" ]; then
-        export APP_RELEASE=$(checkLatestRelease)
-    fi
 
     local build_image=$(initialize)
 
@@ -350,34 +335,6 @@ function restartServices() {
     startServices
 }
 function upgrade() {
-    local latest_release=$(checkLatestRelease)
-
-    echo ""
-    echo "Current release: $APP_RELEASE"
-
-    if [ "$latest_release" == "$APP_RELEASE" ]; then
-        echo ""
-        echo "You are already using the latest release"
-        exit 0
-    fi
-
-    echo "Latest release: $latest_release"
-    echo ""
-
-    # Check for confirmation to upgrade
-    echo "Do you want to upgrade to the latest release ($latest_release)?"
-    read -p "Continue? [y/N]: " confirm
-
-    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-        echo "Exiting..."
-        exit 0
-    fi
-
-    export APP_RELEASE=$latest_release
-
-    echo "Upgrading Plane to the latest release..."
-    echo ""
-
     echo "***** STOPPING SERVICES ****"
     stopServices
 

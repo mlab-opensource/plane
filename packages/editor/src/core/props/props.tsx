@@ -1,6 +1,6 @@
 import { EditorProps } from "@tiptap/pm/view";
-// plane utils
-import { cn } from "@plane/utils";
+// helpers
+import { cn } from "@/helpers/common";
 
 export type TCoreEditorProps = {
   editorClassName: string;

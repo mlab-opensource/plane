@@ -120,11 +120,11 @@ export const WorkspaceInvitationsListItem: FC<Props> = observer((props) => {
 
               updateMemberInvitation(workspaceSlug.toString(), invitationDetails.id, {
                 role: value,
-              }).catch((error) => {
+              }).catch(() => {
                 setToast({
                   type: TOAST_TYPE.ERROR,
                   title: "Error!",
-                  message: error?.error || "An error occurred while updating member role. Please try again.",
+                  message: "An error occurred while updating member role. Please try again.",
                 });
               });
             }}

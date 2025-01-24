@@ -1,7 +1,6 @@
 "use client";
 
 import { FC } from "react";
-import { useTranslation } from "@plane/i18n";
 // constants
 import { CustomSelect } from "@plane/ui";
 import { THEME_OPTIONS, I_THEME_OPTION } from "@/constants/themes";
@@ -14,7 +13,7 @@ type Props = {
 
 export const ThemeSwitch: FC<Props> = (props) => {
   const { value, onChange } = props;
-  const { t } = useTranslation();
+
   return (
     <CustomSelect
       value={value}
@@ -41,10 +40,10 @@ export const ThemeSwitch: FC<Props> = (props) => {
                 }}
               />
             </div>
-            {t(value.key)}
+            {value.label}
           </div>
         ) : (
-          t("select_your_theme")
+          "Select your theme"
         )
       }
       onChange={onChange}
@@ -73,7 +72,7 @@ export const ThemeSwitch: FC<Props> = (props) => {
                 }}
               />
             </div>
-            {t(themeOption.key)}
+            {themeOption.label}
           </div>
         </CustomSelect.Option>
       ))}

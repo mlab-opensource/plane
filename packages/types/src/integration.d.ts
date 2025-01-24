@@ -1,6 +1,7 @@
 // All the app integrations that are available
 export interface IAppIntegration {
   author: string;
+  author: "";
   avatar_url: string | null;
   created_at: string;
   created_by: string | null;

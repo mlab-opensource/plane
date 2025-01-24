@@ -1,8 +1,5 @@
 import set from "lodash/set";
 import { observable, action, computed, makeObservable, runInAction } from "mobx";
-// plane internal packages
-import { EInstanceStatus, TInstanceStatus } from "@plane/constants";
-import {InstanceService} from "@plane/services";
 import {
   IInstance,
   IInstanceAdmin,
@@ -11,6 +8,10 @@ import {
   IInstanceInfo,
   IInstanceConfig,
 } from "@plane/types";
+// helpers
+import { EInstanceStatus, TInstanceStatus } from "@/helpers/instance.helper";
+// services
+import { InstanceService } from "@/services/instance.service";
 // root store
 import { CoreRootStore } from "@/store/root.store";
 
@@ -95,7 +96,7 @@ export class InstanceStore implements IInstanceStore {
     try {
       if (this.instance === undefined) this.isLoading = true;
       this.error = undefined;
-      const instanceInfo = await this.instanceService.info();
+      const instanceInfo = await this.instanceService.getInstanceInfo();
       // handling the new user popup toggle
       if (this.instance === undefined && !instanceInfo?.instance?.workspaces_exist)
         this.store.theme.toggleNewUserPopup();
@@ -124,7 +125,7 @@ export class InstanceStore implements IInstanceStore {
    */
   updateInstanceInfo = async (data: Partial<IInstance>) => {
     try {
-      const instanceResponse = await this.instanceService.update(data);
+      const instanceResponse = await this.instanceService.updateInstanceInfo(data);
       if (instanceResponse) {
         runInAction(() => {
           if (this.instance) set(this.instance, "instance", instanceResponse);
@@ -143,7 +144,7 @@ export class InstanceStore implements IInstanceStore {
    */
   fetchInstanceAdmins = async () => {
     try {
-      const instanceAdmins = await this.instanceService.admins();
+      const instanceAdmins = await this.instanceService.getInstanceAdmins();
       if (instanceAdmins) runInAction(() => (this.instanceAdmins = instanceAdmins));
       return instanceAdmins;
     } catch (error) {
@@ -158,7 +159,7 @@ export class InstanceStore implements IInstanceStore {
    */
   fetchInstanceConfigurations = async () => {
     try {
-      const instanceConfigurations = await this.instanceService.configurations();
+      const instanceConfigurations = await this.instanceService.getInstanceConfigurations();
       if (instanceConfigurations) runInAction(() => (this.instanceConfigurations = instanceConfigurations));
       return instanceConfigurations;
     } catch (error) {
@@ -173,7 +174,7 @@ export class InstanceStore implements IInstanceStore {
    */
   updateInstanceConfigurations = async (data: Partial<IFormattedInstanceConfiguration>) => {
     try {
-      const response = await this.instanceService.updateConfigurations(data);
+      const response = await this.instanceService.updateInstanceConfigurations(data);
       runInAction(() => {
         this.instanceConfigurations = this.instanceConfigurations?.map((config) => {
           const item = response.find((item) => item.key === config.key);

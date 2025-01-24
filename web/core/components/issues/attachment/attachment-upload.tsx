@@ -1,43 +1,61 @@
 import { useCallback, useState } from "react";
 import { observer } from "mobx-react";
 import { useDropzone } from "react-dropzone";
-// plane web hooks
-import { useFileSize } from "@/plane-web/hooks/use-file-size";
+// constants
+import { MAX_FILE_SIZE } from "@/constants/common";
+// helpers
+import { generateFileName } from "@/helpers/attachment.helper";
+// hooks
+import { useInstance } from "@/hooks/store";
 // types
-import { TAttachmentOperations } from "../issue-detail-widgets/attachments/helper";
+import { TAttachmentOperations } from "./root";
 
-type TAttachmentOperationsModal = Pick<TAttachmentOperations, "create">;
+type TAttachmentOperationsModal = Exclude<TAttachmentOperations, "remove">;
 
 type Props = {
   workspaceSlug: string;
   disabled?: boolean;
-  attachmentOperations: TAttachmentOperationsModal;
+  handleAttachmentOperations: TAttachmentOperationsModal;
 };
 
 export const IssueAttachmentUpload: React.FC<Props> = observer((props) => {
-  const { workspaceSlug, disabled = false, attachmentOperations } = props;
+  const { workspaceSlug, disabled = false, handleAttachmentOperations } = props;
+  // store hooks
+  const { config } = useInstance();
   // states
   const [isLoading, setIsLoading] = useState(false);
-  // file size
-  const { maxFileSize } = useFileSize();
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const currentFile: File = acceptedFiles[0];
       if (!currentFile || !workspaceSlug) return;
 
+      const uploadedFile: File = new File([currentFile], generateFileName(currentFile.name), {
+        type: currentFile.type,
+      });
+      const formData = new FormData();
+      formData.append("asset", uploadedFile);
+      formData.append(
+        "attributes",
+        JSON.stringify({
+          name: uploadedFile.name,
+          size: uploadedFile.size,
+        })
+      );
       setIsLoading(true);
-      attachmentOperations.create(currentFile).finally(() => setIsLoading(false));
+      handleAttachmentOperations.create(formData).finally(() => setIsLoading(false));
     },
-    [attachmentOperations, workspaceSlug]
+    [handleAttachmentOperations, workspaceSlug]
   );
 
   const { getRootProps, getInputProps, isDragActive, isDragReject, fileRejections } = useDropzone({
     onDrop,
-    maxSize: maxFileSize,
+    maxSize: config?.file_size_limit ?? MAX_FILE_SIZE,
     multiple: false,
     disabled: isLoading || disabled,
   });
+
+  const maxFileSize = config?.file_size_limit ?? MAX_FILE_SIZE;
 
   const fileError =
     fileRejections.length > 0 ? `Invalid file type or size (max ${maxFileSize / 1024 / 1024} MB)` : null;

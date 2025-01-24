@@ -3,9 +3,7 @@
 import React, { FC } from "react";
 import { observer } from "mobx-react";
 import { X, Pencil, Trash, Link as LinkIcon } from "lucide-react";
-// Plane
-import { EIssueServiceType } from "@plane/constants";
-import { TIssue, TIssueServiceType } from "@plane/types";
+import { TIssue, TIssueRelationTypes } from "@plane/types";
 import { ControlLink, CustomMenu, Tooltip } from "@plane/ui";
 // components
 import { RelationIssueProperty } from "@/components/issues/relations";
@@ -15,9 +13,8 @@ import useIssuePeekOverviewRedirection from "@/hooks/use-issue-peek-overview-red
 import { usePlatformOS } from "@/hooks/use-platform-os";
 // plane web components
 import { IssueIdentifier } from "@/plane-web/components/issues";
-import { TIssueRelationTypes } from "@/plane-web/types";
-// local imports
-import { useRelationOperations } from "../issue-detail-widgets/relations/helper";
+// types
+import { TRelationIssueOperations } from "../issue-detail-widgets/relations/helper";
 
 type Props = {
   workspaceSlug: string;
@@ -26,8 +23,8 @@ type Props = {
   relationKey: TIssueRelationTypes;
   relationIssueId: string;
   disabled: boolean;
+  issueOperations: TRelationIssueOperations;
   handleIssueCrudState: (key: "update" | "delete", issueId: string, issue?: TIssue | null) => void;
-  issueServiceType?: TIssueServiceType;
 };
 
 export const RelationIssueListItem: FC<Props> = observer((props) => {
@@ -38,8 +35,8 @@ export const RelationIssueListItem: FC<Props> = observer((props) => {
     relationKey,
     relationIssueId,
     disabled = false,
+    issueOperations,
     handleIssueCrudState,
-    issueServiceType = EIssueServiceType.ISSUES,
   } = props;
 
   // store hooks
@@ -48,30 +45,23 @@ export const RelationIssueListItem: FC<Props> = observer((props) => {
     removeRelation,
     toggleCreateIssueModal,
     toggleDeleteIssueModal,
-  } = useIssueDetail(issueServiceType);
+  } = useIssueDetail();
   const project = useProject();
   const { getProjectStates } = useProjectState();
+  const { handleRedirection } = useIssuePeekOverviewRedirection();
   const { isMobile } = usePlatformOS();
+
   // derived values
   const issue = getIssueById(relationIssueId);
-  const { handleRedirection } = useIssuePeekOverviewRedirection(!!issue?.is_epic);
-  const issueOperations = useRelationOperations(!!issue?.is_epic ? EIssueServiceType.EPICS : EIssueServiceType.ISSUES);
   const projectDetail = (issue && issue.project_id && project.getProjectById(issue.project_id)) || undefined;
   const currentIssueStateDetail =
     (issue?.project_id && getProjectStates(issue?.project_id)?.find((state) => issue?.state_id == state.id)) ||
     undefined;
+
   if (!issue) return <></>;
-  const issueLink = `/${workspaceSlug}/projects/${projectId}/${issue.is_epic ? "epics" : "issues"}/${issue.id}`;
 
   // handlers
-  const handleIssuePeekOverview = (issue: TIssue) => {
-    if (issueServiceType === EIssueServiceType.ISSUES && issue.is_epic) {
-      // open epics in new tab
-      window.open(issueLink, "_blank");
-      return;
-    }
-    handleRedirection(workspaceSlug, issue, isMobile);
-  };
+  const handleIssuePeekOverview = (issue: TIssue) => handleRedirection(workspaceSlug, issue, isMobile);
 
   const handleEditIssue = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
@@ -90,7 +80,7 @@ export const RelationIssueListItem: FC<Props> = observer((props) => {
   const handleCopyIssueLink = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     e.preventDefault();
-    issueOperations.copyText(issueLink);
+    issueOperations.copyText(`${workspaceSlug}/projects/${issue.project_id}/issues/${issue.id}`);
   };
 
   const handleRemoveRelation = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -103,7 +93,7 @@ export const RelationIssueListItem: FC<Props> = observer((props) => {
     <div key={relationIssueId}>
       <ControlLink
         id={`issue-${issue.id}`}
-        href={issueLink}
+        href={`/${workspaceSlug}/projects/${issue.project_id}/issues/${issue.id}`}
         onClick={() => handleIssuePeekOverview(issue)}
         className="w-full cursor-pointer"
       >
@@ -145,7 +135,6 @@ export const RelationIssueListItem: FC<Props> = observer((props) => {
                 issueId={relationIssueId}
                 disabled={disabled}
                 issueOperations={issueOperations}
-                issueServiceType={issueServiceType}
               />
             </div>
             <div className="flex-shrink-0 text-sm">
@@ -154,7 +143,7 @@ export const RelationIssueListItem: FC<Props> = observer((props) => {
                   <CustomMenu.MenuItem onClick={handleEditIssue}>
                     <div className="flex items-center gap-2">
                       <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
-                      <span>Edit</span>
+                      <span>Edit issue</span>
                     </div>
                   </CustomMenu.MenuItem>
                 )}
@@ -162,7 +151,7 @@ export const RelationIssueListItem: FC<Props> = observer((props) => {
                 <CustomMenu.MenuItem onClick={handleCopyIssueLink}>
                   <div className="flex items-center gap-2">
                     <LinkIcon className="h-3.5 w-3.5" strokeWidth={2} />
-                    <span>Copy link</span>
+                    <span>Copy issue link</span>
                   </div>
                 </CustomMenu.MenuItem>
 
@@ -179,7 +168,7 @@ export const RelationIssueListItem: FC<Props> = observer((props) => {
                   <CustomMenu.MenuItem onClick={handleDeleteIssue}>
                     <div className="flex items-center gap-2">
                       <Trash className="h-3.5 w-3.5" strokeWidth={2} />
-                      <span>Delete</span>
+                      <span>Delete issue</span>
                     </div>
                   </CustomMenu.MenuItem>
                 )}

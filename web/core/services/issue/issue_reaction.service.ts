@@ -1,16 +1,12 @@
-import { EIssueServiceType } from "@plane/constants";
-import { type TIssueCommentReaction, type TIssueReaction, type TIssueServiceType } from "@plane/types";
+import type { TIssueCommentReaction, TIssueReaction } from "@plane/types";
 import { API_BASE_URL } from "@/helpers/common.helper";
 // services
 import { APIService } from "@/services/api.service";
 // types
 
 export class IssueReactionService extends APIService {
-  private serviceType: TIssueServiceType;
-
-  constructor(serviceType: TIssueServiceType = EIssueServiceType.ISSUES) {
+  constructor() {
     super(API_BASE_URL);
-    this.serviceType = serviceType;
   }
 
   async createIssueReaction(
@@ -19,10 +15,7 @@ export class IssueReactionService extends APIService {
     issueId: string,
     data: Partial<TIssueReaction>
   ): Promise<any> {
-    return this.post(
-      `/api/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/reactions/`,
-      data
-    )
+    return this.post(`/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}/reactions/`, data)
       .then((response) => response?.data)
       .catch((error) => {
         throw error?.response?.data;
@@ -30,7 +23,7 @@ export class IssueReactionService extends APIService {
   }
 
   async listIssueReactions(workspaceSlug: string, projectId: string, issueId: string): Promise<TIssueReaction[]> {
-    return this.get(`/api/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/reactions/`)
+    return this.get(`/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}/reactions/`)
       .then((response) => response?.data)
       .catch((error) => {
         throw error?.response?.data;
@@ -39,7 +32,7 @@ export class IssueReactionService extends APIService {
 
   async deleteIssueReaction(workspaceSlug: string, projectId: string, issueId: string, reaction: string): Promise<any> {
     return this.delete(
-      `/api/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/reactions/${reaction}/`
+      `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}/reactions/${reaction}/`
     )
       .then((response) => response?.data)
       .catch((error) => {

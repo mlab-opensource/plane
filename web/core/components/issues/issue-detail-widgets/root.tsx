@@ -12,11 +12,10 @@ type Props = {
   projectId: string;
   issueId: string;
   disabled: boolean;
-  renderWidgetModals?: boolean;
 };
 
 export const IssueDetailWidgets: FC<Props> = (props) => {
-  const { workspaceSlug, projectId, issueId, disabled, renderWidgetModals = true } = props;
+  const { workspaceSlug, projectId, issueId, disabled } = props;
   return (
     <>
       <div className="flex flex-col gap-5">
@@ -33,9 +32,7 @@ export const IssueDetailWidgets: FC<Props> = (props) => {
           disabled={disabled}
         />
       </div>
-      {renderWidgetModals && (
-        <IssueDetailWidgetModals workspaceSlug={workspaceSlug} projectId={projectId} issueId={issueId} />
-      )}
+      <IssueDetailWidgetModals workspaceSlug={workspaceSlug} projectId={projectId} issueId={issueId} />
     </>
   );
 };

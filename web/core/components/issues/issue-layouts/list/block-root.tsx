@@ -5,9 +5,8 @@ import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { attachInstruction, extractInstruction } from "@atlaskit/pragmatic-drag-and-drop-hitbox/tree-item";
 import { observer } from "mobx-react";
-import { EIssueServiceType } from "@plane/constants";
 // plane helpers
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 // types
 import { IIssueDisplayProperties, TIssue, TIssueMap } from "@plane/types";
 // components
@@ -40,7 +39,6 @@ type Props = {
   isParentIssueBeingDragged?: boolean;
   isLastChild?: boolean;
   shouldRenderByDefault?: boolean;
-  isEpic?: boolean;
 };
 
 export const IssueBlockRoot: FC<Props> = observer((props) => {
@@ -61,7 +59,6 @@ export const IssueBlockRoot: FC<Props> = observer((props) => {
     isLastChild = false,
     selectionHelpers,
     shouldRenderByDefault,
-    isEpic = false,
   } = props;
   // states
   const [isExpanded, setExpanded] = useState<boolean>(false);
@@ -72,7 +69,7 @@ export const IssueBlockRoot: FC<Props> = observer((props) => {
   // hooks
   const { isMobile } = usePlatformOS();
   // store hooks
-  const { subIssues: subIssuesStore } = useIssueDetail(isEpic ? EIssueServiceType.EPICS : EIssueServiceType.ISSUES);
+  const { subIssues: subIssuesStore } = useIssueDetail();
 
   const isSubIssue = nestingLevel !== 0;
 
@@ -153,12 +150,10 @@ export const IssueBlockRoot: FC<Props> = observer((props) => {
           canDrag={!isSubIssue && isDragAllowed}
           isCurrentBlockDragging={isParentIssueBeingDragged || isCurrentBlockDragging}
           setIsCurrentBlockDragging={setIsCurrentBlockDragging}
-          isEpic={isEpic}
         />
       </RenderIfVisible>
 
       {isExpanded &&
-        !isEpic &&
         subIssues?.map((subIssueId) => (
           <IssueBlockRoot
             key={`${subIssueId}`}

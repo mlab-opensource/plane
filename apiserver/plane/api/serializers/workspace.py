@@ -8,5 +8,9 @@ class WorkspaceLiteSerializer(BaseSerializer):
 
     class Meta:
         model = Workspace
-        fields = ["name", "slug", "id"]
+        fields = [
+            "name",
+            "slug",
+            "id",
+        ]
         read_only_fields = fields

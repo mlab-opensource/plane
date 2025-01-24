@@ -121,10 +121,7 @@ export const IssueDetailWidgetModals: FC<Props> = observer((props) => {
   };
 
   // helpers
-  const createUpdateModalData: Partial<TIssue> = {
-    parent_id: issueCrudOperationState?.create?.parentIssueId,
-    project_id: projectId,
-  };
+  const createUpdateModalData = { parent_id: issueCrudOperationState?.create?.parentIssueId };
 
   const existingIssuesModalSearchParams = {
     sub_issue: true,
@@ -154,7 +151,6 @@ export const IssueDetailWidgetModals: FC<Props> = observer((props) => {
           data={createUpdateModalData}
           onClose={handleCreateUpdateModalClose}
           onSubmit={handleCreateUpdateModalOnSubmit}
-          isProjectSelectionDisabled
         />
       )}
 
@@ -166,6 +162,7 @@ export const IssueDetailWidgetModals: FC<Props> = observer((props) => {
           handleClose={handleExistingIssuesModalClose}
           searchParams={existingIssuesModalSearchParams}
           handleOnSubmit={handleExistingIssuesModalOnSubmit}
+          workspaceLevelToggle
         />
       )}
 

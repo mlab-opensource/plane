@@ -18,6 +18,7 @@ from plane.authentication.adapter.error import (
 
 
 class GitHubOauthInitiateSpaceEndpoint(View):
+
     def get(self, request):
         # Get host and next path
         request.session["host"] = base_host(request=request, is_space=True)
@@ -29,7 +30,9 @@ class GitHubOauthInitiateSpaceEndpoint(View):
         instance = Instance.objects.first()
         if instance is None or not instance.is_setup_done:
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES["INSTANCE_NOT_CONFIGURED"],
+                error_code=AUTHENTICATION_ERROR_CODES[
+                    "INSTANCE_NOT_CONFIGURED"
+                ],
                 error_message="INSTANCE_NOT_CONFIGURED",
             )
             params = exc.get_error_dict()
@@ -53,6 +56,7 @@ class GitHubOauthInitiateSpaceEndpoint(View):
 
 
 class GitHubCallbackSpaceEndpoint(View):
+
     def get(self, request):
         code = request.GET.get("code")
         state = request.GET.get("state")
@@ -61,7 +65,9 @@ class GitHubCallbackSpaceEndpoint(View):
 
         if state != request.session.get("state", ""):
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES["GITHUB_OAUTH_PROVIDER_ERROR"],
+                error_code=AUTHENTICATION_ERROR_CODES[
+                    "GITHUB_OAUTH_PROVIDER_ERROR"
+                ],
                 error_message="GITHUB_OAUTH_PROVIDER_ERROR",
             )
             params = exc.get_error_dict()
@@ -72,7 +78,9 @@ class GitHubCallbackSpaceEndpoint(View):
 
         if not code:
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES["GITHUB_OAUTH_PROVIDER_ERROR"],
+                error_code=AUTHENTICATION_ERROR_CODES[
+                    "GITHUB_OAUTH_PROVIDER_ERROR"
+                ],
                 error_message="GITHUB_OAUTH_PROVIDER_ERROR",
             )
             params = exc.get_error_dict()
@@ -82,7 +90,10 @@ class GitHubCallbackSpaceEndpoint(View):
             return HttpResponseRedirect(url)
 
         try:
-            provider = GitHubOAuthProvider(request=request, code=code)
+            provider = GitHubOAuthProvider(
+                request=request,
+                code=code,
+            )
             user = provider.authenticate()
             # Login the user and record his device info
             user_login(request=request, user=user, is_space=True)

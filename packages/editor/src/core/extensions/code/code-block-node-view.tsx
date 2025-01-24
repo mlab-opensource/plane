@@ -8,8 +8,8 @@ import { common, createLowlight } from "lowlight";
 import { CopyIcon, CheckIcon } from "lucide-react";
 // ui
 import { Tooltip } from "@plane/ui";
-// plane utils
-import { cn } from "@plane/utils";
+// helpers
+import { cn } from "@/helpers/common";
 
 // we just have ts support for now
 const lowlight = createLowlight(common);

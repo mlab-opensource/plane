@@ -3,14 +3,12 @@
 import { useMemo, useState } from "react";
 import sortBy from "lodash/sortBy";
 import { observer } from "mobx-react";
-// plane ui
-import { Avatar, Loader } from "@plane/ui";
-// components
-import { FilterHeader, FilterOption } from "@/components/issues";
-// helpers
-import { getFileURL } from "@/helpers/file.helper";
 // hooks
+import { Avatar, Loader } from "@plane/ui";
+import { FilterHeader, FilterOption } from "@/components/issues";
 import { useMember, useUser } from "@/hooks/store";
+// components
+// ui
 
 type Props = {
   appliedFilters: string[] | null;
@@ -71,14 +69,7 @@ export const FilterAssignees: React.FC<Props> = observer((props: Props) => {
                       key={`assignees-${member.id}`}
                       isChecked={appliedFilters?.includes(member.id) ? true : false}
                       onClick={() => handleUpdate(member.id)}
-                      icon={
-                        <Avatar
-                          name={member.display_name}
-                          src={getFileURL(member.avatar_url)}
-                          showTooltip={false}
-                          size="md"
-                        />
-                      }
+                      icon={<Avatar name={member.display_name} src={member.avatar} showTooltip={false} size="md" />}
                       title={currentUser?.id === member.id ? "You" : member?.display_name}
                     />
                   );

@@ -4,40 +4,65 @@ import React, { FC } from "react";
 import { observer } from "mobx-react";
 import { Earth, Info, Lock, Minus } from "lucide-react";
 // ui
-import { Avatar, FavoriteStar, Tooltip } from "@plane/ui";
+import { Avatar, FavoriteStar, TOAST_TYPE, Tooltip, setToast } from "@plane/ui";
 // components
-import { PageActions } from "@/components/pages";
+import { PageQuickActions } from "@/components/pages/dropdowns";
 // helpers
 import { renderFormattedDate } from "@/helpers/date-time.helper";
-import { getFileURL } from "@/helpers/file.helper";
 // hooks
-import { useMember } from "@/hooks/store";
-import { usePageOperations } from "@/hooks/use-page-operations";
-import { TPageInstance } from "@/store/pages/base-page";
+import { useMember, usePage } from "@/hooks/store";
 
 type Props = {
-  page: TPageInstance;
+  workspaceSlug: string;
+  projectId: string;
+  pageId: string;
   parentRef: React.RefObject<HTMLElement>;
 };
 
 export const BlockItemAction: FC<Props> = observer((props) => {
-  const { page, parentRef } = props;
+  const { workspaceSlug, projectId, pageId, parentRef } = props;
   // store hooks
+  const page = usePage(pageId);
   const { getUserDetails } = useMember();
-  // page operations
-  const { pageOperations } = usePageOperations({
-    page,
-  });
   // derived values
-  const { access, created_at, is_favorite, owned_by, canCurrentUserFavoritePage } = page;
+  const {
+    access,
+    created_at,
+    is_favorite,
+    owned_by,
+    canCurrentUserFavoritePage,
+    addToFavorites,
+    removePageFromFavorites,
+  } = page;
   const ownerDetails = owned_by ? getUserDetails(owned_by) : undefined;
+
+  // handlers
+  const handleFavorites = () => {
+    if (is_favorite) {
+      removePageFromFavorites().then(() =>
+        setToast({
+          type: TOAST_TYPE.SUCCESS,
+          title: "Success!",
+          message: "Page removed from favorites.",
+        })
+      );
+    } else {
+      addToFavorites().then(() =>
+        setToast({
+          type: TOAST_TYPE.SUCCESS,
+          title: "Success!",
+          message: "Page added to favorites.",
+        })
+      );
+    }
+  };
 
   return (
     <>
       {/* page details */}
       <div className="cursor-default">
         <Tooltip tooltipHeading="Owned by" tooltipContent={ownerDetails?.display_name}>
-          <Avatar src={getFileURL(ownerDetails?.avatar_url ?? "")} name={ownerDetails?.display_name} />
+          <Avatar src={ownerDetails?.avatar} name={ownerDetails?.display_name} />
         </Tooltip>
       </div>
       <div className="cursor-default text-custom-text-300">
@@ -61,25 +86,17 @@ export const BlockItemAction: FC<Props> = observer((props) => {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            pageOperations.toggleFavorite();
+            handleFavorites();
           }}
           selected={is_favorite}
         />
       )}
 
       {/* quick actions dropdown */}
-      <PageActions
-        optionsOrder={[
-          "open-in-new-tab",
-          "copy-link",
-          "make-a-copy",
-          "toggle-lock",
-          "toggle-access",
-          "archive-restore",
-          "delete",
-        ]}
-        page={page}
+      <PageQuickActions
         parentRef={parentRef}
+        page={page}
+        pageLink={`${workspaceSlug}/projects/${projectId}/pages/${pageId}`}
       />
     </>
   );

@@ -2,8 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
-// plane constants
-import { EIssueLayoutTypes, EIssuesStoreType } from "@plane/constants";
+// mobx store
 // components
 import { LogoSpinner } from "@/components/common";
 import {
@@ -15,6 +14,8 @@ import {
   ProjectViewListLayout,
   ProjectViewSpreadsheetLayout,
 } from "@/components/issues";
+// constants
+import { EIssueLayoutTypes, EIssuesStoreType } from "@/constants/issue";
 import { useIssues } from "@/hooks/store";
 import { IssuesStoreContext } from "@/hooks/use-issue-layout-store";
 // types
@@ -52,12 +53,11 @@ export const ProjectViewLayoutRoot: React.FC = observer(() => {
     { revalidateIfStale: false, revalidateOnFocus: false }
   );
 
-  const issueFilters = issuesFilter?.getIssueFilters(viewId?.toString());
-  const activeLayout = issueFilters?.displayFilters?.layout;
+  const activeLayout = issuesFilter?.issueFilters?.displayFilters?.layout;
 
   if (!workspaceSlug || !projectId || !viewId) return <></>;
 
-  if (isLoading && !issueFilters) {
+  if (isLoading) {
     return (
       <div className="relative flex h-screen w-full items-center justify-center">
         <LogoSpinner />

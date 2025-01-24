@@ -1,3 +1,4 @@
+import { Selection } from "@tiptap/pm/state";
 import { Editor } from "@tiptap/react";
 import {
   BoldIcon,
@@ -5,7 +6,7 @@ import {
   CheckSquare,
   Heading2,
   Heading3,
-  TextQuote,
+  QuoteIcon,
   ImageIcon,
   TableIcon,
   ListIcon,
@@ -19,18 +20,12 @@ import {
   Heading6,
   CaseSensitive,
   LucideIcon,
-  MinusSquare,
-  Palette,
-  AlignCenter,
 } from "lucide-react";
 // helpers
 import {
-  insertHorizontalRule,
   insertImage,
   insertTableCommand,
   setText,
-  setTextAlign,
-  toggleBackgroundColor,
   toggleBlockquote,
   toggleBold,
   toggleBulletList,
@@ -45,24 +40,20 @@ import {
   toggleOrderedList,
   toggleStrike,
   toggleTaskList,
-  toggleTextColor,
   toggleUnderline,
 } from "@/helpers/editor-commands";
 // types
-import { TCommandWithProps, TEditorCommands } from "@/types";
+import { TEditorCommands } from "@/types";
 
-type isActiveFunction<T extends TEditorCommands> = (params?: TCommandWithProps<T>) => boolean;
-type commandFunction<T extends TEditorCommands> = (params?: TCommandWithProps<T>) => void;
-
-export type EditorMenuItem<T extends TEditorCommands> = {
-  key: T;
+export interface EditorMenuItem {
+  key: TEditorCommands;
   name: string;
-  command: commandFunction<T>;
+  isActive: () => boolean;
+  command: () => void;
   icon: LucideIcon;
-  isActive: isActiveFunction<T>;
-};
+}
 
-export const TextItem = (editor: Editor): EditorMenuItem<"text"> => ({
+export const TextItem = (editor: Editor): EditorMenuItem => ({
   key: "text",
   name: "Text",
   isActive: () => editor.isActive("paragraph"),
@@ -70,7 +61,7 @@ export const TextItem = (editor: Editor): EditorMenuItem<"text"> => ({
   icon: CaseSensitive,
 });
 
-export const HeadingOneItem = (editor: Editor): EditorMenuItem<"h1"> => ({
+export const HeadingOneItem = (editor: Editor): EditorMenuItem => ({
   key: "h1",
   name: "Heading 1",
   isActive: () => editor.isActive("heading", { level: 1 }),
@@ -78,7 +69,7 @@ export const HeadingOneItem = (editor: Editor): EditorMenuItem<"h1"> => ({
   icon: Heading1,
 });
 
-export const HeadingTwoItem = (editor: Editor): EditorMenuItem<"h2"> => ({
+export const HeadingTwoItem = (editor: Editor): EditorMenuItem => ({
   key: "h2",
   name: "Heading 2",
   isActive: () => editor.isActive("heading", { level: 2 }),
@@ -86,7 +77,7 @@ export const HeadingTwoItem = (editor: Editor): EditorMenuItem<"h2"> => ({
   icon: Heading2,
 });
 
-export const HeadingThreeItem = (editor: Editor): EditorMenuItem<"h3"> => ({
+export const HeadingThreeItem = (editor: Editor): EditorMenuItem => ({
   key: "h3",
   name: "Heading 3",
   isActive: () => editor.isActive("heading", { level: 3 }),
@@ -94,7 +85,7 @@ export const HeadingThreeItem = (editor: Editor): EditorMenuItem<"h3"> => ({
   icon: Heading3,
 });
 
-export const HeadingFourItem = (editor: Editor): EditorMenuItem<"h4"> => ({
+export const HeadingFourItem = (editor: Editor): EditorMenuItem => ({
   key: "h4",
   name: "Heading 4",
   isActive: () => editor.isActive("heading", { level: 4 }),
@@ -102,7 +93,7 @@ export const HeadingFourItem = (editor: Editor): EditorMenuItem<"h4"> => ({
   icon: Heading4,
 });
 
-export const HeadingFiveItem = (editor: Editor): EditorMenuItem<"h5"> => ({
+export const HeadingFiveItem = (editor: Editor): EditorMenuItem => ({
   key: "h5",
   name: "Heading 5",
   isActive: () => editor.isActive("heading", { level: 5 }),
@@ -110,7 +101,7 @@ export const HeadingFiveItem = (editor: Editor): EditorMenuItem<"h5"> => ({
   icon: Heading5,
 });
 
-export const HeadingSixItem = (editor: Editor): EditorMenuItem<"h6"> => ({
+export const HeadingSixItem = (editor: Editor): EditorMenuItem => ({
   key: "h6",
   name: "Heading 6",
   isActive: () => editor.isActive("heading", { level: 6 }),
@@ -118,7 +109,7 @@ export const HeadingSixItem = (editor: Editor): EditorMenuItem<"h6"> => ({
   icon: Heading6,
 });
 
-export const BoldItem = (editor: Editor): EditorMenuItem<"bold"> => ({
+export const BoldItem = (editor: Editor): EditorMenuItem => ({
   key: "bold",
   name: "Bold",
   isActive: () => editor?.isActive("bold"),
@@ -126,7 +117,7 @@ export const BoldItem = (editor: Editor): EditorMenuItem<"bold"> => ({
   icon: BoldIcon,
 });
 
-export const ItalicItem = (editor: Editor): EditorMenuItem<"italic"> => ({
+export const ItalicItem = (editor: Editor): EditorMenuItem => ({
   key: "italic",
   name: "Italic",
   isActive: () => editor?.isActive("italic"),
@@ -134,7 +125,7 @@ export const ItalicItem = (editor: Editor): EditorMenuItem<"italic"> => ({
   icon: ItalicIcon,
 });
 
-export const UnderLineItem = (editor: Editor): EditorMenuItem<"underline"> => ({
+export const UnderLineItem = (editor: Editor): EditorMenuItem => ({
   key: "underline",
   name: "Underline",
   isActive: () => editor?.isActive("underline"),
@@ -142,7 +133,7 @@ export const UnderLineItem = (editor: Editor): EditorMenuItem<"underline"> => ({
   icon: UnderlineIcon,
 });
 
-export const StrikeThroughItem = (editor: Editor): EditorMenuItem<"strikethrough"> => ({
+export const StrikeThroughItem = (editor: Editor): EditorMenuItem => ({
   key: "strikethrough",
   name: "Strikethrough",
   isActive: () => editor?.isActive("strike"),
@@ -150,7 +141,7 @@ export const StrikeThroughItem = (editor: Editor): EditorMenuItem<"strikethrough
   icon: StrikethroughIcon,
 });
 
-export const BulletListItem = (editor: Editor): EditorMenuItem<"bulleted-list"> => ({
+export const BulletListItem = (editor: Editor): EditorMenuItem => ({
   key: "bulleted-list",
   name: "Bulleted list",
   isActive: () => editor?.isActive("bulletList"),
@@ -158,7 +149,7 @@ export const BulletListItem = (editor: Editor): EditorMenuItem<"bulleted-list"> 
   icon: ListIcon,
 });
 
-export const NumberedListItem = (editor: Editor): EditorMenuItem<"numbered-list"> => ({
+export const NumberedListItem = (editor: Editor): EditorMenuItem => ({
   key: "numbered-list",
   name: "Numbered list",
   isActive: () => editor?.isActive("orderedList"),
@@ -166,7 +157,7 @@ export const NumberedListItem = (editor: Editor): EditorMenuItem<"numbered-list"
   icon: ListOrderedIcon,
 });
 
-export const TodoListItem = (editor: Editor): EditorMenuItem<"to-do-list"> => ({
+export const TodoListItem = (editor: Editor): EditorMenuItem => ({
   key: "to-do-list",
   name: "To-do list",
   isActive: () => editor.isActive("taskItem"),
@@ -174,15 +165,15 @@ export const TodoListItem = (editor: Editor): EditorMenuItem<"to-do-list"> => ({
   icon: CheckSquare,
 });
 
-export const QuoteItem = (editor: Editor): EditorMenuItem<"quote"> => ({
+export const QuoteItem = (editor: Editor): EditorMenuItem => ({
   key: "quote",
   name: "Quote",
   isActive: () => editor?.isActive("blockquote"),
   command: () => toggleBlockquote(editor),
-  icon: TextQuote,
+  icon: QuoteIcon,
 });
 
-export const CodeItem = (editor: Editor): EditorMenuItem<"code"> => ({
+export const CodeItem = (editor: Editor): EditorMenuItem => ({
   key: "code",
   name: "Code",
   isActive: () => editor?.isActive("code") || editor?.isActive("codeBlock"),
@@ -190,7 +181,7 @@ export const CodeItem = (editor: Editor): EditorMenuItem<"code"> => ({
   icon: CodeIcon,
 });
 
-export const TableItem = (editor: Editor): EditorMenuItem<"table"> => ({
+export const TableItem = (editor: Editor): EditorMenuItem => ({
   key: "table",
   name: "Table",
   isActive: () => editor?.isActive("table"),
@@ -198,50 +189,19 @@ export const TableItem = (editor: Editor): EditorMenuItem<"table"> => ({
   icon: TableIcon,
 });
 
-export const ImageItem = (editor: Editor): EditorMenuItem<"image"> => ({
-  key: "image",
-  name: "Image",
-  isActive: () => editor?.isActive("image") || editor?.isActive("imageComponent"),
-  command: () => insertImage({ editor, event: "insert", pos: editor.state.selection.from }),
-  icon: ImageIcon,
-});
-
-export const HorizontalRuleItem = (editor: Editor) =>
+export const ImageItem = (editor: Editor) =>
   ({
-    key: "divider",
-    name: "Divider",
-    isActive: () => editor?.isActive("horizontalRule"),
-    command: () => insertHorizontalRule(editor),
-    icon: MinusSquare,
+    key: "image",
+    name: "Image",
+    isActive: () => editor?.isActive("image") || editor?.isActive("imageComponent"),
+    command: (savedSelection: Selection | null) => insertImage({ editor, event: "insert", pos: savedSelection?.from }),
+    icon: ImageIcon,
   }) as const;
 
-export const TextColorItem = (editor: Editor): EditorMenuItem<"text-color"> => ({
-  key: "text-color",
-  name: "Color",
-  isActive: ({ color }) => editor.isActive("customColor", { color }),
-  command: ({ color }) => toggleTextColor(color, editor),
-  icon: Palette,
-});
-
-export const BackgroundColorItem = (editor: Editor): EditorMenuItem<"background-color"> => ({
-  key: "background-color",
-  name: "Background color",
-  isActive: ({ color }) => editor.isActive("customColor", { backgroundColor: color }),
-  command: ({ color }) => toggleBackgroundColor(color, editor),
-  icon: Palette,
-});
-
-export const TextAlignItem = (editor: Editor): EditorMenuItem<"text-align"> => ({
-  key: "text-align",
-  name: "Text align",
-  isActive: ({ alignment }) => editor.isActive({ textAlign: alignment }),
-  command: ({ alignment }) => setTextAlign(alignment, editor),
-  icon: AlignCenter,
-});
-
-export const getEditorMenuItems = (editor: Editor | null): EditorMenuItem<TEditorCommands>[] => {
-  if (!editor) return [];
-
+export function getEditorMenuItems(editor: Editor | null) {
+  if (!editor) {
+    return [];
+  }
   return [
     TextItem(editor),
     HeadingOneItem(editor),
@@ -261,9 +221,5 @@ export const getEditorMenuItems = (editor: Editor | null): EditorMenuItem<TEdito
     QuoteItem(editor),
     TableItem(editor),
     ImageItem(editor),
-    HorizontalRuleItem(editor),
-    TextColorItem(editor),
-    BackgroundColorItem(editor),
-    TextAlignItem(editor),
   ];
-};
+}

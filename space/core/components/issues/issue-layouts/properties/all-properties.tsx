@@ -2,12 +2,11 @@
 
 import { observer } from "mobx-react";
 import { Layers, Link, Paperclip } from "lucide-react";
-// plane types
+// types
+import { cn } from "@plane/editor";
 import { IIssueDisplayProperties } from "@plane/types";
-// plane ui
 import { Tooltip } from "@plane/ui";
-// plane utils
-import { cn } from "@plane/utils";
+// ui
 // components
 import {
   IssueBlockDate,

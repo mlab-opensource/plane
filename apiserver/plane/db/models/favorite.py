@@ -13,7 +13,9 @@ class UserFavorite(WorkspaceBaseModel):
     """
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorites"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="favorites",
     )
     entity_type = models.CharField(max_length=100)
     entity_identifier = models.UUIDField(null=True, blank=True)
@@ -29,7 +31,12 @@ class UserFavorite(WorkspaceBaseModel):
     )
 
     class Meta:
-        unique_together = ["entity_type", "user", "entity_identifier", "deleted_at"]
+        unique_together = [
+            "entity_type",
+            "user",
+            "entity_identifier",
+            "deleted_at",
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["entity_type", "entity_identifier", "user"],
@@ -50,7 +57,7 @@ class UserFavorite(WorkspaceBaseModel):
                 ).aggregate(largest=models.Max("sequence"))["largest"]
             else:
                 largest_sequence = UserFavorite.objects.filter(
-                    workspace=self.workspace
+                    workspace=self.workspace,
                 ).aggregate(largest=models.Max("sequence"))["largest"]
             if largest_sequence is not None:
                 self.sequence = largest_sequence + 10000

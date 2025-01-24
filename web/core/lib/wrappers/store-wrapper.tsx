@@ -1,8 +1,7 @@
-import { ReactNode, useEffect, FC } from "react";
+import { ReactNode, useEffect, FC, useState } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useTranslation, TLanguage } from "@plane/i18n";
 // helpers
 import { applyTheme, unsetCustomCssVariables } from "@/helpers/theme.helper";
 // hooks
@@ -22,7 +21,6 @@ const StoreWrapper: FC<TStoreWrapper> = observer((props) => {
   const { setQuery } = useRouterParams();
   const { sidebarCollapsed, toggleSidebar } = useAppTheme();
   const { data: userProfile } = useUserProfile();
-  const { changeLanguage } = useTranslation();
 
   /**
    * Sidebar collapsed fetching from local storage
@@ -30,6 +28,7 @@ const StoreWrapper: FC<TStoreWrapper> = observer((props) => {
   useEffect(() => {
     const localValue = localStorage && localStorage.getItem("app_sidebar_collapsed");
     const localBoolValue = localValue ? (localValue === "true" ? true : false) : false;
+
     if (localValue && sidebarCollapsed === undefined) toggleSidebar(localBoolValue);
   }, [sidebarCollapsed, setTheme, toggleSidebar]);
 
@@ -38,6 +37,7 @@ const StoreWrapper: FC<TStoreWrapper> = observer((props) => {
    */
   useEffect(() => {
     if (!userProfile?.theme?.theme) return;
+
     const currentTheme = userProfile?.theme?.theme || "system";
     const currentThemePalette = userProfile?.theme?.palette;
     if (currentTheme) {
@@ -50,11 +50,6 @@ const StoreWrapper: FC<TStoreWrapper> = observer((props) => {
       } else unsetCustomCssVariables();
     }
   }, [userProfile?.theme?.theme, userProfile?.theme?.palette, setTheme]);
-
-  useEffect(() => {
-    if (!userProfile?.language) return;
-    changeLanguage(userProfile?.language as TLanguage);
-  }, [userProfile?.language, changeLanguage]);
 
   useEffect(() => {
     if (!params) return;

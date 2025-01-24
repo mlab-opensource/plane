@@ -1,8 +1,7 @@
 import { FC, useEffect, useRef } from "react";
-import isEmpty from "lodash/isEmpty";
 import { observer } from "mobx-react";
 // plane helpers
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 // components
 import {
   SidebarDropdown,
@@ -17,18 +16,15 @@ import { SidebarFavoritesMenu } from "@/components/workspace/sidebar/favorites/f
 import { cn } from "@/helpers/common.helper";
 // hooks
 import { useAppTheme, useUserPermissions } from "@/hooks/store";
-import { useFavorite } from "@/hooks/store/use-favorite";
-import useSize from "@/hooks/use-window-size";
 // plane web components
+import useSize from "@/hooks/use-window-size";
 import { SidebarAppSwitcher } from "@/plane-web/components/sidebar";
-import { SidebarTeamsList } from "@/plane-web/components/workspace/sidebar/teams-sidebar-list";
 import { EUserPermissions, EUserPermissionsLevel } from "@/plane-web/constants/user-permissions";
 
 export const AppSidebar: FC = observer(() => {
   // store hooks
   const { allowPermissions } = useUserPermissions();
   const { toggleSidebar, sidebarCollapsed } = useAppTheme();
-  const { groupedFavorites } = useFavorite();
   const windowSize = useSize();
   // refs
   const ref = useRef<HTMLDivElement>(null);
@@ -48,11 +44,9 @@ export const AppSidebar: FC = observer(() => {
   });
 
   useEffect(() => {
-    if (windowSize[0] < 768 && !sidebarCollapsed) toggleSidebar();
+    if (windowSize[0] < 768) !sidebarCollapsed && toggleSidebar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowSize]);
-
-  const isFavoriteEmpty = isEmpty(groupedFavorites);
 
   return (
     <div
@@ -74,12 +68,9 @@ export const AppSidebar: FC = observer(() => {
             "px-4": !sidebarCollapsed,
           })}
         >
-          {/* Workspace switcher and settings */}
           <SidebarDropdown />
           <div className="flex-shrink-0 h-4" />
-          {/* App switcher */}
-          {canPerformWorkspaceMemberActions && <SidebarAppSwitcher />}
-          {/* Quick actions */}
+          <SidebarAppSwitcher />
           <SidebarQuickActions />
         </div>
         <hr
@@ -92,23 +83,18 @@ export const AppSidebar: FC = observer(() => {
             "vertical-scrollbar px-4": !sidebarCollapsed,
           })}
         >
-          {/* User Menu */}
           <SidebarUserMenu />
-          {/* Workspace Menu */}
+
           <SidebarWorkspaceMenu />
           <hr
             className={cn("flex-shrink-0 border-custom-sidebar-border-300 h-[0.5px] w-3/5 mx-auto my-1", {
               "opacity-0": !sidebarCollapsed,
             })}
           />
-          {/* Favorites Menu */}
-          {canPerformWorkspaceMemberActions && !isFavoriteEmpty && <SidebarFavoritesMenu />}
-          {/* Teams List */}
-          <SidebarTeamsList />
-          {/* Projects List */}
+          {canPerformWorkspaceMemberActions && <SidebarFavoritesMenu />}
+
           <SidebarProjectsList />
         </div>
-        {/* Help Section */}
         <SidebarHelpSection />
       </div>
     </div>

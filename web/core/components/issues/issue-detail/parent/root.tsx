@@ -2,15 +2,14 @@
 
 import { FC } from "react";
 import { observer } from "mobx-react";
+import Link from "next/link";
 import { MinusCircle } from "lucide-react";
 import { TIssue } from "@plane/types";
 // component
 // ui
-import { ControlLink, CustomMenu } from "@plane/ui";
+import { CustomMenu } from "@plane/ui";
 // hooks
 import { useIssues, useProjectState } from "@/hooks/store";
-import useIssuePeekOverviewRedirection from "@/hooks/use-issue-peek-overview-redirection";
-import { usePlatformOS } from "@/hooks/use-platform-os";
 // plane web components
 import { IssueIdentifier } from "@/plane-web/components/issues";
 // types
@@ -30,8 +29,6 @@ export const IssueParentDetail: FC<TIssueParentDetail> = observer((props) => {
   // hooks
   const { issueMap } = useIssues();
   const { getProjectStates } = useProjectState();
-  const { handleRedirection } = useIssuePeekOverviewRedirection();
-  const { isMobile } = usePlatformOS();
 
   const parentIssue = issueMap?.[issue.parent_id || ""] || undefined;
 
@@ -45,10 +42,7 @@ export const IssueParentDetail: FC<TIssueParentDetail> = observer((props) => {
   return (
     <>
       <div className="mb-5 flex w-min items-center gap-3 whitespace-nowrap rounded-md border border-custom-border-300 bg-custom-background-80 px-2.5 py-1 text-xs">
-        <ControlLink
-          href={`/${workspaceSlug}/projects/${parentIssue?.project_id}/issues/${parentIssue.id}`}
-          onClick={() => handleRedirection(workspaceSlug, parentIssue, isMobile)}
-        >
+        <Link href={`/${workspaceSlug}/projects/${parentIssue?.project_id}/issues/${parentIssue.id}`}>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2.5">
               <span className="block h-2 w-2 rounded-full" style={{ backgroundColor: stateColor }} />
@@ -62,7 +56,7 @@ export const IssueParentDetail: FC<TIssueParentDetail> = observer((props) => {
             </div>
             <span className="truncate text-custom-text-100">{(parentIssue?.name ?? "").substring(0, 50)}</span>
           </div>
-        </ControlLink>
+        </Link>
 
         <CustomMenu ellipsis optionsClassName="p-1.5">
           <div className="border-b border-custom-border-300 text-xs font-medium text-custom-text-200">

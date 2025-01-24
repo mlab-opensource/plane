@@ -1,8 +1,8 @@
 import { FC, Fragment } from "react";
 import { observer } from "mobx-react";
 import Link from "next/link";
-import { ICycle, TCycleEstimateType } from "@plane/types";
-import { Loader } from "@plane/ui";
+import { ICycle, TCycleEstimateType, TCyclePlotType } from "@plane/types";
+import { CustomSelect, Loader } from "@plane/ui";
 // components
 import ProgressChart from "@/components/core/sidebar/progress-chart";
 import { EmptyState } from "@/components/empty-state";
@@ -11,7 +11,6 @@ import { EmptyStateType } from "@/constants/empty-state";
 import { useCycle, useProjectEstimates } from "@/hooks/store";
 // plane web constants
 import { EEstimateSystem } from "@/plane-web/constants/estimates";
-import { EstimateTypeDropdown } from "../dropdowns/estimate-type-dropdown";
 
 export type ActiveCycleProductivityProps = {
   workspaceSlug: string;
@@ -19,10 +18,16 @@ export type ActiveCycleProductivityProps = {
   cycle: ICycle | null;
 };
 
+const cycleBurnDownChartOptions = [
+  { value: "issues", label: "Issues" },
+  { value: "points", label: "Points" },
+];
+
 export const ActiveCycleProductivity: FC<ActiveCycleProductivityProps> = observer((props) => {
   const { workspaceSlug, projectId, cycle } = props;
   // hooks
   const { getEstimateTypeByCycleId, setEstimateType } = useCycle();
+  const { currentActiveEstimateId, areEstimateEnabledByProjectId, estimateById } = useProjectEstimates();
 
   // derived values
   const estimateType: TCycleEstimateType = (cycle && getEstimateTypeByCycleId(cycle.id)) || "issues";
@@ -31,6 +36,11 @@ export const ActiveCycleProductivity: FC<ActiveCycleProductivityProps> = observe
     if (!workspaceSlug || !projectId || !cycle || !cycle.id) return;
     setEstimateType(cycle.id, value);
   };
+
+  const isCurrentProjectEstimateEnabled = projectId && areEstimateEnabledByProjectId(projectId) ? true : false;
+  const estimateDetails =
+    isCurrentProjectEstimateEnabled && currentActiveEstimateId && estimateById(currentActiveEstimateId);
+  const isCurrentEstimateTypeIsPoints = estimateDetails && estimateDetails?.type === EEstimateSystem.POINTS;
 
   const chartDistributionData =
     cycle && estimateType === "points" ? cycle?.estimate_distribution : cycle?.distribution || undefined;
@@ -42,7 +52,22 @@ export const ActiveCycleProductivity: FC<ActiveCycleProductivityProps> = observe
         <Link href={`/${workspaceSlug}/projects/${projectId}/cycles/${cycle?.id}`}>
           <h3 className="text-base text-custom-text-300 font-semibold">Issue burndown</h3>
         </Link>
-        <EstimateTypeDropdown value={estimateType} onChange={onChange} cycleId={cycle.id} projectId={projectId} />
+        {isCurrentEstimateTypeIsPoints && (
+          <div className="relative flex items-center gap-2">
+            <CustomSelect
+              value={estimateType}
+              label={<span>{cycleBurnDownChartOptions.find((v) => v.value === estimateType)?.label ?? "None"}</span>}
+              onChange={onChange}
+              maxHeight="lg"
+            >
+              {cycleBurnDownChartOptions.map((item) => (
+                <CustomSelect.Option key={item.value} value={item.value}>
+                  {item.label}
+                </CustomSelect.Option>
+              ))}
+            </CustomSelect>
+          </div>
+        )}
       </div>
 
       <Link href={`/${workspaceSlug}/projects/${projectId}/cycles/${cycle?.id}`}>

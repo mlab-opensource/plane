@@ -3,35 +3,29 @@ import { forwardRef, useCallback } from "react";
 import { EditorWrapper } from "@/components/editors";
 import { EditorBubbleMenu } from "@/components/menus";
 // extensions
-import { SideMenuExtension, SlashCommands } from "@/extensions";
+import { SideMenuExtension, SlashCommand } from "@/extensions";
 // types
 import { EditorRefApi, IRichTextEditor } from "@/types";
 
 const RichTextEditor = (props: IRichTextEditor) => {
-  const { disabledExtensions, dragDropEnabled, bubbleMenuEnabled = true, extensions: externalExtensions = [] } = props;
+  const { dragDropEnabled } = props;
 
   const getExtensions = useCallback(() => {
-    const extensions = [
-      ...externalExtensions,
+    const extensions = [SlashCommand()];
+
+    extensions.push(
       SideMenuExtension({
         aiEnabled: false,
         dragDropEnabled: !!dragDropEnabled,
-      }),
-    ];
-    if (!disabledExtensions?.includes("slash-commands")) {
-      extensions.push(
-        SlashCommands({
-          disabledExtensions,
-        })
-      );
-    }
+      })
+    );
 
     return extensions;
-  }, [dragDropEnabled, disabledExtensions, externalExtensions]);
+  }, [dragDropEnabled]);
 
   return (
     <EditorWrapper {...props} extensions={getExtensions()}>
-      {(editor) => <>{editor && bubbleMenuEnabled && <EditorBubbleMenu editor={editor} />}</>}
+      {(editor) => <>{editor && <EditorBubbleMenu editor={editor} />}</>}
     </EditorWrapper>
   );
 };

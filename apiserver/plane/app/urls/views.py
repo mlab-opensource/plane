@@ -12,7 +12,12 @@ from plane.app.views import (
 urlpatterns = [
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/views/",
-        IssueViewViewSet.as_view({"get": "list", "post": "create"}),
+        IssueViewViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
         name="project-view",
     ),
     path(
@@ -29,7 +34,12 @@ urlpatterns = [
     ),
     path(
         "workspaces/<str:slug>/views/",
-        WorkspaceViewViewSet.as_view({"get": "list", "post": "create"}),
+        WorkspaceViewViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
         name="global-view",
     ),
     path(
@@ -46,17 +56,30 @@ urlpatterns = [
     ),
     path(
         "workspaces/<str:slug>/issues/",
-        WorkspaceViewIssuesViewSet.as_view({"get": "list"}),
+        WorkspaceViewIssuesViewSet.as_view(
+            {
+                "get": "list",
+            }
+        ),
         name="global-view-issues",
     ),
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/user-favorite-views/",
-        IssueViewFavoriteViewSet.as_view({"get": "list", "post": "create"}),
+        IssueViewFavoriteViewSet.as_view(
+            {
+                "get": "list",
+                "post": "create",
+            }
+        ),
         name="user-favorite-view",
     ),
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/user-favorite-views/<uuid:view_id>/",
-        IssueViewFavoriteViewSet.as_view({"delete": "destroy"}),
+        IssueViewFavoriteViewSet.as_view(
+            {
+                "delete": "destroy",
+            }
+        ),
         name="user-favorite-view",
     ),
 ]

@@ -8,7 +8,6 @@ import { Menu, Transition } from "@headlessui/react";
 import { Avatar } from "@plane/ui";
 // helpers
 import { cn } from "@/helpers/common.helper";
-import { getFileURL } from "@/helpers/file.helper";
 // hooks
 import { useUser } from "@/hooks/store";
 // components
@@ -35,10 +34,10 @@ export const SwitchAccountDropdown: FC<TSwitchAccountDropdownProps> = observer((
     <div className="flex w-full shrink-0 justify-end">
       <SwitchAccountModal isOpen={showSwitchAccountModal} onClose={() => setShowSwitchAccountModal(false)} />
       <div className="flex items-center gap-x-2 pr-4 z-10">
-        {user?.avatar_url && (
+        {user?.avatar && (
           <Avatar
             name={displayName}
-            src={getFileURL(user?.avatar_url)}
+            src={user?.avatar}
             size={24}
             shape="square"
             fallbackBackgroundColor="#FCBE1D"

@@ -14,14 +14,14 @@ export interface IWorkspace {
   readonly updated_at: Date;
   name: string;
   url: string;
-  logo_url: string | null;
+  logo: string | null;
+  slug: string;
   readonly total_members: number;
   readonly slug: string;
   readonly created_by: string;
   readonly updated_by: string;
   organization_size: string;
   total_issues: number;
-  total_projects?: number;
 }
 
 export interface IWorkspaceLite {
@@ -71,7 +71,7 @@ export interface IWorkspaceMember {
   member: IUserLite;
   role: TUserPermissions;
   created_at?: string;
-  avatar_url?: string;
+  avatar?: string;
   email?: string;
   first_name?: string;
   last_name?: string;
@@ -92,7 +92,6 @@ export interface IWorkspaceMemberMe {
   updated_by: string;
   view_props: IWorkspaceViewProps;
   workspace: string;
-  draft_issue_count: number;
 }
 
 export interface ILastActiveWorkspaceDetails {
@@ -223,7 +222,3 @@ export interface IWorkspaceProgressResponse {
 export interface IWorkspaceAnalyticsResponse {
   completion_chart: any;
 }
-
-export type TWorkspacePaginationInfo = TPaginationInfo & {
-  results: IWorkspace[];
-};

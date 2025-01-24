@@ -1,9 +1,8 @@
 "use client";
 import React, { FC } from "react";
 import { observer } from "mobx-react";
-import { EIssueServiceType } from "@plane/constants";
 // components
-import { TIssuePriorities, TIssueServiceType } from "@plane/types";
+import { TIssuePriorities } from "@plane/types";
 import { PriorityDropdown, MemberDropdown, StateDropdown } from "@/components/dropdowns";
 // hooks
 import { useIssueDetail } from "@/hooks/store";
@@ -15,15 +14,14 @@ type Props = {
   issueId: string;
   disabled: boolean;
   issueOperations: TRelationIssueOperations;
-  issueServiceType?: TIssueServiceType;
 };
 
 export const RelationIssueProperty: FC<Props> = observer((props) => {
-  const { workspaceSlug, issueId, disabled, issueOperations, issueServiceType = EIssueServiceType.ISSUES } = props;
+  const { workspaceSlug, issueId, disabled, issueOperations } = props;
   // hooks
   const {
     issue: { getIssueById },
-  } = useIssueDetail(issueServiceType);
+  } = useIssueDetail();
 
   // derived value
   const issue = getIssueById(issueId);

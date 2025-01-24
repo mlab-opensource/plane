@@ -5,7 +5,7 @@ import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { draggable, dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { attachInstruction, extractInstruction } from "@atlaskit/pragmatic-drag-and-drop-hitbox/tree-item";
 import { observer } from "mobx-react";
-import { useOutsideClickDetector } from "@plane/hooks";
+import { useOutsideClickDetector } from "@plane/helpers";
 import { DropIndicator, TOAST_TYPE, setToast } from "@plane/ui";
 import { HIGHLIGHT_WITH_LINE, highlightIssueOnDrop } from "@/components/issues/issue-layouts/utils";
 
@@ -34,7 +34,7 @@ export const GanttDnDHOC = observer((props: Props) => {
       draggable({
         element,
         canDrag: () => isDragEnabled,
-        getInitialData: () => ({ id, dragInstanceId: "GANTT_REORDER" }),
+        getInitialData: () => ({ id }),
         onDragStart: () => {
           setIsDragging(true);
         },
@@ -44,7 +44,7 @@ export const GanttDnDHOC = observer((props: Props) => {
       }),
       dropTargetForElements({
         element,
-        canDrop: ({ source }) => source?.data?.id !== id && source?.data?.dragInstanceId === "GANTT_REORDER",
+        canDrop: ({ source }) => source?.data?.id !== id,
         getData: ({ input, element }) => {
           const data = { id };
 

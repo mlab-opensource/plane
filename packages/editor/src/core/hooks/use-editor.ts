@@ -1,8 +1,9 @@
+import { useImperativeHandle, useRef, MutableRefObject, useState, useEffect } from "react";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { DOMSerializer } from "@tiptap/pm/model";
+import { Selection } from "@tiptap/pm/state";
 import { EditorProps } from "@tiptap/pm/view";
-import { useEditor as useTiptapEditor, Extensions } from "@tiptap/react";
-import { useImperativeHandle, MutableRefObject, useEffect } from "react";
+import { useEditor as useTiptapEditor, Editor } from "@tiptap/react";
 import * as Y from "yjs";
 // components
 import { getEditorMenuItems } from "@/components/menus";
@@ -11,35 +12,27 @@ import { CoreEditorExtensions } from "@/extensions";
 // helpers
 import { getParagraphCount } from "@/helpers/common";
 import { insertContentAtSavedSelection } from "@/helpers/insert-content-at-cursor-position";
-import { IMarking, scrollSummary, scrollToNodeViaDOMCoordinates } from "@/helpers/scroll-to-node";
+import { IMarking, scrollSummary } from "@/helpers/scroll-to-node";
 // props
 import { CoreEditorProps } from "@/props";
 // types
-import type {
-  TDocumentEventsServer,
-  EditorRefApi,
-  TEditorCommands,
-  TFileHandler,
-  TExtensions,
-  TMentionHandler,
-} from "@/types";
+import { EditorRefApi, IMentionHighlight, IMentionSuggestion, TEditorCommands, TFileHandler } from "@/types";
 
 export interface CustomEditorProps {
-  editable: boolean;
   editorClassName: string;
   editorProps?: EditorProps;
   enableHistory: boolean;
-  disabledExtensions: TExtensions[];
-  extensions?: Extensions;
+  extensions?: any;
   fileHandler: TFileHandler;
   forwardedRef?: MutableRefObject<EditorRefApi | null>;
   handleEditorReady?: (value: boolean) => void;
   id?: string;
   initialValue?: string;
-  mentionHandler: TMentionHandler;
+  mentionHandler: {
+    highlights: () => Promise<IMentionHighlight[]>;
+    suggestions?: () => Promise<IMentionSuggestion[]>;
+  };
   onChange?: (json: object, html: string) => void;
-  onTransaction?: () => void;
-  autofocus?: boolean;
   placeholder?: string | ((isFocused: boolean, value: string) => string);
   provider?: HocuspocusProvider;
   tabIndex?: number;
@@ -50,8 +43,6 @@ export interface CustomEditorProps {
 
 export const useEditor = (props: CustomEditorProps) => {
   const {
-    disabledExtensions,
-    editable = true,
     editorClassName,
     editorProps = {},
     enableHistory,
@@ -63,60 +54,66 @@ export const useEditor = (props: CustomEditorProps) => {
     initialValue,
     mentionHandler,
     onChange,
-    onTransaction,
     placeholder,
+    provider,
     tabIndex,
     value,
-    provider,
-    autofocus = false,
   } = props;
+  // states
 
-  const editor = useTiptapEditor(
-    {
-      editable,
-      immediatelyRender: false,
-      shouldRerenderOnTransaction: false,
-      autofocus,
-      editorProps: {
-        ...CoreEditorProps({
-          editorClassName,
-        }),
-        ...editorProps,
-      },
-      extensions: [
-        ...CoreEditorExtensions({
-          editable,
-          disabledExtensions,
-          enableHistory,
-          fileHandler,
-          mentionHandler,
-          placeholder,
-          tabIndex,
-        }),
-        ...extensions,
-      ],
-      content: typeof initialValue === "string" && initialValue.trim() !== "" ? initialValue : "<p></p>",
-      onCreate: () => handleEditorReady?.(true),
-      onTransaction: () => {
-        onTransaction?.();
-      },
-      onUpdate: ({ editor }) => onChange?.(editor.getJSON(), editor.getHTML()),
-      onDestroy: () => handleEditorReady?.(false),
+  const [savedSelection, setSavedSelection] = useState<Selection | null>(null);
+  // refs
+  const editorRef: MutableRefObject<Editor | null> = useRef(null);
+  const savedSelectionRef = useRef(savedSelection);
+  const editor = useTiptapEditor({
+    editorProps: {
+      ...CoreEditorProps({
+        editorClassName,
+      }),
+      ...editorProps,
     },
-    [editable]
-  );
+    extensions: [
+      ...CoreEditorExtensions({
+        enableHistory,
+        fileConfig: {
+          uploadFile: fileHandler.upload,
+          deleteFile: fileHandler.delete,
+          restoreFile: fileHandler.restore,
+          cancelUploadImage: fileHandler.cancel,
+        },
+        mentionConfig: {
+          mentionSuggestions: mentionHandler.suggestions ?? (() => Promise.resolve<IMentionSuggestion[]>([])),
+          mentionHighlights: mentionHandler.highlights,
+        },
+        placeholder,
+        tabIndex,
+      }),
+      ...extensions,
+    ],
+    content: typeof initialValue === "string" && initialValue.trim() !== "" ? initialValue : "<p></p>",
+    onCreate: () => handleEditorReady?.(true),
+    onTransaction: ({ editor }) => setSavedSelection(editor.state.selection),
+    onUpdate: ({ editor }) => onChange?.(editor.getJSON(), editor.getHTML()),
+    onDestroy: () => handleEditorReady?.(false),
+  });
+
+  // Update the ref whenever savedSelection changes
+  useEffect(() => {
+    savedSelectionRef.current = savedSelection;
+  }, [savedSelection]);
 
   // Effect for syncing SWR data
   useEffect(() => {
     // value is null when intentionally passed where syncing is not yet
     // supported and value is undefined when the data from swr is not populated
-    if (value == null) return;
+    if (value === null || value === undefined) return;
     if (editor && !editor.isDestroyed && !editor.storage.imageComponent.uploadInProgress) {
       try {
         editor.commands.setContent(value, false, { preserveWhitespace: "full" });
-        if (editor.state.selection) {
+        const currentSavedSelection = savedSelectionRef.current;
+        if (currentSavedSelection) {
           const docLength = editor.state.doc.content.size;
-          const relativePosition = Math.min(editor.state.selection.from, docLength - 1);
+          const relativePosition = Math.min(currentSavedSelection.from, docLength - 1);
           editor.commands.setTextSelection(relativePosition);
         }
       } catch (error) {
@@ -128,63 +125,56 @@ export const useEditor = (props: CustomEditorProps) => {
   useImperativeHandle(
     forwardedRef,
     () => ({
-      blur: () => editor.commands.blur(),
-      scrollToNodeViaDOMCoordinates(behavior?: ScrollBehavior, pos?: number) {
-        const resolvedPos = pos ?? editor.state.selection.from;
-        if (!editor || !resolvedPos) return;
-        scrollToNodeViaDOMCoordinates(editor, resolvedPos, behavior);
-      },
-      getCurrentCursorPosition: () => editor.state.selection.from,
       clearEditor: (emitUpdate = false) => {
-        editor?.chain().setMeta("skipImageDeletion", true).clearContent(emitUpdate).run();
+        editorRef.current?.chain().setMeta("skipImageDeletion", true).clearContent(emitUpdate).run();
       },
       setEditorValue: (content: string) => {
-        editor?.commands.setContent(content, false, { preserveWhitespace: "full" });
+        editorRef.current?.commands.setContent(content, false, { preserveWhitespace: "full" });
       },
       setEditorValueAtCursorPosition: (content: string) => {
-        if (editor.state.selection) {
-          insertContentAtSavedSelection(editor, content);
+        if (savedSelection) {
+          insertContentAtSavedSelection(editorRef, content, savedSelection);
         }
       },
-      executeMenuItemCommand: (props) => {
-        const { itemKey } = props;
-        const editorItems = getEditorMenuItems(editor);
+      executeMenuItemCommand: (itemKey: TEditorCommands) => {
+        const editorItems = getEditorMenuItems(editorRef.current);
 
         const getEditorMenuItem = (itemKey: TEditorCommands) => editorItems.find((item) => item.key === itemKey);
 
         const item = getEditorMenuItem(itemKey);
         if (item) {
-          item.command(props);
+          if (item.key === "image") {
+            item.command(savedSelectionRef.current);
+          } else {
+            item.command();
+          }
         } else {
           console.warn(`No command found for item: ${itemKey}`);
         }
       },
-      isMenuItemActive: (props) => {
-        const { itemKey } = props;
-        const editorItems = getEditorMenuItems(editor);
+      isMenuItemActive: (itemName: TEditorCommands): boolean => {
+        const editorItems = getEditorMenuItems(editorRef.current);
 
-        const getEditorMenuItem = (itemKey: TEditorCommands) => editorItems.find((item) => item.key === itemKey);
-        const item = getEditorMenuItem(itemKey);
-        if (!item) return false;
-
-        return item.isActive(props);
+        const getEditorMenuItem = (itemName: TEditorCommands) => editorItems.find((item) => item.key === itemName);
+        const item = getEditorMenuItem(itemName);
+        return item ? item.isActive() : false;
       },
       onHeadingChange: (callback: (headings: IMarking[]) => void) => {
         // Subscribe to update event emitted from headers extension
-        editor?.on("update", () => {
-          callback(editor?.storage.headingList.headings);
+        editorRef.current?.on("update", () => {
+          callback(editorRef.current?.storage.headingList.headings);
         });
         // Return a function to unsubscribe to the continuous transactions of
         // the editor on unmounting the component that has subscribed to this
         // method
         return () => {
-          editor?.off("update");
+          editorRef.current?.off("update");
         };
       },
-      getHeadings: () => editor?.storage.headingList.headings,
+      getHeadings: () => editorRef?.current?.storage.headingList.headings,
       onStateChange: (callback: () => void) => {
         // Subscribe to editor state changes
-        editor?.on("transaction", () => {
+        editorRef.current?.on("transaction", () => {
           callback();
         });
 
@@ -192,17 +182,17 @@ export const useEditor = (props: CustomEditorProps) => {
         // the editor on unmounting the component that has subscribed to this
         // method
         return () => {
-          editor?.off("transaction");
+          editorRef.current?.off("transaction");
         };
       },
       getMarkDown: (): string => {
-        const markdownOutput = editor?.storage.markdown.getMarkdown();
+        const markdownOutput = editorRef.current?.storage.markdown.getMarkdown();
         return markdownOutput;
       },
       getDocument: () => {
         const documentBinary = provider?.document ? Y.encodeStateAsUpdate(provider?.document) : null;
-        const documentHTML = editor?.getHTML() ?? "<p></p>";
-        const documentJSON = editor.getJSON() ?? null;
+        const documentHTML = editorRef.current?.getHTML() ?? "<p></p>";
+        const documentJSON = editorRef.current?.getJSON() ?? null;
 
         return {
           binary: documentBinary,
@@ -211,19 +201,19 @@ export const useEditor = (props: CustomEditorProps) => {
         };
       },
       scrollSummary: (marking: IMarking): void => {
-        if (!editor) return;
-        scrollSummary(editor, marking);
+        if (!editorRef.current) return;
+        scrollSummary(editorRef.current, marking);
       },
-      isEditorReadyToDiscard: () => editor?.storage.imageComponent.uploadInProgress === false,
+      isEditorReadyToDiscard: () => editorRef.current?.storage.imageComponent.uploadInProgress === false,
       setFocusAtPosition: (position: number) => {
-        if (!editor || editor.isDestroyed) {
+        if (!editorRef.current || editorRef.current.isDestroyed) {
           console.error("Editor reference is not available or has been destroyed.");
           return;
         }
         try {
-          const docSize = editor.state.doc.content.size;
+          const docSize = editorRef.current.state.doc.content.size;
           const safePosition = Math.max(0, Math.min(position, docSize));
-          editor
+          editorRef.current
             .chain()
             .insertContentAt(safePosition, [{ type: "paragraph" }])
             .focus()
@@ -233,17 +223,17 @@ export const useEditor = (props: CustomEditorProps) => {
         }
       },
       getSelectedText: () => {
-        if (!editor) return null;
+        if (!editorRef.current) return null;
 
-        const { state } = editor;
+        const { state } = editorRef.current;
         const { from, to, empty } = state.selection;
 
         if (empty) return null;
 
         const nodesArray: string[] = [];
-        state.doc.nodesBetween(from, to, (node, _pos, parent) => {
-          if (parent === state.doc && editor) {
-            const serializer = DOMSerializer.fromSchema(editor.schema);
+        state.doc.nodesBetween(from, to, (node, pos, parent) => {
+          if (parent === state.doc && editorRef.current) {
+            const serializer = DOMSerializer.fromSchema(editorRef.current?.schema);
             const dom = serializer.serializeNode(node);
             const tempDiv = document.createElement("div");
             tempDiv.appendChild(dom);
@@ -254,36 +244,45 @@ export const useEditor = (props: CustomEditorProps) => {
         return selection;
       },
       insertText: (contentHTML, insertOnNextLine) => {
-        if (!editor) return;
-        const { from, to, empty } = editor.state.selection;
+        if (!editorRef.current) return;
+        // get selection
+        const { from, to, empty } = editorRef.current.state.selection;
         if (empty) return;
         if (insertOnNextLine) {
           // move cursor to the end of the selection and insert a new line
-          editor.chain().focus().setTextSelection(to).insertContent("<br />").insertContent(contentHTML).run();
+          editorRef.current
+            .chain()
+            .focus()
+            .setTextSelection(to)
+            .insertContent("<br />")
+            .insertContent(contentHTML)
+            .run();
         } else {
           // replace selected text with the content provided
-          editor.chain().focus().deleteRange({ from, to }).insertContent(contentHTML).run();
+          editorRef.current.chain().focus().deleteRange({ from, to }).insertContent(contentHTML).run();
         }
       },
       getDocumentInfo: () => ({
-        characters: editor?.storage?.characterCount?.characters?.() ?? 0,
-        paragraphs: getParagraphCount(editor?.state),
-        words: editor?.storage?.characterCount?.words?.() ?? 0,
+        characters: editorRef?.current?.storage?.characterCount?.characters?.() ?? 0,
+        paragraphs: getParagraphCount(editorRef?.current?.state),
+        words: editorRef?.current?.storage?.characterCount?.words?.() ?? 0,
       }),
       setProviderDocument: (value) => {
         const document = provider?.document;
         if (!document) return;
         Y.applyUpdate(document, value);
       },
-      emitRealTimeUpdate: (message: TDocumentEventsServer) => provider?.sendStateless(message),
-      listenToRealTimeUpdate: () => provider && { on: provider.on.bind(provider), off: provider.off.bind(provider) },
     }),
-    [editor]
+    [editorRef, savedSelection]
   );
 
   if (!editor) {
     return null;
   }
+
+  // the editorRef is used to access the editor instance from outside the hook
+  // and should only be used after editor is initialized
+  editorRef.current = editor;
 
   return editor;
 };

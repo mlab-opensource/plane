@@ -1,8 +1,6 @@
-import range from "lodash/range";
-
 export const IntegrationsSettingsLoader = () => (
   <div className="divide-y-[0.5px] divide-custom-border-100 animate-pulse">
-    {range(2).map((i) => (
+    {[...Array(2)].map((i) => (
       <div
         key={i}
         className="flex items-center justify-between gap-2 border-b border-custom-border-100 bg-custom-background-100 px-4 py-6"

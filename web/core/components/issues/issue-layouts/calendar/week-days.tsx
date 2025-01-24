@@ -5,7 +5,6 @@ import { CalendarDayTile } from "@/components/issues";
 // helpers
 import { renderFormattedPayloadDate } from "@/helpers/date-time.helper";
 // types
-import { IProjectEpicsFilter } from "@/plane-web/store/issue/epic";
 import { ICycleIssuesFilter } from "@/store/issue/cycle";
 import { IModuleIssuesFilter } from "@/store/issue/module";
 import { IProjectIssuesFilter } from "@/store/issue/project";
@@ -14,12 +13,7 @@ import { TRenderQuickActions } from "../list/list-view-types";
 import { ICalendarDate, ICalendarWeek } from "./types";
 
 type Props = {
-  issuesFilterStore:
-    | IProjectIssuesFilter
-    | IModuleIssuesFilter
-    | ICycleIssuesFilter
-    | IProjectViewIssuesFilter
-    | IProjectEpicsFilter;
+  issuesFilterStore: IProjectIssuesFilter | IModuleIssuesFilter | ICycleIssuesFilter | IProjectViewIssuesFilter;
   issues: TIssueMap | undefined;
   groupedIssueIds: TGroupedIssues;
   week: ICalendarWeek | undefined;
@@ -32,7 +26,6 @@ type Props = {
   quickAddCallback?: (projectId: string | null | undefined, data: TIssue) => Promise<TIssue | undefined>;
   handleDragAndDrop: (
     issueId: string | undefined,
-    issueProjectId: string | undefined,
     sourceDate: string | undefined,
     destinationDate: string | undefined
   ) => Promise<void>;
@@ -40,8 +33,6 @@ type Props = {
   readOnly?: boolean;
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
-  canEditProperties: (projectId: string | undefined) => boolean;
-  isEpic?: boolean;
 };
 
 export const CalendarWeekDays: React.FC<Props> = observer((props) => {
@@ -62,8 +53,6 @@ export const CalendarWeekDays: React.FC<Props> = observer((props) => {
     readOnly = false,
     selectedDate,
     setSelectedDate,
-    canEditProperties,
-    isEpic = false,
   } = props;
 
   const calendarLayout = issuesFilterStore?.issueFilters?.displayFilters?.calendar?.layout ?? "month";
@@ -99,8 +88,6 @@ export const CalendarWeekDays: React.FC<Props> = observer((props) => {
             addIssuesToView={addIssuesToView}
             readOnly={readOnly}
             handleDragAndDrop={handleDragAndDrop}
-            canEditProperties={canEditProperties}
-            isEpic={isEpic}
           />
         );
       })}

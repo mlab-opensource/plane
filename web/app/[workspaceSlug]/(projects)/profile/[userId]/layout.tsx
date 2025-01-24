@@ -4,7 +4,6 @@ import { observer } from "mobx-react";
 import { useParams, usePathname } from "next/navigation";
 import useSWR from "swr";
 // components
-import { useTranslation } from "@plane/i18n";
 import { AppHeader, ContentWrapper } from "@/components/core";
 import { ProfileSidebar } from "@/components/profile";
 // constants
@@ -33,7 +32,6 @@ const UseProfileLayout: React.FC<Props> = observer((props) => {
   const pathname = usePathname();
   // store hooks
   const { allowPermissions } = useUserPermissions();
-  const { t } = useTranslation();
   // derived values
   const isAuthorized = allowPermissions(
     [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
@@ -81,7 +79,7 @@ const UseProfileLayout: React.FC<Props> = observer((props) => {
                   <div className={`w-full overflow-hidden h-full`}>{children}</div>
                 ) : (
                   <div className="grid h-full w-full place-items-center text-custom-text-200">
-                    {t("you_do_not_have_the_permission_to_access_this_page")}
+                    You do not have the permission to access this page.
                   </div>
                 )}
               </div>

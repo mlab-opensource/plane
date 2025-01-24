@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { useParams, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 // plane constants
-import { ALL_ISSUES, EIssueLayoutTypes, EIssueFilterType, EIssuesStoreType } from "@plane/constants";
+import { ALL_ISSUES } from "@plane/constants";
 import { IIssueDisplayFilterOptions } from "@plane/types";
 // hooks
 // components
@@ -13,7 +13,12 @@ import { SpreadsheetView } from "@/components/issues/issue-layouts";
 import { AllIssueQuickActions } from "@/components/issues/issue-layouts/quick-action-dropdowns";
 import { SpreadsheetLayoutLoader } from "@/components/ui";
 // constants
-import { ISSUE_DISPLAY_FILTERS_BY_LAYOUT } from "@/constants/issue";
+import {
+  EIssueFilterType,
+  EIssueLayoutTypes,
+  EIssuesStoreType,
+  ISSUE_DISPLAY_FILTERS_BY_LAYOUT,
+} from "@/constants/issue";
 // hooks
 import { useGlobalView, useIssues, useUserPermissions } from "@/hooks/store";
 import { useAppRouter } from "@/hooks/use-app-router";
@@ -29,12 +34,10 @@ import { TRenderQuickActions } from "../list/list-view-types";
 
 type Props = {
   isDefaultView: boolean;
-  isLoading?: boolean;
-  toggleLoading: (value: boolean) => void;
 };
 
 export const AllIssueLayoutRoot: React.FC<Props> = observer((props: Props) => {
-  const { isDefaultView, isLoading = false, toggleLoading } = props;
+  const { isDefaultView } = props;
   // router
   const { workspaceSlug, globalViewId } = useParams();
   const router = useAppRouter();
@@ -94,7 +97,7 @@ export const AllIssueLayoutRoot: React.FC<Props> = observer((props: Props) => {
     if (workspaceSlug && globalViewId) fetchNextIssues(workspaceSlug.toString(), globalViewId.toString());
   }, [fetchNextIssues, workspaceSlug, globalViewId]);
 
-  const { isLoading: globalViewsLoading } = useSWR(
+  const { isLoading } = useSWR(
     workspaceSlug ? `WORKSPACE_GLOBAL_VIEWS_${workspaceSlug}` : null,
     async () => {
       if (workspaceSlug) {
@@ -104,12 +107,11 @@ export const AllIssueLayoutRoot: React.FC<Props> = observer((props: Props) => {
     { revalidateIfStale: false, revalidateOnFocus: false }
   );
 
-  const { isLoading: issuesLoading } = useSWR(
+  useSWR(
     workspaceSlug && globalViewId ? `WORKSPACE_GLOBAL_VIEW_ISSUES_${workspaceSlug}_${globalViewId}` : null,
     async () => {
       if (workspaceSlug && globalViewId) {
         clear();
-        toggleLoading(true);
         await fetchFilters(workspaceSlug.toString(), globalViewId.toString());
         await fetchIssues(
           workspaceSlug.toString(),
@@ -121,7 +123,6 @@ export const AllIssueLayoutRoot: React.FC<Props> = observer((props: Props) => {
           }
         );
         routerFilterParams();
-        toggleLoading(false);
       }
     },
     { revalidateIfStale: false, revalidateOnFocus: false }
@@ -175,7 +176,7 @@ export const AllIssueLayoutRoot: React.FC<Props> = observer((props: Props) => {
   );
 
   // when the call is not loading and the view does not exist and the view is not a default view, show empty state
-  if (!isLoading && !globalViewsLoading && !issuesLoading && !viewDetails && !isDefaultView) {
+  if (!isLoading && !viewDetails && !isDefaultView) {
     return (
       <EmptyState
         image={emptyView}
@@ -189,7 +190,7 @@ export const AllIssueLayoutRoot: React.FC<Props> = observer((props: Props) => {
     );
   }
 
-  if ((isLoading && issuesLoading && getIssueLoader() === "init-loader") || !globalViewId || !groupedIssueIds) {
+  if (getIssueLoader() === "init-loader" || !globalViewId || !groupedIssueIds) {
     return <SpreadsheetLayoutLoader />;
   }
 

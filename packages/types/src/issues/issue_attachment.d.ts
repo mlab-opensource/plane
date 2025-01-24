@@ -1,20 +1,15 @@
-import { TFileSignedURLResponse } from "../file";
-
 export type TIssueAttachment = {
   id: string;
   attributes: {
     name: string;
     size: number;
   };
-  asset_url: string;
+  asset: string;
   issue_id: string;
-  // required
+
+  //need
   updated_at: string;
   updated_by: string;
-};
-
-export type TIssueAttachmentUploadResponse = TFileSignedURLResponse & {
-  attachment: TIssueAttachment
 };
 
 export type TIssueAttachmentMap = {

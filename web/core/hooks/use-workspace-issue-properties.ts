@@ -4,6 +4,8 @@ import { useCycle, useProjectEstimates, useLabel, useModule, useProjectState } f
 export const useWorkspaceIssueProperties = (workspaceSlug: string | string[] | undefined) => {
   const { fetchWorkspaceLabels } = useLabel();
 
+  const { fetchWorkspaceStates } = useProjectState();
+
   const { getWorkspaceEstimates } = useProjectEstimates();
 
   const { fetchWorkspaceModules } = useModule();
@@ -28,6 +30,13 @@ export const useWorkspaceIssueProperties = (workspaceSlug: string | string[] | u
   useSWR(
     workspaceSlug ? `WORKSPACE_LABELS_${workspaceSlug}` : null,
     workspaceSlug ? () => fetchWorkspaceLabels(workspaceSlug.toString()) : null,
+    { revalidateIfStale: false, revalidateOnFocus: false }
+  );
+
+  // fetch workspace states
+  useSWR(
+    workspaceSlug ? `WORKSPACE_STATES_${workspaceSlug}` : null,
+    workspaceSlug ? () => fetchWorkspaceStates(workspaceSlug.toString()) : null,
     { revalidateIfStale: false, revalidateOnFocus: false }
   );
 

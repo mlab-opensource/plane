@@ -18,7 +18,6 @@ from plane.authentication.adapter.error import (
 
 
 class OpenIDConnectInitiateSpaceEndpoint(View):
-
     def get(self, request):
         # Get host and next path
         request.session["host"] = base_host(request=request, is_space=True)
@@ -30,9 +29,7 @@ class OpenIDConnectInitiateSpaceEndpoint(View):
         instance = Instance.objects.first()
         if instance is None or not instance.is_setup_done:
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES[
-                    "INSTANCE_NOT_CONFIGURED"
-                ],
+                error_code=AUTHENTICATION_ERROR_CODES["INSTANCE_NOT_CONFIGURED"],
                 error_message="INSTANCE_NOT_CONFIGURED",
             )
             params = exc.get_error_dict()
@@ -56,7 +53,6 @@ class OpenIDConnectInitiateSpaceEndpoint(View):
 
 
 class OpenIDConnectCallbackSpaceEndpoint(View):
-
     def get(self, request):
         code = request.GET.get("code")
         state = request.GET.get("state")
@@ -65,9 +61,7 @@ class OpenIDConnectCallbackSpaceEndpoint(View):
 
         if state != request.session.get("state", ""):
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES[
-                    "OIDC_OAUTH_PROVIDER_ERROR"
-                ],
+                error_code=AUTHENTICATION_ERROR_CODES["OIDC_OAUTH_PROVIDER_ERROR"],
                 error_message="OIDC_OAUTH_PROVIDER_ERROR",
             )
             params = exc.get_error_dict()
@@ -78,9 +72,7 @@ class OpenIDConnectCallbackSpaceEndpoint(View):
 
         if not code:
             exc = AuthenticationException(
-                error_code=AUTHENTICATION_ERROR_CODES[
-                    "OIDC_OAUTH_PROVIDER_ERROR"
-                ],
+                error_code=AUTHENTICATION_ERROR_CODES["OIDC_OAUTH_PROVIDER_ERROR"],
                 error_message="OIDC_OAUTH_PROVIDER_ERROR",
             )
             params = exc.get_error_dict()
@@ -90,16 +82,16 @@ class OpenIDConnectCallbackSpaceEndpoint(View):
             return HttpResponseRedirect(url)
 
         try:
-            provider = OpenIDConnectProvider(
-                request=request,
-                code=code,
-            )
+            provider = OpenIDConnectProvider(request=request, code=code)
             user = provider.authenticate()
             # Login the user and record his device info
             user_login(request=request, user=user, is_space=True)
             # Process workspace and project invitations
             # redirect to referer path
-            url = f"{base_host(request=request, is_space=True)}{str(next_path) if next_path else ''}"
+            url = (
+                f"{base_host(request=request, is_space=True)}"
+                f"{str(next_path) if next_path else ''}"
+            )
             return HttpResponseRedirect(url)
         except AuthenticationException as e:
             params = e.get_error_dict()

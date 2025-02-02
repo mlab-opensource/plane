@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -21,13 +21,13 @@ export const OpenIDConnectButton: FC<OpenIDConnectButtonProps> = (props) => {
   const { resolvedTheme } = useTheme();
   const { config } = useInstance();
 
-  const handleSignIn = () => {
+  const handleSignIn = useCallback(() => {
     window.location.assign(`${API_BASE_URL}/auth/oidc/${nextPath ? `?next_path=${nextPath}` : ``}`);
-  };
+  }, [nextPath]);
 
   useEffect(() => {
     if (config?.is_oidc_enabled && config?.is_oidc_auto) handleSignIn();
-  }, [config]);
+  }, [config, handleSignIn]);
 
   return (
     <button

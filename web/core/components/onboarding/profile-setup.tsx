@@ -7,6 +7,8 @@ import { useTheme } from "next-themes";
 import { Controller, useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 // types
+import { USER_DETAILS, E_ONBOARDING_STEP_1, E_ONBOARDING_STEP_2 } from "@plane/constants";
+import { useTranslation } from "@plane/i18n";
 import { IUser, TUserProfile, TOnboardingSteps } from "@plane/types";
 // ui
 import { Button, Input, Spinner, TOAST_TYPE, setToast } from "@plane/ui";
@@ -15,7 +17,6 @@ import { PasswordStrengthMeter } from "@/components/account";
 import { UserImageUploadModal } from "@/components/core";
 import { OnboardingHeader, SwitchAccountDropdown } from "@/components/onboarding";
 // constants
-import { USER_DETAILS, E_ONBOARDING_STEP_1, E_ONBOARDING_STEP_2 } from "@/constants/event-tracker";
 // helpers
 import { getFileURL } from "@/helpers/file.helper";
 import { E_PASSWORD_STRENGTH, getPasswordStrength } from "@/helpers/password.helper";
@@ -91,6 +92,8 @@ export const ProfileSetup: React.FC<Props> = observer((props) => {
     password: false,
     retypePassword: false,
   });
+  // plane hooks
+  const { t } = useTranslation();
   // hooks
   const { resolvedTheme } = useTheme();
   // store hooks

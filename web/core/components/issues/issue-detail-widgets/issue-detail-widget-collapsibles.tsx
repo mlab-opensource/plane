@@ -26,7 +26,7 @@ export const IssueDetailWidgetCollapsibles: FC<Props> = observer((props) => {
   const {
     issue: { getIssueById },
     subIssues: { subIssuesByIssueId },
-    attachment: { getAttachmentsUploadStatusByIssueId },
+    attachment: { getAttachmentsCountByIssueId, getAttachmentsUploadStatusByIssueId },
     relation: { getRelationCountByIssueId },
   } = useIssueDetail();
 
@@ -41,8 +41,8 @@ export const IssueDetailWidgetCollapsibles: FC<Props> = observer((props) => {
   const shouldRenderRelations = issueRelationsCount > 0;
   const shouldRenderLinks = !!issue?.link_count && issue?.link_count > 0;
   const attachmentUploads = getAttachmentsUploadStatusByIssueId(issueId);
-  const shouldRenderAttachments =
-    (!!issue?.attachment_count && issue?.attachment_count > 0) || (!!attachmentUploads && attachmentUploads.length > 0);
+  const attachmentsCount = getAttachmentsCountByIssueId(issueId);
+  const shouldRenderAttachments = attachmentsCount > 0 || (!!attachmentUploads && attachmentUploads.length > 0);
 
   return (
     <div className="flex flex-col">
@@ -55,12 +55,7 @@ export const IssueDetailWidgetCollapsibles: FC<Props> = observer((props) => {
         />
       )}
       {shouldRenderRelations && (
-        <RelationsCollapsible
-          workspaceSlug={workspaceSlug}
-          projectId={projectId}
-          issueId={issueId}
-          disabled={disabled}
-        />
+        <RelationsCollapsible workspaceSlug={workspaceSlug} issueId={issueId} disabled={disabled} />
       )}
       {shouldRenderLinks && (
         <LinksCollapsible workspaceSlug={workspaceSlug} projectId={projectId} issueId={issueId} disabled={disabled} />

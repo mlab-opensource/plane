@@ -48,6 +48,7 @@ from .workspace.favorite import (
     WorkspaceFavoriteGroupEndpoint,
 )
 from .workspace.recent_visit import UserRecentVisitViewSet
+from .workspace.user_preference import WorkspaceUserPreferenceViewSet
 
 from .workspace.member import (
     WorkSpaceMemberViewSet,
@@ -115,6 +116,8 @@ from .issue.base import (
     IssuePaginatedViewSet,
     IssueDetailEndpoint,
     IssueBulkUpdateDateEndpoint,
+    IssueMetaEndpoint,
+    IssueDetailIdentifierEndpoint,
 )
 
 from .issue.activity import IssueActivityEndpoint
@@ -189,6 +192,7 @@ from .analytic.base import (
     SavedAnalyticEndpoint,
     ExportAnalyticsEndpoint,
     DefaultAnalyticsEndpoint,
+    ProjectStatsEndpoint,
 )
 
 from .notification.base import (
@@ -205,8 +209,6 @@ from .webhook.base import (
     WebhookLogsEndpoint,
     WebhookSecretRegenerateEndpoint,
 )
-
-from .dashboard.base import DashboardEndpoint, WidgetsEndpoint
 
 from .error_404 import custom_404_view
 

@@ -15,24 +15,27 @@ import { copyTextToClipboard } from "@/helpers/string.helper";
 // hooks
 import { usePageFilters } from "@/hooks/use-page-filters";
 import { useQueryParams } from "@/hooks/use-query-params";
+// plane web hooks
+import { EPageStoreType } from "@/plane-web/hooks/store";
 // store
 import { TPageInstance } from "@/store/pages/base-page";
 
 type Props = {
   editorRef: EditorRefApi | null;
   page: TPageInstance;
+  storeType: EPageStoreType;
 };
 
 export const PageOptionsDropdown: React.FC<Props> = observer((props) => {
-  const { editorRef, page } = props;
+  const { editorRef, page, storeType } = props;
   // states
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   // router
   const router = useRouter();
   // store values
-  const { name } = page;
+  const { name, isContentEditable } = page;
   // page filters
-  const { isFullWidth, handleFullWidth } = usePageFilters();
+  const { isFullWidth, handleFullWidth, isStickyToolbarEnabled, handleStickyToolbar } = usePageFilters();
   // update query params
   const { updateQueryParams } = useQueryParams();
   // menu items list
@@ -48,6 +51,18 @@ export const PageOptionsDropdown: React.FC<Props> = observer((props) => {
           </>
         ),
         className: "flex items-center justify-between gap-2",
+      },
+      {
+        key: "sticky-toolbar",
+        action: () => handleStickyToolbar(!isStickyToolbarEnabled),
+        customContent: (
+          <>
+            Sticky toolbar
+            <ToggleSwitch value={isStickyToolbarEnabled} onChange={() => {}} />
+          </>
+        ),
+        className: "flex items-center justify-between gap-2",
+        shouldRender: isContentEditable,
       },
       {
         key: "copy-markdown",
@@ -86,7 +101,16 @@ export const PageOptionsDropdown: React.FC<Props> = observer((props) => {
         shouldRender: true,
       },
     ],
-    [editorRef, handleFullWidth, isFullWidth, router, updateQueryParams]
+    [
+      editorRef,
+      handleFullWidth,
+      handleStickyToolbar,
+      isContentEditable,
+      isFullWidth,
+      isStickyToolbarEnabled,
+      router,
+      updateQueryParams,
+    ]
   );
 
   return (
@@ -102,6 +126,7 @@ export const PageOptionsDropdown: React.FC<Props> = observer((props) => {
         extraOptions={EXTRA_MENU_OPTIONS}
         optionsOrder={[
           "full-screen",
+          "sticky-toolbar",
           "copy-link",
           "make-a-copy",
           "move",
@@ -114,6 +139,7 @@ export const PageOptionsDropdown: React.FC<Props> = observer((props) => {
           "export",
         ]}
         page={page}
+        storeType={storeType}
       />
     </>
   );

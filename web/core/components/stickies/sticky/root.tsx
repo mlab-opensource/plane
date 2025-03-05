@@ -74,30 +74,32 @@ export const StickyNote = observer((props: TProps) => {
         handleClose={() => setIsDeleteModalOpen(false)}
       />
       <div
-        className={cn("w-full flex flex-col h-fit rounded p-4 group/sticky max-h-[650px] overflow-y-scroll", className)}
+        className={cn("w-full h-fit flex flex-col rounded group/sticky overflow-y-scroll", className)}
         style={{
           backgroundColor,
         }}
       >
         {/* {isStickiesPage && <StickyItemDragHandle isDragging={false} />}{" "} */}
         {onClose && (
-          <button type="button" className="flex w-full" onClick={onClose}>
-            <Minimize2 className="size-4 m-auto mr-0" />
+          <button type="button" className="flex-shrink-0 flex justify-end p-2.5" onClick={onClose}>
+            <Minimize2 className="size-4" />
           </button>
         )}
         {/* inputs */}
-        <StickyInput
-          stickyData={stickyData}
-          workspaceSlug={workspaceSlug}
-          handleUpdate={(payload) => {
-            handleLayout?.();
-            debouncedFormSave(payload);
-          }}
-          stickyId={stickyId}
-          handleDelete={() => setIsDeleteModalOpen(true)}
-          handleChange={handleChange}
-          showToolbar={showToolbar}
-        />
+        <div className="-mt-2">
+          <StickyInput
+            stickyData={stickyData}
+            workspaceSlug={workspaceSlug}
+            handleUpdate={(payload) => {
+              handleLayout?.();
+              debouncedFormSave(payload);
+            }}
+            stickyId={stickyId}
+            handleDelete={() => setIsDeleteModalOpen(true)}
+            handleChange={handleChange}
+            showToolbar={showToolbar}
+          />
+        </div>
       </div>
     </>
   );

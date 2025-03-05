@@ -7,6 +7,8 @@ import { PageEditorMobileHeaderRoot, PageExtraOptions, PageSummaryPopover, PageT
 import { cn } from "@/helpers/common.helper";
 // hooks
 import { usePageFilters } from "@/hooks/use-page-filters";
+// plane web hooks
+import { EPageStoreType } from "@/plane-web/hooks/store";
 // store
 import { TPageInstance } from "@/store/pages/base-page";
 
@@ -16,14 +18,15 @@ type Props = {
   page: TPageInstance;
   setSidePeekVisible: (sidePeekState: boolean) => void;
   sidePeekVisible: boolean;
+  storeType: EPageStoreType;
 };
 
 export const PageEditorHeaderRoot: React.FC<Props> = observer((props) => {
-  const { editorReady, editorRef, page, setSidePeekVisible, sidePeekVisible } = props;
+  const { editorReady, editorRef, page, setSidePeekVisible, sidePeekVisible, storeType } = props;
   // derived values
   const { isContentEditable } = page;
   // page filters
-  const { isFullWidth } = usePageFilters();
+  const { isFullWidth, isStickyToolbarEnabled } = usePageFilters();
   // derived values
   const resolvedEditorRef = editorRef.current;
 
@@ -48,9 +51,11 @@ export const PageEditorHeaderRoot: React.FC<Props> = observer((props) => {
               />
             </div>
           )}
-          {editorReady && isContentEditable && editorRef.current && <PageToolbar editorRef={editorRef?.current} />}
+          {isStickyToolbarEnabled && editorReady && isContentEditable && editorRef.current && (
+            <PageToolbar editorRef={editorRef?.current} />
+          )}
         </Header.LeftItem>
-        <PageExtraOptions editorRef={resolvedEditorRef} page={page} />
+        <PageExtraOptions editorRef={resolvedEditorRef} page={page} storeType={storeType} />
       </Header>
       <div className="md:hidden">
         <PageEditorMobileHeaderRoot
@@ -58,6 +63,7 @@ export const PageEditorHeaderRoot: React.FC<Props> = observer((props) => {
           page={page}
           sidePeekVisible={sidePeekVisible}
           setSidePeekVisible={setSidePeekVisible}
+          storeType={storeType}
         />
       </div>
     </>

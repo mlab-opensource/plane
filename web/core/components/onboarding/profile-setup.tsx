@@ -7,6 +7,8 @@ import { useTheme } from "next-themes";
 import { Controller, useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 // types
+import { USER_DETAILS, E_ONBOARDING_STEP_1, E_ONBOARDING_STEP_2 } from "@plane/constants";
+import { useTranslation } from "@plane/i18n";
 import { IUser, TUserProfile, TOnboardingSteps } from "@plane/types";
 // ui
 import { Button, Input, Spinner, TOAST_TYPE, setToast } from "@plane/ui";
@@ -15,7 +17,6 @@ import { PasswordStrengthMeter } from "@/components/account";
 import { UserImageUploadModal } from "@/components/core";
 import { OnboardingHeader, SwitchAccountDropdown } from "@/components/onboarding";
 // constants
-import { USER_DETAILS, E_ONBOARDING_STEP_1, E_ONBOARDING_STEP_2 } from "@/constants/event-tracker";
 // helpers
 import { getFileURL } from "@/helpers/file.helper";
 import { E_PASSWORD_STRENGTH, getPasswordStrength } from "@/helpers/password.helper";
@@ -91,6 +92,8 @@ export const ProfileSetup: React.FC<Props> = observer((props) => {
     password: false,
     retypePassword: false,
   });
+  // plane hooks
+  const { t } = useTranslation();
   // hooks
   const { resolvedTheme } = useTheme();
   // store hooks
@@ -409,7 +412,93 @@ export const ProfileSetup: React.FC<Props> = observer((props) => {
                 </div>
 
                 {/* setting up password for the first time */}
-                
+                {!isPasswordAlreadySetup && (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-sm text-onboarding-text-300 font-medium" htmlFor="password">
+                        Set a password ({t("common.optional")})
+                      </label>
+                      <Controller
+                        control={control}
+                        name="password"
+                        rules={{
+                          required: false,
+                        }}
+                        render={({ field: { value, onChange, ref } }) => (
+                          <div className="relative flex items-center rounded-md">
+                            <Input
+                              type={showPassword.password ? "text" : "password"}
+                              name="password"
+                              value={value}
+                              onChange={onChange}
+                              ref={ref}
+                              hasError={Boolean(errors.password)}
+                              placeholder="New password..."
+                              className="w-full border-[0.5px] border-onboarding-border-100 pr-12 placeholder:text-onboarding-text-400"
+                              onFocus={() => setIsPasswordInputFocused(true)}
+                              onBlur={() => setIsPasswordInputFocused(false)}
+                              autoComplete="on"
+                            />
+                            {showPassword.password ? (
+                              <EyeOff
+                                className="absolute right-3 h-4 w-4 stroke-custom-text-400 hover:cursor-pointer"
+                                onClick={() => handleShowPassword("password")}
+                              />
+                            ) : (
+                              <Eye
+                                className="absolute right-3 h-4 w-4 stroke-custom-text-400 hover:cursor-pointer"
+                                onClick={() => handleShowPassword("password")}
+                              />
+                            )}
+                          </div>
+                        )}
+                      />
+                      <PasswordStrengthMeter password={watch("password") ?? ""} isFocused={isPasswordInputFocused} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-sm text-onboarding-text-300 font-medium" htmlFor="confirm_password">
+                        {t("auth.common.password.confirm_password.label")} ({t("common.optional")})
+                      </label>
+                      <Controller
+                        control={control}
+                        name="confirm_password"
+                        rules={{
+                          required: watch("password") ? true : false,
+                          validate: (value) =>
+                            watch("password") ? (value === watch("password") ? true : "Passwords don't match") : true,
+                        }}
+                        render={({ field: { value, onChange, ref } }) => (
+                          <div className="relative flex items-center rounded-md">
+                            <Input
+                              type={showPassword.retypePassword ? "text" : "password"}
+                              name="confirm_password"
+                              value={value}
+                              onChange={onChange}
+                              ref={ref}
+                              hasError={Boolean(errors.confirm_password)}
+                              placeholder={t("auth.common.password.confirm_password.placeholder")}
+                              className="w-full border-onboarding-border-100 pr-12 placeholder:text-onboarding-text-400"
+                            />
+                            {showPassword.retypePassword ? (
+                              <EyeOff
+                                className="absolute right-3 h-4 w-4 stroke-custom-text-400 hover:cursor-pointer"
+                                onClick={() => handleShowPassword("retypePassword")}
+                              />
+                            ) : (
+                              <Eye
+                                className="absolute right-3 h-4 w-4 stroke-custom-text-400 hover:cursor-pointer"
+                                onClick={() => handleShowPassword("retypePassword")}
+                              />
+                            )}
+                          </div>
+                        )}
+                      />
+                      {errors.confirm_password && (
+                        <span className="text-sm text-red-500">{errors.confirm_password.message}</span>
+                      )}
+                    </div>
+                  </>
+                )}
               </>
             )}
 

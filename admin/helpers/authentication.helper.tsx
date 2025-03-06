@@ -2,8 +2,9 @@ import { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { KeyRound, Mails } from "lucide-react";
-// types
+import { SUPPORT_EMAIL } from "@plane/constants";
 import { TGetBaseAuthenticationModeProps, TInstanceAuthenticationModes } from "@plane/types";
+import { resolveGeneralTheme } from "@plane/utils";
 // components
 import {
   EmailCodesConfiguration,
@@ -12,9 +13,6 @@ import {
   GoogleConfiguration,
   PasswordLoginConfiguration,
 } from "@/components/authentication";
-// helpers
-import { SUPPORT_EMAIL } from "@plane/constants";
-import { resolveGeneralTheme } from "@plane/utils";
 // images
 import githubLightModeImage from "@/public/logos/github-black.png";
 import githubDarkModeImage from "@/public/logos/github-white.png";

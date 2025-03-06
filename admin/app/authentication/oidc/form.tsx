@@ -2,10 +2,12 @@ import { FC, useState } from "react";
 import isEmpty from "lodash/isEmpty";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { API_BASE_URL } from "@plane/constants";
 // types
 import { IFormattedInstanceConfiguration, TInstanceConfigurationKeys, TInstanceOpenIDConnectAuthenticationConfigurationKeys } from "@plane/types";
 // ui
 import { Button, TOAST_TYPE, getButtonStyling, setToast, ToggleSwitch, setPromiseToast } from "@plane/ui";
+import { cn } from "@plane/utils";
 // components
 import {
   CodeBlock,
@@ -15,10 +17,6 @@ import {
   TControllerInputFormField,
   TCopyField,
 } from "@/components/common";
-// helpers
-// import { API_BASE_URL, cn } from "@/helpers/common.helper";
-import { API_BASE_URL } from "@plane/constants";
-import { cn } from "@plane/utils";
 // hooks
 import { useInstance } from "@/hooks/store";
 

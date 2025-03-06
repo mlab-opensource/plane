@@ -13,7 +13,8 @@ import {
   PasswordLoginConfiguration,
 } from "@/components/authentication";
 // helpers
-import { SUPPORT_EMAIL, resolveGeneralTheme } from "@/helpers/common.helper";
+import { SUPPORT_EMAIL } from "@plane/constants";
+import { resolveGeneralTheme } from "@plane/utils";
 // images
 import githubLightModeImage from "@/public/logos/github-black.png";
 import githubDarkModeImage from "@/public/logos/github-white.png";

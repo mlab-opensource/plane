@@ -1,11 +1,13 @@
 import { Extensions } from "@tiptap/core";
 import React from "react";
+// plane imports
+import { cn } from "@plane/utils";
 // components
 import { DocumentContentLoader, PageRenderer } from "@/components/editors";
 // constants
 import { DEFAULT_DISPLAY_CONFIG } from "@/constants/config";
 // extensions
-import { IssueWidget } from "@/extensions";
+import { WorkItemEmbedExtension } from "@/extensions";
 // helpers
 import { getEditorClassNames } from "@/helpers/common";
 // hooks
@@ -37,9 +39,10 @@ const CollaborativeDocumentEditor = (props: ICollaborativeDocumentEditor) => {
   } = props;
 
   const extensions: Extensions = [];
+
   if (embedHandler?.issue) {
     extensions.push(
-      IssueWidget({
+      WorkItemEmbedExtension({
         widgetCallback: embedHandler.issue.widgetCallback,
       })
     );
@@ -73,7 +76,11 @@ const CollaborativeDocumentEditor = (props: ICollaborativeDocumentEditor) => {
 
   if (!editor) return null;
 
-  if (!hasServerSynced && !hasServerConnectionFailed) return <DocumentContentLoader />;
+  const blockWidthClassName = cn("w-full max-w-[720px] mx-auto transition-all duration-200 ease-in-out", {
+    "max-w-[1152px]": displayConfig.wideLayout,
+  });
+
+  if (!hasServerSynced && !hasServerConnectionFailed) return <DocumentContentLoader className={blockWidthClassName} />;
 
   return (
     <PageRenderer
@@ -81,7 +88,7 @@ const CollaborativeDocumentEditor = (props: ICollaborativeDocumentEditor) => {
       bubbleMenuEnabled={bubbleMenuEnabled}
       displayConfig={displayConfig}
       editor={editor}
-      editorContainerClassName={editorContainerClassNames}
+      editorContainerClassName={cn(editorContainerClassNames, "document-editor")}
       id={id}
       tabIndex={tabIndex}
     />

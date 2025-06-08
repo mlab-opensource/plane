@@ -1,11 +1,13 @@
 import { Extensions } from "@tiptap/core";
 import { forwardRef, MutableRefObject } from "react";
+// plane imports
+import { cn } from "@plane/utils";
 // components
 import { PageRenderer } from "@/components/editors";
 // constants
 import { DEFAULT_DISPLAY_CONFIG } from "@/constants/config";
 // extensions
-import { IssueWidget } from "@/extensions";
+import { WorkItemEmbedExtension } from "@/extensions";
 // helpers
 import { getEditorClassNames } from "@/helpers/common";
 // hooks
@@ -51,7 +53,7 @@ const DocumentReadOnlyEditor = (props: IDocumentReadOnlyEditor) => {
   const extensions: Extensions = [];
   if (embedHandler?.issue) {
     extensions.push(
-      IssueWidget({
+      WorkItemEmbedExtension({
         widgetCallback: embedHandler.issue.widgetCallback,
       })
     );
@@ -79,7 +81,7 @@ const DocumentReadOnlyEditor = (props: IDocumentReadOnlyEditor) => {
       bubbleMenuEnabled={false}
       displayConfig={displayConfig}
       editor={editor}
-      editorContainerClassName={editorContainerClassName}
+      editorContainerClassName={cn(editorContainerClassName, "document-editor")}
       id={id}
     />
   );

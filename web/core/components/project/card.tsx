@@ -22,6 +22,7 @@ import {
   TContextMenuItem,
   FavoriteStar,
 } from "@plane/ui";
+import { copyUrlToClipboard } from "@plane/utils";
 // components
 import { Logo } from "@/components/common";
 import { ArchiveRestoreProjectModal, DeleteProjectModal, JoinProjectModal } from "@/components/project";
@@ -29,7 +30,6 @@ import { ArchiveRestoreProjectModal, DeleteProjectModal, JoinProjectModal } from
 import { cn } from "@/helpers/common.helper";
 import { renderFormattedDate } from "@/helpers/date-time.helper";
 import { getFileURL } from "@/helpers/file.helper";
-import { copyUrlToClipboard } from "@/helpers/string.helper";
 // hooks
 import { useMember, useProject, useUserPermissions } from "@/hooks/store";
 import { useAppRouter } from "@/hooks/use-app-router";
@@ -127,7 +127,7 @@ export const ProjectCard: React.FC<Props> = observer((props) => {
   const MENU_ITEMS: TContextMenuItem[] = [
     {
       key: "settings",
-      action: () => router.push(`/${workspaceSlug}/projects/${project.id}/settings`, {}, { showProgressBar: false }),
+      action: () => router.push(`/${workspaceSlug}/settings/projects/${project.id}`, {}, { showProgressBar: false }),
       title: "Settings",
       icon: Settings,
       shouldRender: !isArchived && (hasAdminRole || hasMemberRole),
@@ -344,7 +344,7 @@ export const ProjectCard: React.FC<Props> = observer((props) => {
                       onClick={(e) => {
                         e.stopPropagation();
                       }}
-                      href={`/${workspaceSlug}/projects/${project.id}/settings`}
+                      href={`/${workspaceSlug}/settings/projects/${project.id}`}
                     >
                       <Settings className="h-3.5 w-3.5" />
                     </Link>

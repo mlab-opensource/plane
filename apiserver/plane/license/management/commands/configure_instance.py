@@ -71,6 +71,12 @@ class Command(BaseCommand):
                 "is_encrypted": True,
             },
             {
+                "key": "GITHUB_ORGANIZATION_ID",
+                "value": os.environ.get("GITHUB_ORGANIZATION_ID"),
+                "category": "GITHUB",
+                "is_encrypted": False,
+            },
+            {
                 "key": "OIDC_AUTO",
                 "value": os.environ.get("OIDC_AUTO", "0"),
                 "category": "OIDC",
@@ -192,7 +198,7 @@ class Command(BaseCommand):
             },
             # Deprecated, use LLM_MODEL
             {
-                "key": "GPT_ENGINE",  
+                "key": "GPT_ENGINE",
                 "value": os.environ.get("GPT_ENGINE", "gpt-3.5-turbo"),
                 "category": "SMTP",
                 "is_encrypted": False,

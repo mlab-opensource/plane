@@ -106,6 +106,7 @@ from .asset.v2 import (
     AssetRestoreEndpoint,
     ProjectAssetEndpoint,
     ProjectBulkAssetEndpoint,
+    AssetCheckEndpoint,
 )
 from .issue.base import (
     IssueListEndpoint,
@@ -144,7 +145,7 @@ from .issue.sub_issue import SubIssuesEndpoint
 
 from .issue.subscriber import IssueSubscriberViewSet
 
-from .issue.version import IssueVersionEndpoint, IssueDescriptionVersionEndpoint
+from .issue.version import IssueVersionEndpoint, WorkItemDescriptionVersionEndpoint
 
 from .module.base import (
     ModuleViewSet,
@@ -184,7 +185,11 @@ from .estimate.base import (
     EstimatePointEndpoint,
 )
 
-from .intake.base import IntakeViewSet, IntakeIssueViewSet
+from .intake.base import (
+    IntakeViewSet,
+    IntakeIssueViewSet,
+    IntakeWorkItemDescriptionVersionEndpoint,
+)
 
 from .analytic.base import (
     AnalyticsEndpoint,
@@ -193,6 +198,18 @@ from .analytic.base import (
     ExportAnalyticsEndpoint,
     DefaultAnalyticsEndpoint,
     ProjectStatsEndpoint,
+)
+
+from .analytic.advance import (
+    AdvanceAnalyticsEndpoint,
+    AdvanceAnalyticsStatsEndpoint,
+    AdvanceAnalyticsChartEndpoint,
+)
+
+from .analytic.project_analytics import (
+    ProjectAdvanceAnalyticsEndpoint,
+    ProjectAdvanceAnalyticsStatsEndpoint,
+    ProjectAdvanceAnalyticsChartEndpoint,
 )
 
 from .notification.base import (

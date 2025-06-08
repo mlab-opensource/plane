@@ -32,7 +32,7 @@ export const getAuthenticationModes: (props: TGetBaseAuthenticationModeProps) =>
     ...getBaseAuthenticationModes({ disabled, updateConfig, resolvedTheme }),
     {
       key: "oidc-inofficial",
-      name: "OpenID Connect (Inofficial)",
+      name: "OIDC (Inofficial)",
       description: "Authenticate your users via the OpenID Connect protocol.",
       icon: <Image src={OIDCLogo} height={22} width={22} alt="OIDC Logo" />,
       config: <OpenIDConnectConfiguration disabled={disabled} updateConfig={updateConfig} />,

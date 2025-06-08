@@ -109,6 +109,20 @@ export class FileService extends APIService {
       });
   }
 
+  async updateBulkWorkspaceAssetsUploadStatus(
+    workspaceSlug: string,
+    entityId: string,
+    data: {
+      asset_ids: string[];
+    }
+  ): Promise<void> {
+    return this.post(`/api/assets/v2/workspaces/${workspaceSlug}/${entityId}/bulk/`, data)
+      .then((response) => response?.data)
+      .catch((error) => {
+        throw error?.response?.data;
+      });
+  }
+
   async updateBulkProjectAssetsUploadStatus(
     workspaceSlug: string,
     projectId: string,
@@ -216,6 +230,19 @@ export class FileService extends APIService {
     // remove the last slash and get the asset id
     const assetId = getAssetIdFromUrl(src);
     return this.post(`/api/assets/v2/workspaces/${workspaceSlug}/restore/${assetId}/`)
+      .then((response) => response?.data)
+      .catch((error) => {
+        throw error?.response?.data;
+      });
+  }
+
+  async checkIfAssetExists(
+    workspaceSlug: string,
+    assetId: string
+  ): Promise<{
+    exists: boolean;
+  }> {
+    return this.get(`/api/assets/v2/workspaces/${workspaceSlug}/check/${assetId}/`)
       .then((response) => response?.data)
       .catch((error) => {
         throw error?.response?.data;

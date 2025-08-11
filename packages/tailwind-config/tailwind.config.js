@@ -18,10 +18,10 @@ module.exports = {
       "./pages/**/*.tsx",
       "./app/**/*.tsx",
       "./ui/**/*.tsx",
-      "../packages/ui/src/**/*.{js,ts,jsx,tsx}",
-      "../packages/propel/src/**/*.{js,ts,jsx,tsx}",
-      "../packages/editor/src/**/*.{js,ts,jsx,tsx}",
-      "!../packages/ui/**/*.stories{js,ts,jsx,tsx}",
+      "../../packages/ui/src/**/*.{js,ts,jsx,tsx}",
+      "../../packages/propel/src/**/*.{js,ts,jsx,tsx}",
+      "../../packages/editor/src/**/*.{js,ts,jsx,tsx}",
+      "!../../packages/ui/**/*.stories{js,ts,jsx,tsx}",
     ],
   },
   theme: {
@@ -48,7 +48,6 @@ module.exports = {
         "custom-sidebar-shadow-2xl": "var(--color-sidebar-shadow-2xl)",
         "custom-sidebar-shadow-3xl": "var(--color-sidebar-shadow-3xl)",
         "custom-sidebar-shadow-4xl": "var(--color-sidebar-shadow-4xl)",
-        "onboarding-shadow-sm": "var(--color-onboarding-shadow-sm)",
       },
       colors: {
         custom: {
@@ -232,25 +231,6 @@ module.exports = {
             },
           },
         },
-        onboarding: {
-          background: {
-            100: convertToRGB("--color-onboarding-background-100"),
-            200: convertToRGB("--color-onboarding-background-200"),
-            300: convertToRGB("--color-onboarding-background-300"),
-            400: convertToRGB("--color-onboarding-background-400"),
-          },
-          text: {
-            100: convertToRGB("--color-onboarding-text-100"),
-            200: convertToRGB("--color-onboarding-text-200"),
-            300: convertToRGB("--color-onboarding-text-300"),
-            400: convertToRGB("--color-onboarding-text-400"),
-          },
-          border: {
-            100: convertToRGB("--color-onboarding-border-100"),
-            200: convertToRGB("--color-onboarding-border-200"),
-            300: convertToRGB("--color-onboarding-border-300"),
-          },
-        },
         toast: {
           text: {
             success: convertToRGB("--color-toast-success-text"),
@@ -396,6 +376,9 @@ module.exports = {
         80: "18rem",
         96: "21.6rem",
       },
+      height: {
+        header: "3.25rem",
+      },
       space: {
         0: "0",
         0.5: "0.1125rem",
@@ -456,11 +439,6 @@ module.exports = {
         80: "18rem",
         96: "21.6rem",
       },
-      backgroundImage: {
-        "onboarding-gradient-100": "var( --gradient-onboarding-100)",
-        "onboarding-gradient-200": "var( --gradient-onboarding-200)",
-        "onboarding-gradient-300": "var( --gradient-onboarding-300)",
-      },
       fontFamily: {
         custom: ["Inter", "sans-serif"],
       },
@@ -482,6 +460,14 @@ module.exports = {
           ".px-page-x": {
             paddingLeft: "1.35rem",
             paddingRight: "1.35rem",
+          },
+        },
+        // Hide scrollbar but keep functionality
+        ".scrollbar-hide": {
+          "-ms-overflow-style": "none" /* IE and Edge */,
+          "scrollbar-width": "none" /* Firefox */,
+          "&::-webkit-scrollbar": {
+            display: "none" /* Chrome, Safari and Opera */,
           },
         },
       };

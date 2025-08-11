@@ -18,15 +18,16 @@ module.exports = {
       "./pages/**/*.tsx",
       "./app/**/*.tsx",
       "./ui/**/*.tsx",
-      "../packages/ui/src/**/*.{js,ts,jsx,tsx}",
-      "../packages/propel/src/**/*.{js,ts,jsx,tsx}",
-      "../packages/editor/src/**/*.{js,ts,jsx,tsx}",
-      "!../packages/ui/**/*.stories{js,ts,jsx,tsx}",
+      "../../packages/ui/src/**/*.{js,ts,jsx,tsx}",
+      "../../packages/propel/src/**/*.{js,ts,jsx,tsx}",
+      "../../packages/editor/src/**/*.{js,ts,jsx,tsx}",
+      "!../../packages/ui/**/*.stories{js,ts,jsx,tsx}",
     ],
   },
   theme: {
     extend: {
       boxShadow: {
+        "custom-shadow": "var(--color-shadow-custom)",
         "custom-shadow-2xs": "var(--color-shadow-2xs)",
         "custom-shadow-xs": "var(--color-shadow-xs)",
         "custom-shadow-sm": "var(--color-shadow-sm)",
@@ -208,6 +209,28 @@ module.exports = {
             hover: "rgba(96, 100, 108, 0.25)",
             active: "rgba(96, 100, 108, 0.7)",
           },
+          subscription: {
+            free: {
+              200: convertToRGB("--color-subscription-free-200"),
+              400: convertToRGB("--color-subscription-free-400"),
+            },
+            one: {
+              200: convertToRGB("--color-subscription-one-200"),
+              400: convertToRGB("--color-subscription-one-400"),
+            },
+            pro: {
+              200: convertToRGB("--color-subscription-pro-200"),
+              400: convertToRGB("--color-subscription-pro-400"),
+            },
+            business: {
+              200: convertToRGB("--color-subscription-business-200"),
+              400: convertToRGB("--color-subscription-business-400"),
+            },
+            enterprise: {
+              200: convertToRGB("--color-subscription-enterprise-200"),
+              400: convertToRGB("--color-subscription-enterprise-400"),
+            },
+          },
         },
         onboarding: {
           background: {
@@ -373,6 +396,9 @@ module.exports = {
         80: "18rem",
         96: "21.6rem",
       },
+      height: {
+        header: "3.25rem",
+      },
       space: {
         0: "0",
         0.5: "0.1125rem",
@@ -438,14 +464,15 @@ module.exports = {
         "onboarding-gradient-200": "var( --gradient-onboarding-200)",
         "onboarding-gradient-300": "var( --gradient-onboarding-300)",
       },
-    },
-    fontFamily: {
-      custom: ["Inter", "sans-serif"],
+      fontFamily: {
+        custom: ["Inter", "sans-serif"],
+      },
     },
   },
   plugins: [
     require("tailwindcss-animate"),
     require("@tailwindcss/typography"),
+    require("@tailwindcss/container-queries"),
     function ({ addUtilities }) {
       const newUtilities = {
         // Mobile screens
@@ -458,6 +485,14 @@ module.exports = {
           ".px-page-x": {
             paddingLeft: "1.35rem",
             paddingRight: "1.35rem",
+          },
+        },
+        // Hide scrollbar but keep functionality
+        ".scrollbar-hide": {
+          "-ms-overflow-style": "none" /* IE and Edge */,
+          "scrollbar-width": "none" /* Firefox */,
+          "&::-webkit-scrollbar": {
+            display: "none" /* Chrome, Safari and Opera */,
           },
         },
       };

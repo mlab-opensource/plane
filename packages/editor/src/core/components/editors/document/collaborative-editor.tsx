@@ -1,21 +1,22 @@
 import { Extensions } from "@tiptap/core";
 import React from "react";
+// plane imports
+import { cn } from "@plane/utils";
 // components
-import { DocumentContentLoader, PageRenderer } from "@/components/editors";
+import { PageRenderer } from "@/components/editors";
 // constants
 import { DEFAULT_DISPLAY_CONFIG } from "@/constants/config";
 // extensions
-import { IssueWidget } from "@/extensions";
+import { WorkItemEmbedExtension } from "@/extensions";
 // helpers
 import { getEditorClassNames } from "@/helpers/common";
 // hooks
 import { useCollaborativeEditor } from "@/hooks/use-collaborative-editor";
 // types
-import { EditorRefApi, ICollaborativeDocumentEditor } from "@/types";
+import { EditorRefApi, ICollaborativeDocumentEditorProps } from "@/types";
 
-const CollaborativeDocumentEditor = (props: ICollaborativeDocumentEditor) => {
+const CollaborativeDocumentEditor: React.FC<ICollaborativeDocumentEditorProps> = (props) => {
   const {
-    onTransaction,
     aiHandler,
     bubbleMenuEnabled = true,
     containerClassName,
@@ -25,10 +26,14 @@ const CollaborativeDocumentEditor = (props: ICollaborativeDocumentEditor) => {
     editorClassName = "",
     embedHandler,
     fileHandler,
+    flaggedExtensions,
     forwardedRef,
     handleEditorReady,
     id,
     mentionHandler,
+    onAssetChange,
+    onChange,
+    onTransaction,
     placeholder,
     realtimeConfig,
     serverHandler,
@@ -37,9 +42,10 @@ const CollaborativeDocumentEditor = (props: ICollaborativeDocumentEditor) => {
   } = props;
 
   const extensions: Extensions = [];
+
   if (embedHandler?.issue) {
     extensions.push(
-      IssueWidget({
+      WorkItemEmbedExtension({
         widgetCallback: embedHandler.issue.widgetCallback,
       })
     );
@@ -53,10 +59,13 @@ const CollaborativeDocumentEditor = (props: ICollaborativeDocumentEditor) => {
     embedHandler,
     extensions,
     fileHandler,
+    flaggedExtensions,
     forwardedRef,
     handleEditorReady,
     id,
     mentionHandler,
+    onAssetChange,
+    onChange,
     onTransaction,
     placeholder,
     realtimeConfig,
@@ -73,22 +82,21 @@ const CollaborativeDocumentEditor = (props: ICollaborativeDocumentEditor) => {
 
   if (!editor) return null;
 
-  if (!hasServerSynced && !hasServerConnectionFailed) return <DocumentContentLoader />;
-
   return (
     <PageRenderer
       aiHandler={aiHandler}
       bubbleMenuEnabled={bubbleMenuEnabled}
       displayConfig={displayConfig}
       editor={editor}
-      editorContainerClassName={editorContainerClassNames}
+      editorContainerClassName={cn(editorContainerClassNames, "document-editor")}
       id={id}
+      isLoading={!hasServerSynced && !hasServerConnectionFailed}
       tabIndex={tabIndex}
     />
   );
 };
 
-const CollaborativeDocumentEditorWithRef = React.forwardRef<EditorRefApi, ICollaborativeDocumentEditor>(
+const CollaborativeDocumentEditorWithRef = React.forwardRef<EditorRefApi, ICollaborativeDocumentEditorProps>(
   (props, ref) => (
     <CollaborativeDocumentEditor {...props} forwardedRef={ref as React.MutableRefObject<EditorRefApi | null>} />
   )
